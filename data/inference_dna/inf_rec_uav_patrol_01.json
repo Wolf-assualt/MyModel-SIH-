@@ -1,0 +1,14 @@
+{
+  "record_id": "inf_rec_uav_patrol_01",
+  "sequence_id": 1,
+  "timestamp": "2026-09-10T10:15:18.495317+00:00",
+  "nonce": "a25d956a4ac51136deb32dfb7fa1ecb7",
+  "model_id": "redteam_target_model",
+  "model_identity_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "input_frame_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "preprocessing_digest": "3e0043698a906a0e20fd4f6852221a27e43ccc32fa03967256c188453f9f0010",
+  "output_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "dna_hash": "2aec4b9cf6acac1af993bb4cffe76628aa5c0992d69d40dd0e1fcae3bc7adf7c",
+  "signature": "30450221008487d68e3b9ba69a07f3aad2b14d1f85388d23bd6597948d38905bb6f723d05d0220583dcfca4ba8b7108ffbf7ca10e0a9351426e46a1090c30b3f3265b30d3776c3",
+  "prev_chain_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+}

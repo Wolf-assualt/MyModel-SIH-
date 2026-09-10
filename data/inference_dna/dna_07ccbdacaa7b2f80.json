@@ -1,0 +1,14 @@
+{
+  "record_id": "dna_07ccbdacaa7b2f80",
+  "sequence_id": 1,
+  "timestamp": "2026-09-10T09:40:03.338976+00:00",
+  "nonce": "da1f2664421b9a7773af3efa3b7b376b",
+  "model_id": "db759521-f6db-4b4f-b829-3be52f60e582",
+  "model_identity_digest": "26a60b9a14d22853e8376400e1e4dca123a9c9f7dd537a0f2411d664feedde6b",
+  "input_frame_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "preprocessing_digest": "3e0043698a906a0e20fd4f6852221a27e43ccc32fa03967256c188453f9f0010",
+  "output_digest": "02bd28cb49faf8eeb6922b6899f70b539c15a6632f58339465bc19d034eb78e9",
+  "dna_hash": "c729a0d1596bba567dbdef58aeb20ba1f54e757ba71e2cbcfdf582de9a03a77c",
+  "signature": "3046022100c3d03872fd7e7c3f211051775ffeaefa40e6bc41702d2247973bb9a55076136b022100d864471805eb6fffc08432eebfae35c45f573157d3cfcc883082d5c776035150",
+  "prev_chain_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+}

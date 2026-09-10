@@ -1,0 +1,26 @@
+{
+  "report_id": "report_725d9775481b",
+  "target_asset_id": "6ba1dffe-002f-48ec-9cf3-2e8b122acaf1",
+  "target_asset_type": "MODEL",
+  "assessment_id": "fused_e7ad8db060ba",
+  "overall_verdict": "ACCEPTED",
+  "risk_score": 0.0675,
+  "confidence_score": 0.48,
+  "coverage_ratio": 0.6,
+  "findings_summary": {
+    "CRITICAL": 0,
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 3
+  },
+  "threat_narratives": [],
+  "limitations_and_disclaimers": [
+    "Uninspected assurance layers: [MODEL_IDENTITY, INFERENCE_DNA]. Risk scores represent partial assurance.",
+    "Integrity and drift metrics are bounded by operational camera sensor dynamics and calibration.",
+    "Zero-trust provenance assurance assumes asymmetric root signing key confidentiality."
+  ],
+  "report_digest": "b0ff250b01e6f07bccb047a276aa40a6522ab266bd5e8a792901397807639788",
+  "signature": "30440220049cc764656abe88280b14d6d8bacb97434d7f409456d5156b2b689041bd199502200841185664786a9add6d04b04084eeb86a9475493d60700427324b27418f884c",
+  "signer_public_key_pem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAENRcShYdqfvK2spSJF4e2c0pKJ4Pa\nGy5s70io48fl7n8jCPAm8lemSCCCCuHOQfjfBqhEcib6rKoLyAPi95MqOg==\n-----END PUBLIC KEY-----\n",
+  "created_at": "2026-09-10T09:16:42.948833Z"
+}

@@ -1,0 +1,12 @@
+# TRUST-CV (SIH26228) Production & Runtime Dependencies
+# Lightweight, deterministic, zero-cloud air-gapped defense stack
+
+fastapi>=0.110.0
+uvicorn>=0.28.0
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+sqlalchemy>=2.0.28
+cryptography>=42.0.0
+pillow>=10.2.0
+numpy>=1.26.0
+pytest>=8.0.0

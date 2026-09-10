@@ -1,0 +1,48 @@
+{
+  "report_id": "shift_5882b03e4952",
+  "baseline_id": "sensor_tower_07",
+  "target_batch_id": "batch_recon_09",
+  "sample_count": 50,
+  "overall_drift_score": 0.0,
+  "detected_drift_type": "NO_DRIFT",
+  "feature_metrics": [
+    {
+      "feature_name": "brightness",
+      "baseline_mean": 128.9121,
+      "target_mean": 128.9121,
+      "drift_score": 0.0,
+      "is_drifted": false
+    },
+    {
+      "feature_name": "contrast",
+      "baseline_mean": 44.0412,
+      "target_mean": 44.0412,
+      "drift_score": 0.0,
+      "is_drifted": false
+    },
+    {
+      "feature_name": "sharpness",
+      "baseline_mean": 84.5902,
+      "target_mean": 84.5902,
+      "drift_score": 0.0,
+      "is_drifted": false
+    },
+    {
+      "feature_name": "color_temperature",
+      "baseline_mean": 1.0515,
+      "target_mean": 1.0515,
+      "drift_score": 0.0,
+      "is_drifted": false
+    },
+    {
+      "feature_name": "channel_entropy",
+      "baseline_mean": 7.1757,
+      "target_mean": 7.1757,
+      "drift_score": 0.0,
+      "is_drifted": false
+    }
+  ],
+  "status": "ACCEPTED",
+  "report_digest": "51d2cc04bb2821c6a41ac21f5cfb81b4f315458e4da134145c31ccb58053a929",
+  "created_at": "2026-09-10T09:10:01.555985Z"
+}

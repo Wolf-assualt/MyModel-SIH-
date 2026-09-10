@@ -1,0 +1,34 @@
+{
+  "assessment_id": "fused_d5451f6691a1",
+  "target_entity_id": "adversarial_recon_unit_44_backdoored",
+  "risk_score": 0.85,
+  "confidence_score": 0.12,
+  "verdict": "QUARANTINED",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "correlated_findings": [
+    "Data Poisoning Indicator: Backdoor trigger patterns detected in training partition."
+  ],
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_backdoor_crit_01",
+      "source": "DATA_INTEGRITY",
+      "severity": "CRITICAL",
+      "metric_value": 0.98,
+      "description": "Trigger backdoor checkerboard patch confirmed across target samples.",
+      "metadata": {}
+    }
+  ],
+  "assessment_digest": "2e4be8e4160c5ce6efc9721c78c30b91e3c257a0573bd9755528afdd3aebf6c4",
+  "created_at": "2026-09-10T09:08:11.271781Z"
+}

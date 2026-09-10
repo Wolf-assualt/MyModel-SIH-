@@ -1,0 +1,77 @@
+{
+  "batch_id": "api_batch_recon_01_backdoored",
+  "dataset_name": "Synthetic_RedTeam_Set",
+  "format": "IMAGE_FOLDER",
+  "contributor_id": "redteam_operator",
+  "sample_count": 4,
+  "merkle_root": "0000000000000000000000000000000000000000000000000000000000000000",
+  "samples": [
+    {
+      "sample_id": "samp_api_batch_recon_01_0",
+      "file_path": "data\\quarantine\\attacks\\backdoor_sample_0_api_batch_recon_01_sample_0.png",
+      "sha256_hash": "dce0f55f872f18aed6f1c7c06535ee557035ef7c2007dde2641fd4e317c4f64b",
+      "width": 64,
+      "height": 64,
+      "labels": [
+        {
+          "label": "adversarial_tank",
+          "confidence": 1.0
+        }
+      ],
+      "metadata": {
+        "index": 0,
+        "backdoor_injected": true
+      }
+    },
+    {
+      "sample_id": "samp_api_batch_recon_01_1",
+      "file_path": "data\\quarantine\\attacks\\backdoor_sample_1_api_batch_recon_01_sample_0.png",
+      "sha256_hash": "5ec8975ae4600ee7d26103e708a6e4710e872ab7110165c4b40f0b51f706cef6",
+      "width": 64,
+      "height": 64,
+      "labels": [
+        {
+          "label": "adversarial_tank",
+          "confidence": 1.0
+        }
+      ],
+      "metadata": {
+        "index": 1,
+        "backdoor_injected": true
+      }
+    },
+    {
+      "sample_id": "samp_api_batch_recon_01_2",
+      "file_path": "data\\quarantine\\attacks\\synthetic_samples\\api_batch_recon_01_sample_1.png",
+      "sha256_hash": "20d2e3ab4268feda17dcf1b5b2c6f1c93fb45afa911b165cd68bdab4276cafdf",
+      "width": 64,
+      "height": 64,
+      "labels": [
+        {
+          "label": "recon_vehicle",
+          "confidence": 0.95
+        }
+      ],
+      "metadata": {
+        "index": 2
+      }
+    },
+    {
+      "sample_id": "samp_api_batch_recon_01_3",
+      "file_path": "data\\quarantine\\attacks\\synthetic_samples\\api_batch_recon_01_sample_1.png",
+      "sha256_hash": "3fd73ff0fc647f77fa793d297a1899d494ba8139b84d9193a11ab4ff6bb1f9b7",
+      "width": 64,
+      "height": 64,
+      "labels": [
+        {
+          "label": "recon_vehicle",
+          "confidence": 0.95
+        }
+      ],
+      "metadata": {
+        "index": 3
+      }
+    }
+  ],
+  "created_at": "2026-09-10T09:49:11.636357Z"
+}

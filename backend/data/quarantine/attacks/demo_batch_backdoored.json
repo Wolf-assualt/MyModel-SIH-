@@ -1,0 +1,77 @@
+{
+  "batch_id": "demo_batch_backdoored",
+  "dataset_name": "Synthetic_RedTeam_Set",
+  "format": "IMAGE_FOLDER",
+  "contributor_id": "redteam_operator",
+  "sample_count": 4,
+  "merkle_root": "0000000000000000000000000000000000000000000000000000000000000000",
+  "samples": [
+    {
+      "sample_id": "samp_demo_batch_0",
+      "file_path": "data\\quarantine\\attacks\\backdoor_sample_0_demo_batch_sample_0.png",
+      "sha256_hash": "b469fd99fdc87ca3e6a98276306fc71ea26479c19bc36bb2d1d8da5528f0e4bc",
+      "width": 64,
+      "height": 64,
+      "labels": [
+        {
+          "label": "tank",
+          "confidence": 1.0
+        }
+      ],
+      "metadata": {
+        "index": 0,
+        "backdoor_injected": true
+      }
+    },
+    {
+      "sample_id": "samp_demo_batch_1",
+      "file_path": "data\\quarantine\\attacks\\backdoor_sample_1_demo_batch_sample_0.png",
+      "sha256_hash": "5be1fdfcdc02fdd71e7f889e609ba0ba738594b57f62a1a839fa4c886d5cdc84",
+      "width": 64,
+      "height": 64,
+      "labels": [
+        {
+          "label": "tank",
+          "confidence": 1.0
+        }
+      ],
+      "metadata": {
+        "index": 1,
+        "backdoor_injected": true
+      }
+    },
+    {
+      "sample_id": "samp_demo_batch_2",
+      "file_path": "data\\quarantine\\attacks\\synthetic_samples\\demo_batch_sample_1.png",
+      "sha256_hash": "40a52c2bad7c0d097be80996a29a8777932932a8078d62b5ec5e08f28d5fd730",
+      "width": 64,
+      "height": 64,
+      "labels": [
+        {
+          "label": "recon_vehicle",
+          "confidence": 0.95
+        }
+      ],
+      "metadata": {
+        "index": 2
+      }
+    },
+    {
+      "sample_id": "samp_demo_batch_3",
+      "file_path": "data\\quarantine\\attacks\\synthetic_samples\\demo_batch_sample_1.png",
+      "sha256_hash": "88d695fbb67ecbf44b6405927cad36972842f129af8e9b624a16f8aa80e0571b",
+      "width": 64,
+      "height": 64,
+      "labels": [
+        {
+          "label": "recon_vehicle",
+          "confidence": 0.95
+        }
+      ],
+      "metadata": {
+        "index": 3
+      }
+    }
+  ],
+  "created_at": "2026-09-10T08:49:43.529503Z"
+}

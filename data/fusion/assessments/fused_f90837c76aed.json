@@ -1,0 +1,42 @@
+{
+  "assessment_id": "fused_f90837c76aed",
+  "target_entity_id": "pipeline_run_99",
+  "risk_score": 0.85,
+  "confidence_score": 0.28,
+  "verdict": "QUARANTINED",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY",
+      "INFERENCE_DNA"
+    ],
+    "coverage_ratio": 0.4,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "correlated_findings": [
+    "Cryptographic Provenance Failure: Inference DNA tampering or replay detected."
+  ],
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_api_01",
+      "source": "DATA_INTEGRITY",
+      "severity": "LOW",
+      "metric_value": 0.05,
+      "description": "Perceptual hashing integrity verified.",
+      "metadata": {}
+    },
+    {
+      "evidence_id": "ev_api_02",
+      "source": "INFERENCE_DNA",
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "Signature forgery detected in telemetry receipt.",
+      "metadata": {}
+    }
+  ],
+  "assessment_digest": "74f22f8f385b01d33f2dfd221792524c4515d3dd08f2801d416efecd39fce796",
+  "created_at": "2026-09-10T09:49:10.090136Z"
+}

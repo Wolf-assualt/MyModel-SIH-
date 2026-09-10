@@ -1,0 +1,77 @@
+{
+  "batch_id": "adversarial_recon_unit_44_backdoored",
+  "dataset_name": "Synthetic_RedTeam_Set",
+  "format": "IMAGE_FOLDER",
+  "contributor_id": "redteam_operator",
+  "sample_count": 4,
+  "merkle_root": "0000000000000000000000000000000000000000000000000000000000000000",
+  "samples": [
+    {
+      "sample_id": "samp_adversarial_recon_unit_44_0",
+      "file_path": "data\\quarantine\\attacks\\backdoor_sample_0_adversarial_recon_unit_44_sample_0.png",
+      "sha256_hash": "0865bff326e71f29ec073c78048c7db0f8e59a47afc6feb2d392f194b233efd0",
+      "width": 64,
+      "height": 64,
+      "labels": [
+        {
+          "label": "spoofed_target_vehicle",
+          "confidence": 1.0
+        }
+      ],
+      "metadata": {
+        "index": 0,
+        "backdoor_injected": true
+      }
+    },
+    {
+      "sample_id": "samp_adversarial_recon_unit_44_1",
+      "file_path": "data\\quarantine\\attacks\\backdoor_sample_1_adversarial_recon_unit_44_sample_0.png",
+      "sha256_hash": "8669221a344f39a86393191c17c4c734c32e4f22ec516d007e81b89ffe81c4d4",
+      "width": 64,
+      "height": 64,
+      "labels": [
+        {
+          "label": "spoofed_target_vehicle",
+          "confidence": 1.0
+        }
+      ],
+      "metadata": {
+        "index": 1,
+        "backdoor_injected": true
+      }
+    },
+    {
+      "sample_id": "samp_adversarial_recon_unit_44_2",
+      "file_path": "data\\quarantine\\attacks\\synthetic_samples\\adversarial_recon_unit_44_sample_1.png",
+      "sha256_hash": "cfcd80d4f024e55d9c593a2d89769f761cb52372576c6e961571f3ef99ab2b67",
+      "width": 64,
+      "height": 64,
+      "labels": [
+        {
+          "label": "recon_vehicle",
+          "confidence": 0.95
+        }
+      ],
+      "metadata": {
+        "index": 2
+      }
+    },
+    {
+      "sample_id": "samp_adversarial_recon_unit_44_3",
+      "file_path": "data\\quarantine\\attacks\\synthetic_samples\\adversarial_recon_unit_44_sample_1.png",
+      "sha256_hash": "b6af08c29852e484047fb7be73032b42547cc70f21a8fa4c9a21bd909b74b051",
+      "width": 64,
+      "height": 64,
+      "labels": [
+        {
+          "label": "recon_vehicle",
+          "confidence": 0.95
+        }
+      ],
+      "metadata": {
+        "index": 3
+      }
+    }
+  ],
+  "created_at": "2026-09-10T09:49:09.636939Z"
+}

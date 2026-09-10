@@ -1,0 +1,184 @@
+/* ==========================================================================
+   TRUST-CV Tactical Defense SOC Dashboard Stylesheet
+   Theme: Deep Obsidian (#030712) with Cybernetic HUD accents
+   ========================================================================== */
+
+:root {
+  --bg-obsidian: #030712;
+  --bg-card: #0b0f19;
+  --bg-card-hover: #111827;
+  --border-subtle: #1e293b;
+  --cyan-accent: #06b6d4;
+  --emerald-accent: #10b981;
+  --crimson-accent: #f43f5e;
+  --amber-accent: #f59e0b;
+  --purple-accent: #a855f7;
+}
+
+body {
+  background-color: var(--bg-obsidian);
+  color: #f1f5f9;
+  font-family: 'Rajdhani', 'Inter', sans-serif;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* Monospace utility for cryptographic digests & addresses */
+.font-mono, .hash-display, code, pre {
+  font-family: 'JetBrains Mono', monospace !important;
+  letter-spacing: -0.02em;
+}
+
+/* Ambient Tactical Grid Background */
+.tactical-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+/* Subtle CRT scanline overlay */
+.scanlines {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.02),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.02)
+  );
+  background-size: 100% 4px, 6px 100%;
+  pointer-events: none;
+}
+
+/* Radial Vignette */
+.vignette-overlay {
+  background: radial-gradient(circle at center, transparent 40%, rgba(3, 7, 18, 0.85) 100%);
+  pointer-events: none;
+}
+
+/* Glowing Border Utilities */
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.25), inset 0 0 10px rgba(6, 182, 212, 0.1);
+  border-color: rgba(6, 182, 212, 0.6) !important;
+}
+
+.glow-emerald {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.25), inset 0 0 10px rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.6) !important;
+}
+
+.glow-crimson {
+  box-shadow: 0 0 25px rgba(244, 63, 94, 0.4), inset 0 0 12px rgba(244, 63, 94, 0.15);
+  border-color: rgba(244, 63, 94, 0.8) !important;
+}
+
+.glow-amber {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.25), inset 0 0 10px rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.6) !important;
+}
+
+/* Radar Ping Animation */
+@keyframes radar-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.radar-ping {
+  animation: radar-pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@keyframes threat-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.8);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 12px rgba(244, 63, 94, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(244, 63, 94, 0);
+  }
+}
+
+.threat-pulse {
+  animation: threat-pulse 1.8s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* Tactical Sleek Scrollbars */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0b0f19;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #06b6d4;
+}
+
+/* Glassmorphism Panel */
+.hud-panel {
+  background: rgba(11, 15, 25, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(30, 41, 59, 0.8);
+  border-radius: 6px;
+  position: relative;
+}
+
+/* Corner bracket accents */
+.corner-bracket::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid #06b6d4;
+  border-left: 2px solid #06b6d4;
+}
+
+.corner-bracket::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 8px;
+  height: 8px;
+  border-bottom: 2px solid #06b6d4;
+  border-right: 2px solid #06b6d4;
+}
+
+/* Slide-out Drawer */
+.inspector-drawer {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inspector-drawer.closed {
+  transform: translateX(100%);
+}
+
+.inspector-drawer.open {
+  transform: translateX(0);
+}

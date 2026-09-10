@@ -1,0 +1,28 @@
+{
+  "report_id": "report_933a3c506e57",
+  "target_asset_id": "adversarial_recon_unit_44_backdoored",
+  "target_asset_type": "DATASET_BATCH",
+  "assessment_id": "fused_7a4338df79f8",
+  "overall_verdict": "QUARANTINED",
+  "risk_score": 0.85,
+  "confidence_score": 0.12,
+  "coverage_ratio": 0.2,
+  "findings_summary": {
+    "CRITICAL": 1,
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 0
+  },
+  "threat_narratives": [
+    "Data Poisoning Indicator: Backdoor trigger patterns detected in training partition."
+  ],
+  "limitations_and_disclaimers": [
+    "Uninspected assurance layers: [MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT]. Risk scores represent partial assurance.",
+    "Integrity and drift metrics are bounded by operational camera sensor dynamics and calibration.",
+    "Zero-trust provenance assurance assumes asymmetric root signing key confidentiality."
+  ],
+  "report_digest": "36d272b15205e7c16ef98ca26b1b9c0a8d4173f679115f03cc23b18577e51fd2",
+  "signature": "304402200307df304712abe208fb9c5efb07b9ccab56dab8648a07724d8f4b1ef641b48202202e43fd64a8815da74b992b70f4f221fca54a99b0b3bc3d00ea4745dfc8b7606a",
+  "signer_public_key_pem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEDnHkAwudRI1e/IGygFGq7dTfxSwx\n/hzpgYWYNf5QiHe4OuHiqhM4LyRzGvaIFfDXJ8pdeyW/HyG75KIG4eHt1Q==\n-----END PUBLIC KEY-----\n",
+  "created_at": "2026-09-10T09:10:04.563573Z"
+}

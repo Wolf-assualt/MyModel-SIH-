@@ -1,0 +1,11 @@
+{
+  "baseline_id": "sensor_base",
+  "features": {
+    "brightness": [
+      120.0,
+      125.0
+    ]
+  },
+  "metadata": {},
+  "registered_at": "2026-09-10T07:09:35.893332+00:00"
+}

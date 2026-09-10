@@ -1,0 +1,27 @@
+{
+  "report_id": "shift_0862ca7f5aaa",
+  "baseline_id": "base_b487ae91-b44a-48e4-a6ef-a0d56cd788ba",
+  "target_batch_id": "9fc194f5-e1e1-4f5c-b7fa-9d3e65d35acc",
+  "sample_count": 20,
+  "overall_drift_score": 0.0,
+  "detected_drift_type": "NO_DRIFT",
+  "feature_metrics": [
+    {
+      "feature_name": "brightness",
+      "baseline_mean": 0.5,
+      "target_mean": 0.5,
+      "drift_score": 0.0,
+      "is_drifted": false
+    },
+    {
+      "feature_name": "contrast",
+      "baseline_mean": 0.4,
+      "target_mean": 0.4,
+      "drift_score": 0.0,
+      "is_drifted": false
+    }
+  ],
+  "status": "ACCEPTED",
+  "report_digest": "2e472d121ee982990ca378357a8eb0073f455336abb1915d83687823fd5f361c",
+  "created_at": "2026-09-10T09:22:52.788264Z"
+}

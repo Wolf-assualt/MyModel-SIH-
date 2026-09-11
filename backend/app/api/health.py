@@ -30,3 +30,21 @@ def status_check(db: Session = Depends(get_db)) -> ResponseEnvelope[dict]:
             "status": "operational",
         }
     )
+
+
+@router.get("/readiness", response_model=ResponseEnvelope[dict])
+def readiness_check(db: Session = Depends(get_db)) -> ResponseEnvelope[dict]:
+    """Offline system readiness and operational state inspection."""
+    db.execute(text("SELECT 1"))
+    return ResponseEnvelope(
+        data={
+            "ready": True,
+            "status": "healthy",
+            "database": "connected",
+            "airgap": True,
+            "crypto": "ECDSA_SECP256R1",
+            "app": settings.APP_NAME,
+            "version": settings.APP_VERSION,
+        }
+    )
+

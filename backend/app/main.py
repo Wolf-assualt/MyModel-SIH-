@@ -48,6 +48,7 @@ app = FastAPI(
 
 # Mount all system API routers under /api/v1
 app.include_router(health_router, prefix="/api/v1")
+app.include_router(health_router)
 app.include_router(crypto_router, prefix="/api/v1")
 app.include_router(datasets_router, prefix="/api/v1")
 app.include_router(integrity_router, prefix="/api/v1")

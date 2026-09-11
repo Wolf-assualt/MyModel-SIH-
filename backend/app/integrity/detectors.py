@@ -231,6 +231,8 @@ class TriggerBackdoorDetector:
         if len(samples) < 2:
             return self._detect_isolated_trigger(samples, patch_size)
 
+        findings.extend(self._detect_isolated_trigger(samples, patch_size))
+
         # Group samples by primary label class
         label_groups: Dict[str, List[SampleRecord]] = defaultdict(list)
         for s in samples:

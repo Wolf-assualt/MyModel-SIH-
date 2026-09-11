@@ -58,3 +58,6 @@ class KeyManager:
 
 # Singleton instance for system-level signature generation
 default_key_manager = KeyManager()
+default_signer = default_key_manager
+Signer = KeyManager
+

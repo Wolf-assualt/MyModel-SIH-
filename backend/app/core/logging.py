@@ -70,3 +70,7 @@ def setup_logging() -> None:
     handler.setLevel(log_level)
     handler.setFormatter(JSONFormatter())
     root_logger.addHandler(handler)
+
+
+logger = logging.getLogger("trust_cv")
+

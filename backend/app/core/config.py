@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     SQLITE_URL: str = "sqlite:///./trust_cv.db"
     DATA_DIR: str = "./data"
     LOG_LEVEL: str = "INFO"
+    MAX_UPLOAD_FILES: int = 3000
 
     model_config = SettingsConfigDict(
         env_file=".env",

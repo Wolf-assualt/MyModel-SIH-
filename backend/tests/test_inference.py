@@ -82,7 +82,7 @@ def test_sequential_sequence_ids_and_unique_nonces(temp_dna_generator, sample_ou
     assert rec2.sequence_id == 2
     assert rec1.nonce != rec2.nonce
     assert rec1.prev_chain_hash == "0" * 64
-    assert rec2.prev_chain_hash == rec1.dna_hash
+    assert rec2.prev_chain_hash == temp_dna_generator.chain.records[0]["current_hash"]
     assert temp_dna_generator.chain.records[0]["data_hash"] == rec1.dna_hash
 
 

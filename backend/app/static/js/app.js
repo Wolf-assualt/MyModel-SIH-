@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const SENTINEL2_BANDS = ["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B09", "B11", "B12"];
+  const MAX_UPLOAD_FILES = 3000;
 
   // =========================================================================
   // 1. THEME MANAGEMENT
@@ -43,13 +44,11 @@ document.addEventListener('DOMContentLoaded', () => {
     AppState.theme = theme;
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('trustcv_theme', theme);
-    
-    const themeBtn = document.getElementById('btn-theme-toggle');
-    if (themeBtn) {
-      themeBtn.innerHTML = theme === 'dark' 
-        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
-        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
-      themeBtn.title = `Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`;
+    const icon = document.querySelector('#btn-theme-toggle svg');
+    if (icon) {
+      icon.innerHTML = theme === 'dark' 
+        ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+        : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
     }
 
     if (AppState.graphRenderer) {
@@ -62,23 +61,28 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
 
   function setPhase(phaseNum) {
-    AppState.activePhase = phaseNum;
-
-    // Update Views
-    document.querySelectorAll('.stage-view').forEach(v => v.classList.remove('active'));
-    const targetView = document.getElementById(`stage-view-${phaseNum}`);
-    if (targetView) targetView.classList.add('active');
-
-    // Update HUD Stepper
-    document.querySelectorAll('.hud-step').forEach(s => {
-      const stepIdx = parseInt(s.getAttribute('data-step'), 10);
-      s.classList.remove('active', 'completed');
-      if (stepIdx === phaseNum) {
-        s.classList.add('active');
-      } else if (stepIdx < phaseNum) {
-        s.classList.add('completed');
-      }
+    AppState.currentPhase = phaseNum;
+    document.querySelectorAll('.stage-view').forEach(view => {
+      view.classList.remove('active');
     });
+    const target = document.getElementById(`stage-view-${phaseNum}`);
+    if (target) target.classList.add('active');
+
+    document.querySelectorAll('.hud-step').forEach(step => {
+      const stepNum = parseInt(step.getAttribute('data-step'), 10);
+      step.classList.toggle('active', stepNum === phaseNum);
+      step.classList.toggle('completed', stepNum < phaseNum);
+    });
+
+    // Animate stage transitions
+    if (phaseNum === 2) {
+      const term = document.getElementById('terminal-body');
+      if (term) term.scrollTop = term.scrollHeight;
+    } else if (phaseNum === 3) {
+      if (AppState.graphRenderer) {
+        setTimeout(() => AppState.graphRenderer.animateFlow(), 300);
+      }
+    }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -109,6 +113,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function handleFileSelection(filesList) {
     if (!filesList || filesList.length === 0) return;
+
+    const fileCount = filesList.length;
+    const banner = document.getElementById('upload-status-banner');
+    const countEl = document.getElementById('upload-file-count');
+    const sizeEl = document.getElementById('upload-total-size');
+    const msgEl = document.getElementById('upload-validation-msg');
+    const metaStatus = document.getElementById('meta-expected-status');
+
+    // Preflight count validation: block immediately if exceeds MAX_UPLOAD_FILES
+    if (fileCount > MAX_UPLOAD_FILES) {
+      AppState.selectedFiles = [];
+      AppState.detectedBands = [];
+      AppState.uploadMode = 'real_upload';
+      setUploadMode('real_upload');
+
+      if (banner) banner.style.display = 'block';
+      if (countEl) {
+        countEl.textContent = `${fileCount.toLocaleString()} File(s) Selected (EXCEEDS LIMIT)`;
+        countEl.style.color = 'var(--status-danger)';
+      }
+      if (sizeEl) sizeEl.textContent = 'BLOCKED';
+      if (msgEl) {
+        msgEl.textContent = `Too many files selected (${fileCount.toLocaleString()}). Maximum allowed is ${MAX_UPLOAD_FILES.toLocaleString()} files per upload.`;
+        msgEl.style.color = 'var(--status-danger)';
+      }
+      if (metaStatus) {
+        metaStatus.textContent = `BLOCKED (MAX ${MAX_UPLOAD_FILES} FILES)`;
+        metaStatus.style.color = 'var(--status-danger)';
+      }
+
+      // Reset spectral band visualizer
+      document.querySelectorAll('.spectral-band-tile').forEach(tile => {
+        tile.classList.remove('detected', 'tampered');
+        tile.style.borderColor = '';
+        tile.style.background = '';
+      });
+
+      return;
+    }
 
     AppState.uploadMode = 'real_upload';
     setUploadMode('real_upload');
@@ -337,6 +380,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function launchAssuranceScan() {
+    if (AppState.uploadMode === 'real_upload') {
+      if (!AppState.selectedFiles || AppState.selectedFiles.length === 0) {
+        alert("Please select a valid dataset folder or band files before launching the assurance scan.");
+        return;
+      }
+      if (AppState.selectedFiles.length > MAX_UPLOAD_FILES) {
+        alert(`Too many files selected (${AppState.selectedFiles.length.toLocaleString()}). Maximum allowed is ${MAX_UPLOAD_FILES.toLocaleString()} files per upload.`);
+        return;
+      }
+    }
+
     setPhase(2);
     const scenario = Scenarios[AppState.currentScenario];
     const isRealUpload = (AppState.uploadMode === 'real_upload' && AppState.selectedFiles.length > 0);

@@ -29,6 +29,12 @@ async def upload_and_ingest_dataset(
     if not files:
         raise HTTPException(status_code=400, detail="No files uploaded.")
 
+    if len(files) > settings.MAX_UPLOAD_FILES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Too many files selected. Maximum allowed is {settings.MAX_UPLOAD_FILES} files per upload (received {len(files)}).",
+        )
+
     upload_batch_id = str(uuid.uuid4())
     upload_dir = Path(settings.DATA_DIR) / "uploads" / upload_batch_id
     upload_dir.mkdir(parents=True, exist_ok=True)

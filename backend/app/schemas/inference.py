@@ -34,6 +34,7 @@ class InferenceDNARecord(BaseModel):
     timestamp: str  # ISO-8601 UTC string
     nonce: str = Field(..., min_length=16, max_length=64)
     model_id: str
+    model_version: str = "1.0.0"
     model_identity_digest: str = Field(..., min_length=64, max_length=64)
     input_frame_sha256: str = Field(..., min_length=64, max_length=64)
     preprocessing_digest: str = Field(..., min_length=64, max_length=64)
@@ -46,6 +47,7 @@ class InferenceDNARecord(BaseModel):
 class InferenceRequest(BaseModel):
     """Request payload to execute inference under provenance tracking."""
     model_id: str = Field(..., min_length=1)
+    model_version: str = "1.0.0"
     image_bytes_b64: Optional[str] = None
     image_sha256: Optional[str] = None
     preprocessing: Optional[PreprocessingSpec] = None
@@ -70,6 +72,22 @@ class VerifyDNAResponse(BaseModel):
     signature_valid: bool
     hash_integrity_valid: bool
     chain_pointer_valid: bool
+    discrepancies: List[str] = Field(default_factory=list)
+
+
+class VerifyChainRequest(BaseModel):
+    """Payload to audit a sequential chain of inference DNA records."""
+    records: List[InferenceDNARecord]
+    public_key_pem: Optional[str] = None
+
+
+class ChainVerificationResponse(BaseModel):
+    """Audit verdict for full inference hash chain continuity and anti-replay verification."""
+    is_valid: bool
+    total_records: int
+    broken_sequence_id: Optional[int] = None
+    replay_detected: bool = False
+    evidence_records: List[Dict[str, Any]] = Field(default_factory=list)
     discrepancies: List[str] = Field(default_factory=list)
 
 

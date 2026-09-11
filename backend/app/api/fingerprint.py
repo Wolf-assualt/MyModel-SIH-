@@ -31,7 +31,21 @@ def generate_model_fingerprint(
     return ResponseEnvelope(data=fingerprint)
 
 
+@router.get("/{model_id}", response_model=ResponseEnvelope[ModelFingerprint])
+def get_model_fingerprint(
+    model_id: str,
+    seed: int = Query(42, description="Battery randomization seed"),
+) -> ResponseEnvelope[ModelFingerprint]:
+    """Retrieve stored behavioural fingerprint by model ID and battery seed."""
+    fingerprint = default_fingerprinter.load_fingerprint(model_id=model_id, seed=seed)
+    if not fingerprint:
+        raise HTTPException(status_code=404, detail=f"Fingerprint for model '{model_id}' (seed {seed}) not found.")
+
+    return ResponseEnvelope(data=fingerprint)
+
+
 @router.post("/compare", response_model=ResponseEnvelope[FingerprintComparisonResponse])
+@router.post("/verify", response_model=ResponseEnvelope[FingerprintComparisonResponse])
 def compare_model_fingerprints(
     payload: FingerprintComparisonRequest,
 ) -> ResponseEnvelope[FingerprintComparisonResponse]:
@@ -53,5 +67,9 @@ def compare_model_fingerprints(
             count=payload.battery_size,
         )
 
-    comparison = default_fingerprinter.compare_fingerprints(cand_fp, ref_fp)
+    comparison = default_fingerprinter.compare_fingerprints(
+        candidate_fp=cand_fp,
+        reference_fp=ref_fp,
+        divergence_threshold=payload.divergence_threshold,
+    )
     return ResponseEnvelope(data=comparison)

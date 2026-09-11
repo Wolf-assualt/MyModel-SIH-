@@ -54,6 +54,7 @@ class DatasetFormat(str, Enum):
     COCO = "COCO"
     YOLO = "YOLO"
     IMAGE_FOLDER = "ImageFolder"
+    BIGEARTHNET_S2 = "BIGEARTHNET_S2"
 
 
 class AttackClass(str, Enum):

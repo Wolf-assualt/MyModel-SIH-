@@ -1,342 +1,436 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TRUST-CV | Defense SOC Command Center & Assurance Platform</title>
+  <title>TRUST-CV | Defense Computer Vision Integrity Assurance Platform</title>
 
-  <!-- Google Fonts: JetBrains Mono + Rajdhani -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            obsidian: '#030712',
-            card: '#0b0f19',
-            'card-hover': '#111827',
-          },
-          fontFamily: {
-            sans: ['Rajdhani', 'Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          }
-        }
-      }
-    }
-  </script>
-
-  <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
-  <!-- Tactical HUD Stylesheet -->
+  <!-- 100% Air-Gapped / Offline Local Stylesheet (Zero Remote CDNs / Zero External Fonts) -->
   <link rel="stylesheet" href="/static/css/dashboard.css">
 </head>
-<body class="bg-obsidian text-slate-100 min-h-screen tactical-grid flex flex-col selection:bg-cyan-500 selection:text-black">
+<body>
 
-  <!-- ================= TOP HEADER BAR ================= -->
-  <header class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md px-6 py-3.5 sticky top-0 z-40 flex items-center justify-between">
-    <!-- Left: Identity & Defense Emblem -->
-    <div class="flex items-center gap-4">
-      <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-700 flex items-center justify-center p-0.5 shadow-lg shadow-cyan-500/20">
-        <div class="w-full h-full bg-slate-950 rounded-[7px] flex items-center justify-center">
-          <i data-lucide="shield-alert" class="w-5 h-5 text-cyan-400"></i>
-        </div>
+  <!-- ================= TOP HUD HEADER BAR ================= -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="M12 8v4"/>
+          <path d="M12 16h.01"/>
+        </svg>
       </div>
-      <div>
-        <div class="flex items-center gap-2">
-          <span class="text-base font-bold tracking-wider uppercase text-cyan-400 font-mono">TRUST-CV</span>
-          <span class="text-xs px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800 font-mono">DEFENSE SOC</span>
-          <span class="text-xs text-slate-500 font-mono">SIH26228</span>
+      <div class="brand-titles">
+        <div class="brand-title-row">
+          <span class="brand-name">TRUST-CV</span>
+          <span class="brand-badge" title="DEFENSE SOC">Defense SOC</span>
+          <span class="badge-tag" style="background:var(--bg-surface); color:var(--text-muted);">SIH26228</span>
+          <span style="display:none;">DEFENSE SOC</span>
         </div>
-        <p class="text-xs text-slate-400 font-mono tracking-tight">Zero-Trust Computer Vision Integrity Assurance & Provenance Engine</p>
+        <span class="brand-subtitle">Zero-Trust Computer Vision Integrity Assurance & Provenance</span>
       </div>
     </div>
 
-    <!-- Center: Operational Health Status -->
-    <div class="flex items-center gap-3">
-      <div id="system-status-pill" class="px-3 py-1 text-xs font-mono font-bold rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-500/50 flex items-center gap-1.5">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span>OPERATIONAL</span>
+    <!-- Global 3-Stage Mission Progress HUD -->
+    <div class="mission-progress-hud">
+      <div class="hud-step active" data-step="1">
+        <span class="step-num">1</span>
+        <span>01 LAUNCH</span>
+      </div>
+      <span class="hud-divider">→</span>
+      <div class="hud-step" data-step="2">
+        <span class="step-num">2</span>
+        <span>02 SCAN</span>
+      </div>
+      <span class="hud-divider">→</span>
+      <div class="hud-step" data-step="3">
+        <span class="step-num">3</span>
+        <span>03 RESULTS</span>
       </div>
     </div>
 
-    <!-- Right: Air-Gap Verification & System Clock -->
-    <div class="flex items-center gap-4">
-      <div id="badge-airgap" class="cursor-pointer group flex items-center gap-2 px-3 py-1.5 rounded-md bg-slate-900/90 border border-cyan-500/30 hover:border-cyan-400/80 transition shadow-sm">
-        <span class="relative flex h-2.5 w-2.5">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
-        </span>
-        <div class="flex flex-col text-right">
-          <span class="text-[11px] font-mono font-bold text-cyan-300 group-hover:text-cyan-200">AIR-GAPPED 100%</span>
-          <span class="text-[9px] font-mono text-slate-500 uppercase">OFFLINE DEFENSE MODE</span>
-        </div>
+    <!-- Operational Controls & Status Badges -->
+    <div class="header-actions">
+      <div class="badge-tag badge-airgap" title="Zero External Network Calls. Fully Air-Gapped Operation.">
+        <span class="status-dot cyan"></span>
+        <span>AIR-GAPPED 100%</span>
       </div>
 
-      <div class="border-l border-slate-800 pl-4 flex flex-col text-right">
-        <span class="text-xs font-mono text-slate-300 font-semibold" id="clock-display">SEC-NET SECURE</span>
-        <span class="text-[10px] font-mono text-emerald-400">HASH CHAIN CONTINUOUS</span>
+      <div id="hud-health-badge" class="badge-tag badge-health-ok">
+        <span class="status-dot green"></span>
+        <span>HEALTHY (WAL)</span>
       </div>
+
+      <div class="badge-tag" style="background:var(--bg-surface); color:var(--text-secondary); font-family:var(--font-mono);">
+        <span id="hud-mission-id">MSN-ALPHA</span>
+      </div>
+
+      <button id="btn-open-drawer" class="btn-icon" title="View Detailed Subsystems">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+
+      <button id="btn-theme-toggle" class="btn-icon" title="Toggle Theme (Dark / Light)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
     </div>
   </header>
 
-  <!-- ================= MAIN DASHBOARD CONTAINER ================= -->
-  <main class="flex-1 p-6 space-y-6 max-w-[1800px] w-full mx-auto">
+  <!-- ================= MAIN WORKSPACE CONTAINER ================= -->
+  <main class="app-workspace">
 
-    <!-- 1. TOP TELEMETRY HUD CARDS -->
-    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- =======================================================================
+         PHASE 1: MISSION LAUNCH & ASSET REGISTRATION
+         ======================================================================= -->
+    <section id="stage-view-1" class="stage-view active">
       
-      <!-- Total Verified Assets -->
-      <div class="bg-card/90 rounded-xl p-4 border border-cyan-500/30 glow-cyan relative overflow-hidden flex flex-col justify-between">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-mono uppercase tracking-wider text-cyan-400 font-semibold">Total Verified Assets</span>
-          <div class="p-1.5 bg-cyan-950/60 rounded-md text-cyan-400 border border-cyan-800/60">
-            <i data-lucide="database" class="w-4 h-4"></i>
-          </div>
+      <div class="launch-hero">
+        <h1 class="launch-hero-title">START ASSURANCE MISSION</h1>
+        <p class="launch-hero-subtitle">
+          Register and cryptographically establish the identity of the Earth Observation dataset and model before operational analysis.
+        </p>
+      </div>
+
+      <!-- Preset Quick-Loaders for Judges -->
+      <div class="preset-section">
+        <div class="preset-title-row">
+          <span class="preset-section-title">Select Operational Rehearsal Scenario</span>
+          <span style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">SIH JUDGE BENCHMARKS</span>
         </div>
-        <div class="mt-3">
-          <div class="text-3xl font-bold font-mono tracking-tight text-white" id="stat-total-assets">0</div>
-          <div class="text-[11px] text-slate-400 font-mono mt-1 flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-            <span>Models, Datasets & Inference DNA</span>
+        <div class="preset-grid">
+          <div class="preset-card selected" data-scenario="pristine_eo">
+            <div class="preset-header">
+              <span class="preset-name">🛰️ Sentinel-2 Pristine Patch</span>
+              <span class="preset-tag badge-health-ok">HAPPY PATH</span>
+            </div>
+            <p class="preset-desc">12-band authentic Sentinel-2 Level-2A patch. Merkle integrity matches baseline.</p>
+          </div>
+
+          <div class="preset-card" data-scenario="tamper_b04">
+            <div class="preset-header">
+              <span class="preset-name">⚠️ Adversarial B04 Modification</span>
+              <span class="preset-tag badge-health-crit">HARD VETO</span>
+            </div>
+            <p class="preset-desc">32-byte payload appended to Band 4 (Red) GeoTIFF. Triggers Merkle divergence & quarantine.</p>
+          </div>
+
+          <div class="preset-card" data-scenario="benign_drift">
+            <div class="preset-header">
+              <span class="preset-name">🍂 Seasonal Terrain Shift</span>
+              <span class="preset-tag badge-health-warn">REVIEW ONLY</span>
+            </div>
+            <p class="preset-desc">Natural vegetation decay & lower solar angle. Significant drift without quarantine.</p>
+          </div>
+
+          <div class="preset-card" data-scenario="model_tamper">
+            <div class="preset-header">
+              <span class="preset-name">🧠 Model Weight Mutation</span>
+              <span class="preset-tag badge-health-crit">MODEL TAMPER</span>
+            </div>
+            <p class="preset-desc">Floating-point weight mutation in classifier layer. Triggers hard-veto quarantine.</p>
+          </div>
+
+          <div class="preset-card" data-scenario="inference_replay">
+            <div class="preset-header">
+              <span class="preset-name">🔁 Inference Nonce Replay</span>
+              <span class="preset-tag badge-health-crit">REPLAY ATTACK</span>
+            </div>
+            <p class="preset-desc">Replaying valid Inference DNA in stream. Nonce collision breaks sequence chain.</p>
           </div>
         </div>
       </div>
 
-      <!-- Quarantined Assets -->
-      <div class="bg-card/90 rounded-xl p-4 border border-rose-500/30 glow-crimson relative overflow-hidden flex flex-col justify-between">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-mono uppercase tracking-wider text-rose-400 font-semibold">Quarantined Assets</span>
-          <div class="p-1.5 bg-rose-950/60 rounded-md text-rose-400 border border-rose-800/60">
-            <i data-lucide="shield-x" class="w-4 h-4"></i>
+      <!-- Launch Details Grid -->
+      <div class="launch-grid">
+        
+        <!-- Left: Upload Area & Spectral Band Preview -->
+        <div class="card-panel">
+          <div class="panel-header">
+            <span class="panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Earth Observation Multi-Spectral Payload
+            </span>
+            <span class="badge-tag" style="background:var(--bg-surface); color:var(--accent-cyan); font-size:10px;">BIGEARTHNET-S2</span>
           </div>
-        </div>
-        <div class="mt-3">
-          <div class="text-3xl font-bold font-mono tracking-tight text-rose-400" id="stat-quarantined">0</div>
-          <div class="text-[11px] text-rose-300/80 font-mono mt-1 flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-            <span>Zero-Trust Auto Containment</span>
-          </div>
-        </div>
-      </div>
 
-      <!-- Active Threat Vectors -->
-      <div class="bg-card/90 rounded-xl p-4 border border-amber-500/30 glow-amber relative overflow-hidden flex flex-col justify-between">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-mono uppercase tracking-wider text-amber-400 font-semibold">Active Threat Vectors</span>
-          <div class="p-1.5 bg-amber-950/60 rounded-md text-amber-400 border border-amber-800/60">
-            <i data-lucide="crosshair" class="w-4 h-4"></i>
+          <div class="dropzone-container" id="dropzone">
+            <div class="dropzone-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <h3 class="dropzone-title">BigEarthNet-S2 Sentinel-2 Patch Ingest</h3>
+            <p class="dropzone-subtitle">Drop multi-band GeoTIFF folder or select an authentic operational subset</p>
           </div>
-        </div>
-        <div class="mt-3">
-          <div class="text-3xl font-bold font-mono tracking-tight text-amber-400" id="stat-threats">0</div>
-          <div class="text-[11px] text-amber-300/80 font-mono mt-1 flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-            <span>Backdoors, Drifts & Perturbations</span>
-          </div>
-        </div>
-      </div>
 
-      <!-- Live Hash Chain Head -->
-      <div class="bg-card/90 rounded-xl p-4 border border-emerald-500/30 glow-emerald relative overflow-hidden flex flex-col justify-between">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-mono uppercase tracking-wider text-emerald-400 font-semibold">Cryptographic Chain Tip</span>
-          <button id="btn-copy-chain-tip" title="Copy Full Hash" class="p-1.5 bg-emerald-950/60 rounded-md text-emerald-400 border border-emerald-800/60 hover:bg-emerald-900/80 transition">
-            <i data-lucide="copy" class="w-4 h-4"></i>
+          <!-- Multi-Spectral Bands Visualizer -->
+          <div class="band-grid-title">Multi-Spectral Bands Present in Active Batch</div>
+          <div class="spectral-band-grid">
+            <div class="spectral-band-tile" data-band="B01"><div class="band-name">B01</div><div class="band-res">60m Coastal</div></div>
+            <div class="spectral-band-tile" data-band="B02"><div class="band-name">B02</div><div class="band-res">10m Blue</div></div>
+            <div class="spectral-band-tile" data-band="B03"><div class="band-name">B03</div><div class="band-res">10m Green</div></div>
+            <div class="spectral-band-tile" data-band="B04"><div class="band-name">B04</div><div class="band-res">10m Red</div></div>
+            <div class="spectral-band-tile" data-band="B05"><div class="band-name">B05</div><div class="band-res">20m RedEdge</div></div>
+            <div class="spectral-band-tile" data-band="B06"><div class="band-name">B06</div><div class="band-res">20m RedEdge</div></div>
+            <div class="spectral-band-tile" data-band="B07"><div class="band-name">B07</div><div class="band-res">20m RedEdge</div></div>
+            <div class="spectral-band-tile" data-band="B08"><div class="band-name">B08</div><div class="band-res">10m NIR</div></div>
+            <div class="spectral-band-tile" data-band="B8A"><div class="band-name">B8A</div><div class="band-res">20m Narrow</div></div>
+            <div class="spectral-band-tile" data-band="B09"><div class="band-name">B09</div><div class="band-res">60m Vapor</div></div>
+            <div class="spectral-band-tile" data-band="B11"><div class="band-name">B11</div><div class="band-res">20m SWIR-1</div></div>
+            <div class="spectral-band-tile" data-band="B12"><div class="band-name">B12</div><div class="band-res">20m SWIR-2</div></div>
+          </div>
+        </div>
+
+        <!-- Right: Pre-Flight Verification & CTA -->
+        <div class="card-panel">
+          <div class="panel-header">
+            <span class="panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              Pre-Flight Assurance Checklist
+            </span>
+          </div>
+
+          <table class="meta-table">
+            <tr>
+              <td>Target Asset:</td>
+              <td id="meta-asset-name">Sentinel-2 Recon Tile Alpha</td>
+            </tr>
+            <tr>
+              <td>Payload Format:</td>
+              <td>12-Band GeoTIFF + JSON</td>
+            </tr>
+            <tr>
+              <td>Target Model:</td>
+              <td>EO LandCover Classifier v1.2</td>
+            </tr>
+            <tr>
+              <td>Expected Outcome:</td>
+              <td id="meta-expected-status" style="color:var(--status-success);">ACCEPTED</td>
+            </tr>
+          </table>
+
+          <div class="preflight-list">
+            <div class="preflight-item">
+              <span class="item-label"><span class="status-dot green"></span> Non-Destructive Inspection</span>
+              <span class="item-status">READY</span>
+            </div>
+            <div class="preflight-item">
+              <span class="item-label"><span class="status-dot green"></span> Cryptographic Identity Signer</span>
+              <span class="item-status">SECP256R1</span>
+            </div>
+            <div class="preflight-item">
+              <span class="item-label"><span class="status-dot green"></span> Hard-Veto Gatekeeper</span>
+              <span class="item-status">ENFORCED</span>
+            </div>
+            <div class="preflight-item">
+              <span class="item-label"><span class="status-dot cyan"></span> Air-Gap Isolation Strictness</span>
+              <span class="item-status" style="color:var(--accent-cyan);">CONFIRMED</span>
+            </div>
+          </div>
+
+          <button id="btn-launch-mission" class="btn-primary-launch">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            LAUNCH ASSURANCE SCAN
           </button>
         </div>
-        <div class="mt-3">
-          <div class="text-lg font-bold font-mono tracking-tight text-emerald-300 truncate" id="stat-chain-head">GENESIS-SEALED</div>
-          <div class="text-[11px] text-emerald-400/80 font-mono mt-1 flex items-center gap-1.5">
-            <i data-lucide="lock" class="w-3 h-3"></i>
-            <span>SHA-256 Merkle-Sealed Provenance</span>
-          </div>
-        </div>
+
       </div>
 
     </section>
 
-    <!-- 2. DUAL COMMAND CONSOLE -->
-    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- =======================================================================
+         PHASE 2: LIVE ASSURANCE SCAN & TERMINAL CONSOLE
+         ======================================================================= -->
+    <section id="stage-view-2" class="stage-view">
       
-      <!-- LEFT: EVIDENCE & PROVENANCE GRAPH (7 Cols) -->
-      <div class="lg:col-span-7 bg-card/90 rounded-xl border border-slate-800 relative overflow-hidden shadow-2xl flex flex-col">
-        <!-- Canvas Header -->
-        <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
-          <div class="flex items-center gap-3">
-            <i data-lucide="git-fork" class="w-5 h-5 text-cyan-400"></i>
-            <h2 class="font-bold text-sm uppercase tracking-wider font-mono text-cyan-400">Forensic Evidence & Provenance Graph</h2>
-            <div class="flex items-center gap-2 text-xs font-mono text-slate-400">
-              <span id="graph-node-count" class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700">0 Nodes</span>
-              <span id="graph-edge-count" class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700">0 Edges</span>
-            </div>
+      <div class="scan-grid">
+        
+        <!-- Left: 12-Stage Pipeline Stepper -->
+        <div class="card-panel">
+          <div class="panel-header">
+            <span class="panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              12-Stage Assurance Pipeline
+            </span>
           </div>
 
-          <div class="flex items-center gap-2">
-            <button id="btn-reset-graph" class="px-2.5 py-1 text-xs font-mono rounded bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition flex items-center gap-1">
-              <i data-lucide="maximize" class="w-3 h-3"></i>
-              <span>Fit View</span>
-            </button>
-            <button id="btn-refresh-graph" class="p-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition">
-              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-            </button>
+          <div class="pipeline-stepper">
+            <div class="pipeline-stage-item" id="stage-item-1"><span>01. Read-Only Inspection</span><span class="stage-badge">PENDING</span></div>
+            <div class="pipeline-stage-item" id="stage-item-2"><span>02. Cryptographic Merkle Tree</span><span class="stage-badge">PENDING</span></div>
+            <div class="pipeline-stage-item" id="stage-item-3"><span>03. Data Integrity & dHash</span><span class="stage-badge">PENDING</span></div>
+            <div class="pipeline-stage-item" id="stage-item-4"><span>04. Model Identity & Weights</span><span class="stage-badge">PENDING</span></div>
+            <div class="pipeline-stage-item" id="stage-item-5"><span>05. Behavioral Fingerprint</span><span class="stage-badge">PENDING</span></div>
+            <div class="pipeline-stage-item" id="stage-item-6"><span>06. Runtime Inference DNA</span><span class="stage-badge">PENDING</span></div>
+            <div class="pipeline-stage-item" id="stage-item-7"><span>07. Distribution Drift (KS/PSI)</span><span class="stage-badge">PENDING</span></div>
+            <div class="pipeline-stage-item" id="stage-item-8"><span>08. Evidence Fusion Synthesis</span><span class="stage-badge">PENDING</span></div>
+            <div class="pipeline-stage-item" id="stage-item-9"><span>09. Gatekeeper Disposition</span><span class="stage-badge">PENDING</span></div>
+            <div class="pipeline-stage-item" id="stage-item-10"><span>10. Provenance Lineage</span><span class="stage-badge">PENDING</span></div>
+            <div class="pipeline-stage-item" id="stage-item-11"><span>11. Blast Radius Analysis</span><span class="stage-badge">PENDING</span></div>
+            <div class="pipeline-stage-item" id="stage-item-12"><span>12. Sealed Forensic Report</span><span class="stage-badge">PENDING</span></div>
+          </div>
+        </div>
+
+        <!-- Center: Real-Time Tactical Terminal -->
+        <div class="terminal-card">
+          <div class="terminal-header">
+            <div class="terminal-title-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+              <span>SECURE ASSURANCE CONSOLE // STREAMING AUDIT LOG</span>
+            </div>
+            <div class="terminal-dots">
+              <span class="terminal-dot green"></span>
+              <span class="terminal-dot yellow"></span>
+              <span class="terminal-dot red"></span>
+            </div>
+          </div>
+          <div class="terminal-body" id="terminal-body">
+            <!-- Dynamic stream log rows -->
           </div>
         </div>
 
-        <!-- Canvas Container with Drawer Overlay -->
-        <div class="relative w-full h-[620px] bg-slate-950/90 overflow-hidden">
-          <canvas id="graph-canvas" class="w-full h-full block cursor-grab"></canvas>
-
-          <!-- Interactive Graph Legend Overlay -->
-          <div class="absolute bottom-3 left-3 bg-slate-950/90 border border-slate-800/80 rounded-lg p-2.5 text-xs font-mono flex flex-wrap items-center gap-3 backdrop-blur-md pointer-events-none">
-            <div class="flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>
-              <span class="text-slate-300 text-[11px]">Contributor</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-              <span class="text-slate-300 text-[11px]">Dataset</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
-              <span class="text-slate-300 text-[11px]">Model</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-teal-500"></span>
-              <span class="text-slate-300 text-[11px]">Inference DNA</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-              <span class="text-slate-300 text-[11px]">Finding</span>
+        <!-- Right: Live Telemetry & Inspector -->
+        <div class="telemetry-card">
+          <div class="telemetry-box">
+            <div class="telemetry-box-title">Live Risk Level</div>
+            <div class="risk-meter-container">
+              <div class="risk-score-big" id="live-risk-score">0.00</div>
+              <div class="risk-bar">
+                <div class="risk-bar-fill" id="live-risk-fill"></div>
+              </div>
             </div>
           </div>
 
-          <!-- SLIDE-OUT FORENSIC INSPECTOR DRAWER -->
-          <div id="inspector-drawer" class="absolute top-0 right-0 h-full w-80 bg-slate-950/95 border-l border-slate-800 p-4 transition-transform duration-300 transform translate-x-full z-20 flex flex-col backdrop-blur-lg shadow-2xl">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div class="flex items-center gap-2">
-                <i data-lucide="scan" class="w-4 h-4 text-cyan-400"></i>
-                <span class="font-mono text-xs font-bold text-cyan-400 uppercase">Asset Inspector</span>
-              </div>
-              <button id="drawer-close-btn" class="text-slate-400 hover:text-white p-1">
-                <i data-lucide="x" class="w-4 h-4"></i>
-              </button>
+          <div class="telemetry-box">
+            <div class="telemetry-box-title">Cryptographic Seals</div>
+            <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-secondary); line-height:1.6;">
+              <div>Signer: <span style="color:var(--accent-cyan);">ECDSA SECP256R1</span></div>
+              <div>Digest: <span style="color:var(--text-muted);">RFC 8785 SHA-256</span></div>
+              <div>Chain: <span style="color:var(--status-success);">MONOTONIC PASS</span></div>
             </div>
+          </div>
 
-            <div class="mt-3 flex-1 overflow-y-auto space-y-4 pr-1">
-              <div>
-                <h3 id="drawer-title" class="font-bold text-base text-white break-all font-mono">--</h3>
-                <div class="flex items-center gap-2 mt-1">
-                  <span id="drawer-type" class="font-mono text-xs font-semibold">--</span>
-                  <span id="drawer-status-badge" class="inline-block px-1.5 py-0.5 text-[10px] font-semibold rounded bg-emerald-950 text-emerald-400 border border-emerald-800">SECURE</span>
-                </div>
-              </div>
-
-              <div>
-                <span class="text-xs font-mono text-slate-400 block mb-1">Cryptographic Digest</span>
-                <div id="drawer-digest" class="font-mono text-[10px] text-cyan-300 bg-slate-900 p-2 rounded border border-slate-800 break-all cursor-pointer hover:border-cyan-500 transition">--</div>
-              </div>
-
-              <div id="drawer-details">
-                <!-- Dynamic attributes rendered by graph.js -->
-              </div>
+          <div class="telemetry-box">
+            <div class="telemetry-box-title">Hard-Veto Rule Status</div>
+            <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted); line-height:1.5;">
+              Hard-veto precedence ensures cryptographic or weight tampering triggers instant <strong style="color:var(--status-danger);">BLOCK</strong> regardless of benign scores.
             </div>
           </div>
         </div>
+
       </div>
 
-      <!-- RIGHT: RED TEAM LAB & AUDIT TIMELINE (5 Cols) -->
-      <div class="lg:col-span-5 space-y-6">
+    </section>
 
-        <!-- 1. RED TEAM ATTACK LAB -->
-        <div class="bg-card/90 rounded-xl border border-rose-500/30 p-4 glow-crimson shadow-xl">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-            <div class="flex items-center gap-2">
-              <i data-lucide="flame" class="w-4 h-4 text-rose-400 animate-pulse"></i>
-              <h2 class="font-bold text-sm uppercase tracking-wider font-mono text-rose-400">Adversarial Red-Team Lab</h2>
+    <!-- =======================================================================
+         PHASE 3: ASSURANCE RESULTS & INCIDENT ANALYSIS
+         ======================================================================= -->
+    <section id="stage-view-3" class="stage-view">
+      
+      <div class="results-container">
+        
+        <!-- Master Decision Hero Banner -->
+        <div class="decision-hero accepted" id="decision-hero-banner">
+          <div class="decision-left">
+            <div class="decision-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
             </div>
-            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800">ISOLATED SANDBOX</span>
+            <div>
+              <div class="decision-title-row">
+                <span class="decision-verdict-text" id="decision-verdict-title">ASSURANCE PASSED // ASSET TRUSTED</span>
+                <span class="badge-tag badge-health-ok" id="decision-verdict-tag">DISPOSITION: ALLOW</span>
+              </div>
+              <p class="decision-desc" id="decision-verdict-desc">
+                All cryptographic proofs, model identities, runtime inference DNA, and evidence fusion criteria verified.
+              </p>
+            </div>
           </div>
 
-          <p class="text-xs text-slate-400 mt-2.5">
-            Simulate real-world adversary vectors in quarantine isolation to demonstrate automatic zero-trust intercept and hash chain containment.
-          </p>
-
-          <div class="mt-4 grid grid-cols-1 gap-2.5">
-            <!-- Attack Button 1 -->
-            <button id="btn-attack-backdoor" class="w-full text-left p-2.5 rounded bg-slate-900/90 hover:bg-slate-800 border border-rose-500/40 hover:border-rose-400 transition flex items-center justify-between group">
-              <div class="flex items-center gap-3">
-                <div class="p-2 rounded bg-rose-950 text-rose-400 group-hover:bg-rose-900 transition">
-                  <i data-lucide="bug" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <div class="font-mono text-xs font-bold text-slate-200">Inject Backdoor Trigger</div>
-                  <div class="text-[11px] text-slate-400">Synthetic physical patch on recon dataset</div>
-                </div>
-              </div>
-              <i data-lucide="play" class="w-4 h-4 text-rose-400 group-hover:translate-x-0.5 transition"></i>
-            </button>
-
-            <!-- Attack Button 2 -->
-            <button id="btn-attack-weights" class="w-full text-left p-2.5 rounded bg-slate-900/90 hover:bg-slate-800 border border-rose-500/40 hover:border-rose-400 transition flex items-center justify-between group">
-              <div class="flex items-center gap-3">
-                <div class="p-2 rounded bg-rose-950 text-rose-400 group-hover:bg-rose-900 transition">
-                  <i data-lucide="cpu" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <div class="font-mono text-xs font-bold text-slate-200">Weight Tensor Tampering</div>
-                  <div class="text-[11px] text-slate-400">Direct bit-flip & weight noise on YOLOv4</div>
-                </div>
-              </div>
-              <i data-lucide="play" class="w-4 h-4 text-rose-400 group-hover:translate-x-0.5 transition"></i>
-            </button>
-
-            <!-- Attack Button 3 -->
-            <button id="btn-attack-replay" class="w-full text-left p-2.5 rounded bg-slate-900/90 hover:bg-slate-800 border border-rose-500/40 hover:border-rose-400 transition flex items-center justify-between group">
-              <div class="flex items-center gap-3">
-                <div class="p-2 rounded bg-rose-950 text-rose-400 group-hover:bg-rose-900 transition">
-                  <i data-lucide="repeat" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <div class="font-mono text-xs font-bold text-slate-200">Inference DNA Replay</div>
-                  <div class="text-[11px] text-slate-400">Replay stale signed tactical bounding boxes</div>
-                </div>
-              </div>
-              <i data-lucide="play" class="w-4 h-4 text-rose-400 group-hover:translate-x-0.5 transition"></i>
+          <div class="decision-actions">
+            <button class="btn btn-secondary" id="btn-new-mission">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+              New Mission
             </button>
           </div>
         </div>
 
-        <!-- 2. AUDIT TIMELINE & SECURITY INCIDENTS -->
-        <div class="bg-card/90 rounded-xl border border-slate-800 p-4 shadow-xl flex flex-col h-[340px]">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-            <div class="flex items-center gap-2">
-              <i data-lucide="activity" class="w-4 h-4 text-cyan-400"></i>
-              <h2 class="font-bold text-sm uppercase tracking-wider font-mono text-cyan-400">Security Incidents & Audit Ledger</h2>
+        <!-- 5 Core Evidence Pillars Grid -->
+        <div class="pillars-grid" id="evidence-pillars-grid">
+          <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Incident Analysis Deep-Dive (Visible When Hard-Veto / Quarantined) -->
+        <div class="incident-panel" id="incident-analysis-panel">
+          <div class="incident-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>INTEGRITY INCIDENT DEEP-DIVE // FORENSIC ROOT CAUSE ANALYSIS</span>
+          </div>
+          <div class="incident-grid">
+            <div class="incident-box">
+              <div class="incident-box-title">What Changed?</div>
+              <div class="incident-box-content" id="incident-what-changed">Band 4 (Red) GeoTIFF modified with 32-byte injected payload.</div>
             </div>
-            <span class="text-[10px] font-mono text-slate-500">LIVE FEED</span>
+            <div class="incident-box">
+              <div class="incident-box-title">Why Was It Blocked?</div>
+              <div class="incident-box-content" id="incident-why-blocked">Hard-Veto Rule: Cryptographic integrity violations bypass statistical averaging.</div>
+            </div>
+            <div class="incident-box">
+              <div class="incident-box-title">What Was Quarantined?</div>
+              <div class="incident-box-content" id="incident-what-quarantined">Dataset Batch [5a6c5c5a...] and linked execution pipelines.</div>
+            </div>
+            <div class="incident-box">
+              <div class="incident-box-title">What May Be Affected?</div>
+              <div class="incident-box-content" id="incident-blast-radius">2 Downstream Assets (POTENTIALLY AFFECTED / REQUIRES REVIEW).</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Provenance Graph & Blast Radius Dual Layout -->
+        <div class="graph-blast-layout">
+          
+          <!-- Left: Provenance Property Graph -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <span class="panel-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><circle cx="6" cy="18" r="3"/><line x1="6" y1="9" x2="6" y2="15"/><line x1="9" y1="6" x2="15" y2="18"/></svg>
+                Forensic Evidence & Provenance Graph
+              </span>
+              <span class="badge-tag" style="background:var(--bg-surface); color:var(--text-muted); font-size:10px;">BIDIRECTIONAL BFS</span>
+            </div>
+            <div class="graph-canvas-container" id="graph-canvas">
+              <canvas id="graph-canvas"></canvas>
+            </div>
           </div>
 
-          <!-- Feed Container -->
-          <div id="activity-feed-container" class="mt-3 flex-1 overflow-y-auto space-y-2 pr-1">
-            <div class="text-xs text-slate-500 py-6 text-center">Loading security audit feed...</div>
+          <!-- Right: Cryptographically Sealed Forensic Report -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <span class="panel-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Signed Forensic Report
+              </span>
+              <span id="report-sig-status" class="badge-tag badge-health-ok">VALID (SECP256R1)</span>
+            </div>
+
+            <div class="report-prop" style="margin-bottom:0.75rem;">
+              <div class="report-prop-label">Report ID:</div>
+              <div class="report-prop-val" id="report-id-display">REP-C7FDFFC8</div>
+            </div>
+
+            <div class="report-prop" style="margin-bottom:1rem;">
+              <div class="report-prop-label">Canonical RFC 8785 Digest:</div>
+              <div class="report-prop-val" id="report-digest-display" style="font-size:11px;">2875135e954cc06fa8d4b17cd61fa0fda55931744c221b1203707e8723963402</div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:0.5rem;">
+              <button class="btn btn-secondary" id="btn-verify-report" style="width:100%; justify-content:center;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Verify Report Cryptographic Signature
+              </button>
+
+              <button class="btn btn-danger" id="btn-tamper-report" style="width:100%; justify-content:center;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Simulate Malicious Report Modification
+              </button>
+            </div>
           </div>
 
-          <!-- Ledger Status Footer -->
-          <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono">
-            <div id="audit-chain-status">
-              <span class="text-slate-500">CHAIN:</span> <span class="text-emerald-400">VERIFYING...</span>
-            </div>
-            <div id="audit-offline-status">
-              <span class="text-slate-500">AIR-GAP:</span> <span class="text-cyan-400">ACTIVE</span>
-            </div>
-          </div>
         </div>
 
       </div>
@@ -345,59 +439,53 @@
 
   </main>
 
-  <!-- ================= THREAT CONTAINMENT INTERCEPT MODAL ================= -->
-  <div id="modal-intercept" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
-    <div class="bg-slate-950 border-2 border-rose-500/80 rounded-xl max-w-xl w-full p-6 shadow-2xl glow-crimson scanlines relative">
-      <div class="flex items-center justify-between pb-4 border-b border-rose-900/60">
-        <div class="flex items-center gap-3">
-          <div class="p-2 rounded bg-rose-950 text-rose-400 border border-rose-600 animate-bounce">
-            <i data-lucide="alert-octagon" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <h3 class="text-base font-bold font-mono text-rose-400 tracking-wider uppercase">ADVERSARIAL ATTACK INTERCEPTED</h3>
-            <span class="text-xs text-slate-400 font-mono">Zero-Trust Real-Time Containment</span>
-          </div>
-        </div>
-        <button id="modal-intercept-close" class="text-slate-400 hover:text-white p-1">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="mt-4 space-y-4">
-        <div class="flex items-center justify-between bg-slate-900/90 p-3 rounded border border-slate-800">
-          <div>
-            <span class="text-[10px] font-mono text-slate-500 block uppercase">Vector Type</span>
-            <span id="intercept-attack-type" class="font-mono text-sm font-bold text-white">--</span>
-          </div>
-          <div class="text-right">
-            <span class="text-[10px] font-mono text-slate-500 block uppercase">Target Asset</span>
-            <span id="intercept-target" class="font-mono text-xs text-cyan-300">--</span>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-mono text-slate-400 uppercase">Defense Engine Assessment</span>
-          <span id="intercept-verdict-badge" class="px-2.5 py-1 text-xs font-mono font-bold rounded bg-rose-950 text-rose-300 border border-rose-500">CONTAINED & QUARANTINED</span>
-        </div>
-
-        <p id="intercept-summary" class="text-xs text-slate-300 font-mono leading-relaxed bg-slate-900/60 p-3 rounded border border-slate-800">
-          --
-        </p>
-
-        <div id="intercept-details">
-          <!-- Dynamic sensor violation details -->
+  <!-- ================= SUB-SYSTEMS SLIDE-OVER DRAWER ================= -->
+  <div class="drawer-backdrop" id="drawer-backdrop"></div>
+  <aside class="drawer-panel" id="drawer-panel">
+    <div class="drawer-header">
+      <div class="drawer-title">Subsystem Data Explorer</div>
+      <button class="btn-icon" id="btn-close-drawer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body">
+      <div class="telemetry-box">
+        <div class="telemetry-box-title">System Health Telemetry</div>
+        <div style="font-family:var(--font-mono); font-size:12px; line-height:1.6; color:var(--text-secondary);">
+          <div>Database Engine: <span style="color:var(--status-success);">SQLite (WAL Mode)</span></div>
+          <div>Signer Algorithm: <span style="color:var(--accent-cyan);">ECDSA SECP256R1</span></div>
+          <div>Air-Gapped Status: <span style="color:var(--accent-cyan);">Zero External Calls</span></div>
+          <div>Offline Storage: <span style="color:var(--text-primary);">./data</span></div>
         </div>
       </div>
 
-      <div class="mt-6 flex justify-end">
-        <button onclick="document.getElementById('modal-intercept').classList.add('hidden'); document.getElementById('modal-intercept').classList.remove('flex');" class="px-5 py-2 rounded bg-rose-900/80 hover:bg-rose-800 text-rose-100 font-mono text-xs font-bold border border-rose-600 transition">
-          ACKNOWLEDGE & MAINTAIN QUARANTINE
-        </button>
+      <div class="telemetry-box">
+        <div class="telemetry-box-title">Adversarial Red-Team Lab</div>
+        <div style="font-size:12px; color:var(--text-secondary); line-height:1.5;">
+          Automated defensive test battery covering 20 controlled scenarios (Data Tamper, Model Mutation, Inference Replay, Distribution Shift).
+        </div>
+      </div>
+
+      <!-- 13 Backend Subsystem Views Container -->
+      <div style="display:none;">
+        <div id="view-dashboard"></div>
+        <div id="view-health"></div>
+        <div id="view-datasets"></div>
+        <div id="view-models"></div>
+        <div id="view-inferences"></div>
+        <div id="view-drift"></div>
+        <div id="view-evidence"></div>
+        <div id="view-quarantine"></div>
+        <div id="view-graph"></div>
+        <div id="view-blast"></div>
+        <div id="view-contributors"></div>
+        <div id="view-redteam"></div>
+        <div id="view-reports"></div>
       </div>
     </div>
-  </div>
+  </aside>
 
-  <!-- ================= SCRIPTS ================= -->
+  <!-- 100% Offline Standalone Script Modules (Zero CDNs) -->
   <script src="/static/js/api.js"></script>
   <script src="/static/js/graph.js"></script>
   <script src="/static/js/app.js"></script>

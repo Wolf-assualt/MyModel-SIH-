@@ -41,12 +41,13 @@ mkdir -p data/drift
 mkdir -p data/graph
 mkdir -p data/reports/assurance
 mkdir -p data/quarantine/attacks
+mkdir -p data/fusion/assessments
 echo "[OK] Storage tree verified."
 echo ""
 
 # 3. Check core dependencies
 echo "[*] Checking package dependencies..."
-if ! $PY_CMD -c "import fastapi, uvicorn, pydantic, sqlalchemy, cryptography, PIL, numpy" &>/dev/null; then
+if ! $PY_CMD -c "import fastapi, uvicorn, pydantic, sqlalchemy, cryptography, PIL, numpy, httpx" &>/dev/null; then
     echo "[!] Installing missing dependencies from requirements.txt..."
     pip install -r requirements.txt
 fi

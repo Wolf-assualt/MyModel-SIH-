@@ -239,6 +239,8 @@ class TriggerBackdoorDetector:
 
         corner_names = ["top_left", "top_right", "bottom_left", "bottom_right"]
 
+        sample_lookup = {s.sample_id: s for s in samples}
+
         for label_key, group in label_groups.items():
             if len(group) < 2:
                 continue
@@ -274,7 +276,8 @@ class TriggerBackdoorDetector:
                         continue
 
                 for sig, sample_ids in patch_signatures.items():
-                    if len(sample_ids) >= 2:
+                    unique_shas = {sample_lookup[sid].sha256_hash for sid in sample_ids if sid in sample_lookup}
+                    if len(unique_shas) >= 2:
                         findings.append(
                             IntegrityFinding(
                                 finding_id=str(uuid.uuid4()),

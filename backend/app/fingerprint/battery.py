@@ -45,12 +45,26 @@ class TestBatteryGenerator:
             return np.array(blurred, dtype=np.uint8)
 
         elif p_type == PerturbationType.CONTRAST_SHIFT:
-            # Contrast scaling
+            # Contrast scaling (1.3x)
             scaled = np.clip(image.astype(np.float32) * 1.3, 0, 255).astype(np.uint8)
             return scaled
 
+        elif p_type == PerturbationType.BRIGHTNESS_SHIFT:
+            # Additive brightness (+30)
+            shifted = np.clip(image.astype(np.float32) + 30.0, 0, 255).astype(np.uint8)
+            return shifted
+
         elif p_type == PerturbationType.ROTATION:
-            # 90-degree rotation preserving dimensions if square
+            # 90-degree rotation preserving square dimensions
             return np.rot90(image, k=1).copy()
+
+        elif p_type == PerturbationType.OCCLUSION_PATCH:
+            # 16x16 zero occlusion mask in center
+            occluded = image.copy()
+            h, w = occluded.shape[:2]
+            cy, cx = h // 2, w // 2
+            half_p = min(8, h // 4, w // 4)
+            occluded[cy - half_p : cy + half_p, cx - half_p : cx + half_p] = 0
+            return occluded
 
         return image.copy()

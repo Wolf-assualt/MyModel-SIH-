@@ -37,15 +37,16 @@ if not exist "data\drift" mkdir "data\drift"
 if not exist "data\graph" mkdir "data\graph"
 if not exist "data\reports\assurance" mkdir "data\reports\assurance"
 if not exist "data\quarantine\attacks" mkdir "data\quarantine\attacks"
+if not exist "data\fusion\assessments" mkdir "data\fusion\assessments"
 echo [OK] Storage tree verified.
 echo.
 
 :: 4. Verify/Install core runtime dependencies
 echo [*] Checking package dependencies...
-python -c "import fastapi, uvicorn, pydantic, sqlalchemy, cryptography, PIL, numpy" >nul 2>&1
+python -c "import fastapi, uvicorn, pydantic, sqlalchemy, cryptography, PIL, numpy, httpx" >nul 2>&1
 if %errorlevel% neq 0 (
     echo [!] Missing core dependencies detected. Installing lightweight requirements...
-    pip install fastapi uvicorn pydantic pydantic-settings sqlalchemy pytest cryptography pillow numpy
+    pip install -r requirements.txt
     if %errorlevel% neq 0 (
         color 0C
         echo [ERROR] Failed to install dependencies.

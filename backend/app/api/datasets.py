@@ -1,12 +1,16 @@
-"""Dataset Ingestion and Manifest Verification Endpoints."""
+from typing import List
 from pathlib import Path
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
+from app.core.database import get_db
 from app.datasets.engine import default_ingestion_engine
+from app.models.dataset import Dataset
 from app.schemas.base import AssetStatus, ResponseEnvelope
 from app.schemas.dataset import (
     BatchManifest,
     BatchVerificationResponse,
+    DatasetResponse,
     IngestDirectoryRequest,
     IngestResponse,
 )
@@ -14,8 +18,18 @@ from app.schemas.dataset import (
 router = APIRouter(prefix="/datasets", tags=["Dataset Ingestion"])
 
 
+@router.get("", response_model=ResponseEnvelope[List[BatchManifest]])
+def list_datasets() -> ResponseEnvelope[List[BatchManifest]]:
+    """List all ingested dataset batch manifests."""
+    manifests = default_ingestion_engine.list_manifests()
+    return ResponseEnvelope(data=manifests)
+
+
 @router.post("/ingest", response_model=ResponseEnvelope[IngestResponse])
-def ingest_dataset(payload: IngestDirectoryRequest) -> ResponseEnvelope[IngestResponse]:
+def ingest_dataset(
+    payload: IngestDirectoryRequest,
+    db: Session = Depends(get_db),
+) -> ResponseEnvelope[IngestResponse]:
     """Ingest a directory of CV samples, compute Merkle inclusion root, and persist manifest."""
     source_dir = Path(payload.source_path)
     if not source_dir.exists() or not source_dir.is_dir():
@@ -40,6 +54,12 @@ def ingest_dataset(payload: IngestDirectoryRequest) -> ResponseEnvelope[IngestRe
             source_path=payload.source_path,
             annotation_path=payload.annotation_path,
         )
+        # Register batch into database
+        default_ingestion_engine.register_batch_to_database(
+            manifest=manifest,
+            db=db,
+            root_path=str(source_dir.resolve()),
+        )
     except Exception as exc:
         raise HTTPException(status_code=400, detail=f"Dataset ingestion failed: {str(exc)}")
 
@@ -52,6 +72,20 @@ def ingest_dataset(payload: IngestDirectoryRequest) -> ResponseEnvelope[IngestRe
             status=AssetStatus.ACCEPTED,
         )
     )
+
+
+
+@router.get("/{dataset_id}", response_model=ResponseEnvelope[DatasetResponse])
+def get_dataset_details(
+    dataset_id: str,
+    db: Session = Depends(get_db),
+) -> ResponseEnvelope[DatasetResponse]:
+    """Retrieve ingested dataset record and associated batches from database."""
+    dataset = db.query(Dataset).filter(Dataset.id == dataset_id).first()
+    if not dataset:
+        raise HTTPException(status_code=404, detail=f"Dataset with ID '{dataset_id}' not found.")
+
+    return ResponseEnvelope(data=DatasetResponse.model_validate(dataset))
 
 
 @router.get("/manifest/{batch_id}", response_model=ResponseEnvelope[BatchManifest])
@@ -73,3 +107,22 @@ def verify_batch_manifest(batch_id: str) -> ResponseEnvelope[BatchVerificationRe
         raise HTTPException(status_code=404, detail=f"Batch manifest {batch_id} not found.")
 
     return ResponseEnvelope(data=result)
+
+
+@router.post("/bigearthnet/inspect", response_model=ResponseEnvelope[dict])
+def inspect_bigearthnet(payload: IngestDirectoryRequest) -> ResponseEnvelope[dict]:
+    """Perform read-only structure inspection and audit on a local BigEarthNet-S2 directory."""
+    from app.datasets.bigearthnet import BigEarthNetS2Adapter
+    source_dir = Path(payload.source_path)
+    if not source_dir.exists() or not source_dir.is_dir():
+        raise HTTPException(
+            status_code=400,
+            detail=f"Source directory does not exist or is not a directory: {payload.source_path}",
+        )
+    try:
+        inspection = BigEarthNetS2Adapter.inspect(source_dir)
+        return ResponseEnvelope(data=inspection)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"BigEarthNet inspection failed: {str(exc)}")
+
+

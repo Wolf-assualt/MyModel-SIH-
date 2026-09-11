@@ -1,3 +1,5 @@
+from pathlib import Path
+from typing import Dict, List
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,5 +20,33 @@ class Settings(BaseSettings):
     def DATABASE_URL(self) -> str:
         return self.SQLITE_URL
 
+    @property
+    def REQUIRED_SUBDIRS(self) -> List[str]:
+        return [
+            "manifests",
+            "models",
+            "inference_dna",
+            "fingerprints",
+            "drift",
+            "graph",
+            "reports/assurance",
+            "quarantine/attacks",
+            "fusion/assessments",
+        ]
+
+    def ensure_directories(self) -> List[Path]:
+        """Ensure all required local air-gapped storage directories exist idempotently."""
+        base_path = Path(self.DATA_DIR).resolve()
+        base_path.mkdir(parents=True, exist_ok=True)
+        created_paths: List[Path] = [base_path]
+
+        for subdir in self.REQUIRED_SUBDIRS:
+            target_path = base_path / subdir
+            target_path.mkdir(parents=True, exist_ok=True)
+            created_paths.append(target_path)
+
+        return created_paths
+
 
 settings = Settings()
+

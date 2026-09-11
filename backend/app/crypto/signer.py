@@ -1,8 +1,11 @@
 """ECDSA (SECP256R1) Key Management, Digital Signatures, and Verification."""
+from pathlib import Path
 from typing import Optional
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
+
+from app.core.config import settings
 
 
 class KeyManager:
@@ -56,5 +59,23 @@ class KeyManager:
             return False
 
 
+def _init_default_key_manager() -> KeyManager:
+    """Initialize or load persistent system-level default keypair."""
+    default_key_file = Path(settings.DATA_DIR) / "keys" / "sentinel_ecdsa.pem"
+    if default_key_file.is_file():
+        try:
+            return KeyManager(private_key_pem=default_key_file.read_bytes())
+        except Exception:
+            pass
+    km = KeyManager()
+    try:
+        default_key_file.parent.mkdir(parents=True, exist_ok=True)
+        default_key_file.write_bytes(km.export_private_key_pem())
+    except Exception:
+        pass
+    return km
+
+
 # Singleton instance for system-level signature generation
-default_key_manager = KeyManager()
+default_key_manager = _init_default_key_manager()
+default_signer = default_key_manager

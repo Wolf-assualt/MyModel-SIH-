@@ -18,6 +18,9 @@ class SystemHealthOverview(BaseModel):
     active_threats_count: int = Field(..., ge=0)
     chain_head_hash: str = Field(..., min_length=64, max_length=64)
     system_integrity_status: str  # "OPERATIONAL", "ELEVATED_RISK", "CRITICAL_ALERT"
+    subsystems: Dict[str, Any] = Field(default_factory=dict)
+    risk_tallies: Dict[str, int] = Field(default_factory=dict)
+
 
 
 class ActivityTimelineItem(BaseModel):

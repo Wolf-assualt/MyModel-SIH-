@@ -2,11 +2,12 @@
 import json
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from PIL import Image
 
 from app.crypto.canonical import hash_file
-from app.schemas.dataset import SampleRecord
+from app.schemas.dataset import DatasetFormat, SampleRecord
+
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
@@ -65,6 +66,9 @@ class DirectoryParser(BaseParser):
             )
             records.append(record)
 
+        if not records:
+            raise ValueError(f"Empty dataset: No valid image files discovered in {source_dir}")
+
         return records
 
 
@@ -77,8 +81,11 @@ class COCOParser(BaseParser):
         if not annotation_path or not annotation_path.is_file():
             raise FileNotFoundError(f"COCO annotation JSON not found: {annotation_path}")
 
-        with open(annotation_path, "r", encoding="utf-8") as f:
-            coco_data = json.load(f)
+        try:
+            with open(annotation_path, "r", encoding="utf-8") as f:
+                coco_data = json.load(f)
+        except Exception as exc:
+            raise ValueError(f"Malformed COCO annotation JSON: {exc}")
 
         # Build category map: category_id -> name
         categories = {c["id"]: c.get("name", str(c["id"])) for c in coco_data.get("categories", [])}
@@ -86,7 +93,9 @@ class COCOParser(BaseParser):
         # Group annotations by image_id
         annotations_by_image: Dict[int, List[Dict]] = {}
         for ann in coco_data.get("annotations", []):
-            img_id = ann["image_id"]
+            img_id = ann.get("image_id")
+            if img_id is None:
+                continue
             if img_id not in annotations_by_image:
                 annotations_by_image[img_id] = []
             annotations_by_image[img_id].append({
@@ -103,8 +112,10 @@ class COCOParser(BaseParser):
 
         records: List[SampleRecord] = []
         for img in images:
-            img_id = img["id"]
-            file_name = img["file_name"]
+            img_id = img.get("id")
+            file_name = img.get("file_name")
+            if not file_name or img_id is None:
+                continue
             img_path = source_dir / file_name
 
             if not img_path.is_file():
@@ -133,6 +144,9 @@ class COCOParser(BaseParser):
                 metadata={"file_name": file_name, "coco_id": img_id, "format": "COCO"},
             )
             records.append(record)
+
+        if not records:
+            raise ValueError(f"Empty dataset: No valid referenced image files discovered in {source_dir}")
 
         return records
 
@@ -194,4 +208,70 @@ class YOLOParser(BaseParser):
             )
             records.append(record)
 
+        if not records:
+            raise ValueError(f"Empty dataset: No valid image files discovered in {source_dir}")
+
         return records
+
+
+
+class DatasetParserFactory:
+    """Factory for dataset parsers with automated structure-based format detection."""
+
+    @staticmethod
+    def detect_format(source_dir: Path, annotation_path: Optional[Path] = None) -> DatasetFormat:
+        """Inspect directory structure and files to auto-detect dataset format."""
+        if not source_dir.is_dir():
+            raise FileNotFoundError(f"Source directory does not exist: {source_dir}")
+
+        # 1. BigEarthNet-S2 detection: check if contains Sentinel-2 patches
+        from app.datasets.bigearthnet import BigEarthNetS2Adapter
+        if BigEarthNetS2Adapter.is_patch_dir(source_dir) or any(
+            item.is_dir() and BigEarthNetS2Adapter.is_patch_dir(item) for item in source_dir.iterdir()
+        ):
+            return DatasetFormat.BIGEARTHNET_S2
+
+        # 2. COCO detection: explicit annotation JSON or presence of annotations/*.json
+        if annotation_path and annotation_path.is_file() and annotation_path.suffix.lower() == ".json":
+            return DatasetFormat.COCO
+
+        if (source_dir / "annotations").is_dir():
+            coco_candidates = list((source_dir / "annotations").glob("*.json"))
+            if coco_candidates:
+                return DatasetFormat.COCO
+
+        # 3. YOLO detection: companion .txt or parallel labels/ directory with .txt
+        has_txt = any(source_dir.rglob("*.txt"))
+        has_labels_dir = (source_dir / "labels").is_dir()
+        if has_txt or has_labels_dir:
+            return DatasetFormat.YOLO
+
+        # 4. Default to IMAGE_FOLDER
+        return DatasetFormat.IMAGE_FOLDER
+
+    @staticmethod
+    def get_parser(format_type: Union[DatasetFormat, str]) -> BaseParser:
+        """Return the dedicated parser instance for a given format."""
+        norm_format = format_type.value if hasattr(format_type, "value") else str(format_type)
+        if norm_format == DatasetFormat.BIGEARTHNET_S2.value or norm_format == "BIGEARTHNET_S2":
+            from app.datasets.bigearthnet import BigEarthNetS2Parser
+            return BigEarthNetS2Parser()
+        elif norm_format == DatasetFormat.COCO.value or norm_format == "COCO":
+            return COCOParser()
+        elif norm_format == DatasetFormat.YOLO.value or norm_format == "YOLO":
+            return YOLOParser()
+        elif norm_format == DatasetFormat.IMAGE_FOLDER.value or norm_format in ("IMAGE_FOLDER", "ImageFolder"):
+            return DirectoryParser()
+        raise ValueError(f"Unsupported dataset format: {format_type}")
+
+
+__all__ = [
+    "BaseParser",
+    "DirectoryParser",
+    "COCOParser",
+    "YOLOParser",
+    "DatasetParserFactory",
+    "get_image_dimensions",
+    "IMAGE_EXTENSIONS",
+]
+

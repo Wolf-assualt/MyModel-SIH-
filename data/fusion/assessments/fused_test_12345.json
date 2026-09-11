@@ -2,8 +2,12 @@
   "assessment_id": "fused_test_12345",
   "target_entity_id": "yolov8_tactical_v1",
   "risk_score": 0.885,
+  "risk_level": "LOW",
   "confidence_score": 0.54,
   "verdict": "QUARANTINED",
+  "action": "ALLOW",
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
   "coverage": {
     "sources_checked": [
       "DATA_INTEGRITY",
@@ -19,32 +23,70 @@
   "correlated_findings": [
     "Correlated Targeted Backdoor Poisoning Campaign detected: Training data contains synthetic triggers."
   ],
+  "contributing_evidence": [],
+  "decisive_evidence": [],
   "raw_evidence": [
     {
       "evidence_id": "ev_01",
       "source": "DATA_INTEGRITY",
+      "source_domain": null,
+      "source_component": "sentinel_engine",
+      "evidence_type": "INTEGRITY_CHECK",
       "severity": "CRITICAL",
+      "confidence": 1.0,
+      "timestamp": "2026-09-11T02:06:12.982982Z",
+      "subject_id": null,
+      "related_dataset_id": null,
+      "related_model_id": null,
+      "related_inference_id": null,
       "metric_value": 0.95,
       "description": "Synthetic backdoor trigger pattern confirmed in training batch.",
-      "metadata": {}
+      "metrics": {},
+      "metadata": {},
+      "provenance_references": []
     },
     {
       "evidence_id": "ev_02",
       "source": "BEHAVIOURAL_FINGERPRINT",
+      "source_domain": null,
+      "source_component": "sentinel_engine",
+      "evidence_type": "INTEGRITY_CHECK",
       "severity": "HIGH",
+      "confidence": 1.0,
+      "timestamp": "2026-09-11T02:06:12.982982Z",
+      "subject_id": null,
+      "related_dataset_id": null,
+      "related_model_id": null,
+      "related_inference_id": null,
       "metric_value": 0.55,
       "description": "Model output divergence detected on perturbation battery.",
-      "metadata": {}
+      "metrics": {},
+      "metadata": {},
+      "provenance_references": []
     },
     {
       "evidence_id": "ev_03",
       "source": "DISTRIBUTION_SHIFT",
+      "source_domain": null,
+      "source_component": "sentinel_engine",
+      "evidence_type": "INTEGRITY_CHECK",
       "severity": "MEDIUM",
+      "confidence": 1.0,
+      "timestamp": "2026-09-11T02:06:12.982982Z",
+      "subject_id": null,
+      "related_dataset_id": null,
+      "related_model_id": null,
+      "related_inference_id": null,
       "metric_value": 0.35,
       "description": "Operational environmental illumination shift observed.",
-      "metadata": {}
+      "metrics": {},
+      "metadata": {},
+      "provenance_references": []
     }
   ],
+  "explanation": "",
   "assessment_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "created_at": "2026-09-10T09:49:11.815999Z"
+  "signature": null,
+  "created_at": "2026-09-11T02:06:12.982982Z",
+  "provenance_references": []
 }

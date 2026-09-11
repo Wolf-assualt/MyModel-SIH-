@@ -1,7 +1,7 @@
-"""Model Ingestion, Cryptographic Identity, and Baseline Verification API Endpoints."""
+from typing import List, Optional
 from pathlib import Path
-from typing import Optional
 from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel
 
 from app.models_engine.registry import default_model_registry
 from app.schemas.base import ResponseEnvelope
@@ -14,7 +14,20 @@ from app.schemas.model import (
 router = APIRouter(prefix="/models", tags=["Model Supply Chain & Identity"])
 
 
+class ModelVerifyBodyRequest(BaseModel):
+    model_id: str
+    baseline_id: Optional[str] = None
+
+
+@router.get("", response_model=ResponseEnvelope[List[ModelIdentityManifest]])
+def list_models() -> ResponseEnvelope[List[ModelIdentityManifest]]:
+    """List all registered model identity manifests."""
+    models = default_model_registry.list_models()
+    return ResponseEnvelope(data=models)
+
+
 @router.post("/register", response_model=ResponseEnvelope[ModelIdentityManifest])
+@router.post("/ingest", response_model=ResponseEnvelope[ModelIdentityManifest])
 def register_model(payload: ModelIngestRequest) -> ResponseEnvelope[ModelIdentityManifest]:
     """Ingest a CV model, inspect internal graph structures, and issue cryptographic identity manifest."""
     model_path = Path(payload.model_path)
@@ -38,6 +51,7 @@ def register_model(payload: ModelIngestRequest) -> ResponseEnvelope[ModelIdentit
     return ResponseEnvelope(data=manifest)
 
 
+@router.get("/manifest/{model_id}", response_model=ResponseEnvelope[ModelIdentityManifest])
 @router.get("/{model_id}", response_model=ResponseEnvelope[ModelIdentityManifest])
 def get_model_manifest(model_id: str) -> ResponseEnvelope[ModelIdentityManifest]:
     """Retrieve registered model identity manifest by model ID."""
@@ -46,6 +60,20 @@ def get_model_manifest(model_id: str) -> ResponseEnvelope[ModelIdentityManifest]
         raise HTTPException(status_code=404, detail=f"Model manifest '{model_id}' not found.")
 
     return ResponseEnvelope(data=manifest)
+
+
+@router.post("/verify", response_model=ResponseEnvelope[ModelVerifyResponse])
+def verify_model_endpoint(payload: ModelVerifyBodyRequest) -> ResponseEnvelope[ModelVerifyResponse]:
+    """Verify model candidate against reference baseline via POST body."""
+    try:
+        result = default_model_registry.verify_against_baseline(
+            model_id=payload.model_id,
+            baseline_id=payload.baseline_id,
+        )
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Model '{payload.model_id}' not found in registry.")
+
+    return ResponseEnvelope(data=result)
 
 
 @router.post("/{model_id}/verify", response_model=ResponseEnvelope[ModelVerifyResponse])

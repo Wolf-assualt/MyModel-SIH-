@@ -1,0 +1,34 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local database / test artifacts
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.db
+backend/data/
+data/
+storage/
+
+# Cryptographic private keys
+*.key
+private_key.pem
+secrets/
+
+# OS artifacts
+.DS_Store
+Thumbs.db

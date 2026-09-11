@@ -1,6 +1,6 @@
 """Database schema initialization utility."""
 from app.core.config import settings
-from app.core.logging import logger
+from app.core.logging import logger, setup_logging
 from app.db.base import Base
 from app.db.session import engine
 
@@ -10,6 +10,7 @@ import app.models  # noqa: F401
 
 def init_db() -> None:
     """Create all database tables and ensure directories exist."""
+    setup_logging()
     settings.ensure_directories()
     logger.info("Initializing database schemas...")
     Base.metadata.create_all(bind=engine)
@@ -18,3 +19,4 @@ def init_db() -> None:
 
 if __name__ == "__main__":
     init_db()
+

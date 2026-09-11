@@ -1,6 +1,6 @@
 """Inference execution under provenance tracking and cryptographic audit API."""
 import base64
-from typing import Any, Dict
+from typing import Any, Dict, List
 from fastapi import APIRouter, HTTPException
 
 from app.crypto.canonical import canonical_json_hash, hash_bytes
@@ -9,10 +9,13 @@ from app.inference.verifier import InferenceDNAVerifier
 from app.schemas.base import ResponseEnvelope
 from app.schemas.inference import (
     BoundingBox,
+    ChainVerificationResponse,
+    InferenceDNARecord,
     InferenceOutput,
     InferenceReceipt,
     InferenceRequest,
     PreprocessingSpec,
+    VerifyChainRequest,
     VerifyDNARequest,
     VerifyDNAResponse,
 )
@@ -21,6 +24,7 @@ router = APIRouter(prefix="/inference", tags=["Inference DNA & Provenance"])
 
 
 @router.post("/execute", response_model=ResponseEnvelope[InferenceReceipt])
+@router.post("/dna", response_model=ResponseEnvelope[InferenceReceipt])
 def execute_inference_with_provenance(
     payload: InferenceRequest,
 ) -> ResponseEnvelope[InferenceReceipt]:
@@ -56,6 +60,7 @@ def execute_inference_with_provenance(
     try:
         dna_record = default_dna_generator.create_dna_record(
             model_id=payload.model_id,
+            model_version=payload.model_version,
             model_identity_digest=model_identity_digest,
             input_frame_sha256=input_sha256,
             prep_spec=prep_spec,
@@ -72,13 +77,41 @@ def execute_inference_with_provenance(
     return ResponseEnvelope(data=receipt)
 
 
+@router.get("/records", response_model=ResponseEnvelope[List[InferenceDNARecord]])
+def list_inference_records(limit: int = 50) -> ResponseEnvelope[List[InferenceDNARecord]]:
+    """List stored inference DNA records."""
+    records = default_dna_generator.list_records(limit=limit)
+    return ResponseEnvelope(data=records)
+
+
+@router.get("/record/{record_id}", response_model=ResponseEnvelope[InferenceDNARecord])
+def get_inference_dna_record(record_id: str) -> ResponseEnvelope[InferenceDNARecord]:
+    """Retrieve an existing Inference DNA record by record ID."""
+    record = default_dna_generator.load_record(record_id)
+    if not record:
+        raise HTTPException(status_code=404, detail=f"Inference record '{record_id}' not found.")
+    return ResponseEnvelope(data=record)
+
+
 @router.post("/verify", response_model=ResponseEnvelope[VerifyDNAResponse])
 def verify_inference_dna(
     payload: VerifyDNARequest,
 ) -> ResponseEnvelope[VerifyDNAResponse]:
-    """Cryptographically audit an inference DNA record against a public key."""
+    """Cryptographically audit an individual inference DNA record against a public key."""
     result = InferenceDNAVerifier.verify_record(
         record=payload.dna_record,
+        public_key_pem=payload.public_key_pem,
+    )
+    return ResponseEnvelope(data=result)
+
+
+@router.post("/verify-chain", response_model=ResponseEnvelope[ChainVerificationResponse])
+def verify_inference_chain_endpoint(
+    payload: VerifyChainRequest,
+) -> ResponseEnvelope[ChainVerificationResponse]:
+    """Audit full inference hash chain continuity, sequence monotonicity, and anti-replay freshness."""
+    result = InferenceDNAVerifier.verify_chain(
+        records=payload.records,
         public_key_pem=payload.public_key_pem,
     )
     return ResponseEnvelope(data=result)

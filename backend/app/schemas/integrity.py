@@ -1,7 +1,7 @@
 """Pydantic schemas for Training-Data Integrity Engine."""
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from app.schemas.base import AssetStatus
@@ -32,6 +32,30 @@ class IntegrityFinding(BaseModel):
     details: Dict[str, Any] = Field(default_factory=dict)
 
 
+class ImageAssessment(BaseModel):
+    sample_id: str
+    file_name: str
+    sha256_hash: str
+    result: str
+    integrity_status: str
+    trust_status: str
+    anomaly_score: Optional[float] = None
+    evidence: List[str] = Field(default_factory=list)
+    action: str
+    preview_data_url: Optional[str] = None
+    quarantined: bool = False
+
+
+class AuditEvent(BaseModel):
+    timestamp: datetime
+    artifact_id: str
+    sha256_hash: str
+    detection_result: str
+    integrity_status: str
+    reason: str
+    action: str
+
+
 class DatasetIntegrityReport(BaseModel):
     batch_id: str
     total_samples_analyzed: int
@@ -40,6 +64,8 @@ class DatasetIntegrityReport(BaseModel):
     overall_health_score: float  # 0.0 (severely compromised) to 1.0 (clean)
     recommendation: AssetStatus  # ACCEPTED, UNDER_REVIEW, or QUARANTINED
     report_digest: str  # SHA-256 canonical hash of this report
+    image_results: List[ImageAssessment] = Field(default_factory=list)
+    audit_events: List[AuditEvent] = Field(default_factory=list)
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 

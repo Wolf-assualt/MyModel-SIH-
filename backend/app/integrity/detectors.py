@@ -229,7 +229,7 @@ class TriggerBackdoorDetector:
     def detect(self, samples: List[SampleRecord], patch_size: int = 16) -> List[IntegrityFinding]:
         findings: List[IntegrityFinding] = []
         if len(samples) < 2:
-            return findings
+            return self._detect_isolated_trigger(samples, patch_size)
 
         # Group samples by primary label class
         label_groups: Dict[str, List[SampleRecord]] = defaultdict(list)
@@ -293,4 +293,59 @@ class TriggerBackdoorDetector:
                             )
                         )
 
+        return findings
+
+    def _detect_isolated_trigger(
+        self,
+        samples: List[SampleRecord],
+        patch_size: int,
+    ) -> List[IntegrityFinding]:
+        """Detect a measured high-contrast trigger patch when no comparison sample exists."""
+        findings: List[IntegrityFinding] = []
+        corner_names = ["top_left", "top_right", "bottom_left", "bottom_right"]
+        for sample in samples:
+            try:
+                with Image.open(sample.file_path) as img:
+                    width, height = img.size
+                    if width < patch_size or height < patch_size:
+                        continue
+                    for corner in corner_names:
+                        if corner == "top_left":
+                            box = (0, 0, patch_size, patch_size)
+                        elif corner == "top_right":
+                            box = (width - patch_size, 0, width, patch_size)
+                        elif corner == "bottom_left":
+                            box = (0, height - patch_size, patch_size, height)
+                        else:
+                            box = (width - patch_size, height - patch_size, width, height)
+
+                        patch = np.array(img.crop(box).convert("L"), dtype=np.float32)
+                        variance = float(np.var(patch))
+                        dark_ratio = float(np.mean(patch < 32))
+                        light_ratio = float(np.mean(patch > 224))
+                        if variance >= 5000.0 and dark_ratio >= 0.20 and light_ratio >= 0.20:
+                            findings.append(
+                                IntegrityFinding(
+                                    finding_id=str(uuid.uuid4()),
+                                    check_type=IntegrityCheckType.TRIGGER_BACKDOOR,
+                                    severity=IntegritySeverity.CRITICAL,
+                                    sample_ids=[sample.sample_id],
+                                    description=(
+                                        f"High-contrast localized trigger candidate detected in {corner} corner "
+                                        f"(variance {variance:.1f}, dark ratio {dark_ratio:.2f}, light ratio {light_ratio:.2f})."
+                                    ),
+                                    metric_score=min(1.0, variance / 16384.0),
+                                    details={
+                                        "corner": corner,
+                                        "patch_size": patch_size,
+                                        "variance": variance,
+                                        "dark_ratio": dark_ratio,
+                                        "light_ratio": light_ratio,
+                                        "isolated_sample": True,
+                                    },
+                                )
+                            )
+                            break
+            except Exception:
+                continue
         return findings

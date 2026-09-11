@@ -3,11 +3,13 @@ import hashlib
 import shutil
 import uuid
 import zipfile
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from app.core.config import settings
+from app.crypto.canonical import canonical_json_dumps
 from app.datasets.engine import default_ingestion_engine
 from app.integrity.engine import default_integrity_engine
 from app.schemas.base import AssetStatus, ResponseEnvelope
@@ -17,7 +19,7 @@ from app.schemas.dataset import (
     IngestDirectoryRequest,
     IngestResponse,
 )
-from app.schemas.integrity import DatasetIntegrityReport
+from app.schemas.integrity import AuditEvent, DatasetIntegrityReport, ImageAssessment
 
 router = APIRouter(prefix="/datasets", tags=["Dataset Ingestion"])
 
@@ -82,6 +84,49 @@ async def upload_and_scan_dataset(
         raise HTTPException(status_code=400, detail=f"Dataset upload failed: {exc}")
     except Exception as exc:
         raise HTTPException(status_code=400, detail=f"Dataset analysis failed: {exc}")
+
+
+@router.post("/quarantine/{batch_id}/{sample_id:path}", response_model=ResponseEnvelope[ImageAssessment])
+def quarantine_dataset_image(batch_id: str, sample_id: str) -> ResponseEnvelope[ImageAssessment]:
+    """Copy a flagged sample into isolated storage and block it from trusted use."""
+    manifest = default_ingestion_engine.load_manifest(batch_id)
+    report = default_integrity_engine.load_report(batch_id)
+    if not manifest or not report:
+        raise HTTPException(status_code=404, detail=f"Dataset batch '{batch_id}' not found.")
+
+    assessment = next((item for item in report.image_results if item.sample_id == sample_id), None)
+    sample = next((item for item in manifest.samples if item.sample_id == sample_id), None)
+    if not assessment or not sample:
+        raise HTTPException(status_code=404, detail=f"Image '{sample_id}' not found in batch '{batch_id}'.")
+    if assessment.result == "REAL / CLEAN":
+        raise HTTPException(status_code=400, detail="Clean images cannot be quarantined.")
+
+    quarantine_dir = Path(settings.DATA_DIR) / "quarantine" / "uploads" / batch_id
+    quarantine_dir.mkdir(parents=True, exist_ok=True)
+    destination = quarantine_dir / Path(sample.file_path).name
+    shutil.copy2(sample.file_path, destination)
+
+    assessment.quarantined = True
+    assessment.action = "BLOCKED: EXCLUDED FROM INFERENCE"
+    assessment.trust_status = "REVOKED"
+    event = AuditEvent(
+        timestamp=datetime.now(timezone.utc),
+        artifact_id=sample.sample_id,
+        sha256_hash=sample.sha256_hash,
+        detection_result=assessment.result,
+        integrity_status=assessment.integrity_status,
+        reason="Integrity/poisoning violation",
+        action="QUARANTINED",
+    )
+    report.audit_events.append(event)
+    audit_file = Path(settings.DATA_DIR) / "audit" / "image_events.jsonl"
+    audit_file.parent.mkdir(parents=True, exist_ok=True)
+    with audit_file.open("a", encoding="utf-8") as stream:
+        stream.write(event.model_dump_json() + "\n")
+    report_file = default_integrity_engine.reports_dir / f"integrity_{batch_id}.json"
+    with report_file.open("w", encoding="utf-8") as stream:
+        stream.write(canonical_json_dumps(report.model_dump(mode="json")))
+    return ResponseEnvelope(data=assessment)
 
 
 @router.post("/ingest", response_model=ResponseEnvelope[IngestResponse])

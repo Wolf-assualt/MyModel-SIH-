@@ -98,3 +98,49 @@ def test_upload_1500_files_accepted_by_starlette_multipart_parser():
     assert data["success"] is True
     assert data["data"]["sample_count"] == 1500
 
+
+def test_upload_image_folder_auto_fallback_from_bigearthnet_format():
+    """Verify that uploading standard .jpg/.png images (e.g. EuroSAT RGB) gracefully auto-resolves to IMAGE_FOLDER even if default format was BIGEARTHNET_S2."""
+    from PIL import Image
+    
+    # Generate 5 valid small in-memory JPEG images
+    files = []
+    for i in range(5):
+        buf = BytesIO()
+        img = Image.new("RGB", (32, 32), color=(i * 40, 100, 150))
+        img.save(buf, format="JPEG")
+        buf.seek(0)
+        files.append(("files", (f"AnnualCrop_{i}.jpg", buf, "image/jpeg")))
+
+    response = client.post("/api/v1/datasets/upload", data={"format": "BIGEARTHNET_S2"}, files=files)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["data"]["sample_count"] == 5
+    assert len(data["data"]["merkle_root"]) == 64
+
+
+def test_upload_preserves_nested_subfolders_without_collision():
+    """Verify uploading subfolders (e.g. EuroSAT classes AnnualCrop/1.jpg and Forest/1.jpg) preserves relative hierarchy."""
+    from PIL import Image
+
+    buf1 = BytesIO()
+    Image.new("RGB", (32, 32), color=(255, 0, 0)).save(buf1, format="JPEG")
+    buf1.seek(0)
+
+    buf2 = BytesIO()
+    Image.new("RGB", (32, 32), color=(0, 255, 0)).save(buf2, format="JPEG")
+    buf2.seek(0)
+
+    files = [
+        ("files", ("AnnualCrop/sample_1.jpg", buf1, "image/jpeg")),
+        ("files", ("Forest/sample_1.jpg", buf2, "image/jpeg")),
+    ]
+
+    response = client.post("/api/v1/datasets/upload", files=files)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["data"]["sample_count"] == 2
+
+

@@ -42,10 +42,13 @@ async def upload_and_ingest_dataset(
     try:
         saved_files = []
         for upload_file in files:
-            # Preserve relative filename or basename
-            raw_filename = upload_file.filename or f"band_{len(saved_files)}.tif"
-            filename = Path(raw_filename).name
-            dest_path = upload_dir / filename
+            raw_filename = upload_file.filename or f"sample_{len(saved_files)}.jpg"
+            # Sanitize parts to prevent directory traversal while preserving folder structure
+            clean_parts = [p for p in Path(raw_filename).parts if p not in ("..", "/", "\\", "")]
+            if clean_parts:
+                dest_path = upload_dir.joinpath(*clean_parts)
+            else:
+                dest_path = upload_dir / f"sample_{len(saved_files)}.jpg"
             dest_path.parent.mkdir(parents=True, exist_ok=True)
 
             content = await upload_file.read()
@@ -53,11 +56,30 @@ async def upload_and_ingest_dataset(
                 f.write(content)
             saved_files.append(dest_path)
 
+        # Dynamically determine format based on uploaded file extensions
+        tif_files = [f for f in saved_files if f.suffix.lower() in {".tif", ".tiff"}]
+        image_files = [f for f in saved_files if f.suffix.lower() in {".jpg", ".jpeg", ".png", ".bmp", ".webp"}]
+        json_files = [f for f in saved_files if f.suffix.lower() == ".json"]
+
+        resolved_format = format
+        annotation_path = None
+
+        if tif_files:
+            resolved_format = DatasetFormat.BIGEARTHNET_S2
+        elif json_files and not tif_files:
+            resolved_format = DatasetFormat.COCO
+            annotation_path = str(json_files[0])
+        elif image_files and not tif_files:
+            resolved_format = DatasetFormat.IMAGE_FOLDER
+        elif not tif_files and format in (DatasetFormat.BIGEARTHNET_S2, DatasetFormat.SENTINEL_2):
+            resolved_format = DatasetFormat.IMAGE_FOLDER
+
         manifest = default_ingestion_engine.ingest(
             dataset_name=dataset_name,
-            format=format,
+            format=resolved_format,
             contributor_id=contributor_id,
             source_path=str(upload_dir),
+            annotation_path=annotation_path,
         )
 
         return ResponseEnvelope(

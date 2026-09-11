@@ -128,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sizeEl = document.getElementById('upload-total-size');
     const msgEl = document.getElementById('upload-validation-msg');
     const metaStatus = document.getElementById('meta-expected-status');
+    const formatBadge = document.getElementById('badge-dataset-format');
 
     // Preflight count validation: block immediately if exceeds MAX_UPLOAD_FILES
     if (fileCount > MAX_UPLOAD_FILES) {
@@ -165,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setUploadMode('real_upload');
     AppState.selectedFiles = Array.from(filesList);
 
-    // Calculate total size
+    // Calculate total size and analyze file types
     let totalBytes = 0;
     const detectedBands = new Set();
     let hasTif = false;
@@ -203,7 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Detect format and structure
     let format = 'IMAGE_FOLDER';
-    let isStructureValid = true;
     let validationMessage = '';
 
     if (hasTif && detectedBands.size > 0) {
@@ -242,12 +242,24 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Update Preflight Table
-    const assetName = AppState.selectedFiles[0].name.replace(/\.[^/.]+$/, "") || 'Uploaded_Dataset_Batch';
-    document.getElementById('meta-asset-name').textContent = assetName.substring(0, 24);
-    document.getElementById('meta-payload-format').textContent = format;
-    document.getElementById('meta-expected-status').textContent = 'VALID (READY TO SCAN)';
-    document.getElementById('meta-expected-status').style.color = 'var(--status-success)';
+    // Derive human-readable asset/folder name
+    let assetName = 'Uploaded_Dataset_Batch';
+    const firstFile = AppState.selectedFiles[0];
+    if (firstFile.webkitRelativePath) {
+      const parts = firstFile.webkitRelativePath.split('/');
+      assetName = parts.length > 1 ? parts[0] : parts[0].replace(/\.[^/.]+$/, "");
+    } else if (firstFile.name) {
+      assetName = firstFile.name.replace(/\.[^/.]+$/, "");
+    }
+
+    const metaAssetNameEl = document.getElementById('meta-asset-name');
+    const metaPayloadFormatEl = document.getElementById('meta-payload-format');
+    if (metaAssetNameEl) metaAssetNameEl.textContent = assetName.substring(0, 24);
+    if (metaPayloadFormatEl) metaPayloadFormatEl.textContent = format;
+    if (metaStatus) {
+      metaStatus.textContent = 'VALID (READY TO SCAN)';
+      metaStatus.style.color = 'var(--status-success)';
+    }
 
     AppState.mission.assetName = assetName;
     AppState.mission.format = format;
@@ -555,7 +567,11 @@ document.addEventListener('DOMContentLoaded', () => {
         title: 'Data Integrity',
         verdict: isTamper ? 'TAMPERED' : 'PASS',
         badgeClass: isTamper ? 'badge-health-crit' : 'badge-health-ok',
-        desc: isTamper ? 'Merkle root divergence in spectral band payload.' : `All ${isRealUpload ? AppState.selectedFiles.length : 12} bands bit-exact match approved Merkle tree.`,
+        desc: isTamper 
+          ? 'Merkle root divergence in payload files.' 
+          : (isRealUpload && AppState.mission.format !== 'BIGEARTHNET_S2' 
+              ? `All ${AppState.selectedFiles.length} dataset samples bit-exact match approved Merkle tree.` 
+              : `All ${isRealUpload ? AppState.selectedFiles.length : 12} bands bit-exact match approved Merkle tree.`),
         meta: 'Merkle Root: ' + merkleDisplay,
       },
       {

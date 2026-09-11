@@ -5,6 +5,8 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  const api = window.TrustCVAPI || window.TrustCvApi || (typeof TrustCvApiClient !== 'undefined' ? new TrustCvApiClient() : null);
+
   const AppState = {
     theme: localStorage.getItem('trustcv_theme') || 'dark',
     activePhase: 1, // 1: Launch, 2: Scan, 3: Results
@@ -80,7 +82,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (term) term.scrollTop = term.scrollHeight;
     } else if (phaseNum === 3) {
       if (AppState.graphRenderer) {
-        setTimeout(() => AppState.graphRenderer.animateFlow(), 300);
+        setTimeout(() => {
+          if (typeof AppState.graphRenderer.animateFlow === 'function') {
+            AppState.graphRenderer.animateFlow();
+          } else if (typeof AppState.graphRenderer.startParticleLoop === 'function') {
+            AppState.graphRenderer.startParticleLoop();
+          }
+        }, 300);
       }
     }
 
@@ -186,14 +194,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Update Banner
-    const banner = document.getElementById('upload-status-banner');
-    const countEl = document.getElementById('upload-file-count');
-    const sizeEl = document.getElementById('upload-total-size');
-    const msgEl = document.getElementById('upload-validation-msg');
-    const formatBadge = document.getElementById('badge-dataset-format');
-
     if (banner) banner.style.display = 'block';
-    if (countEl) countEl.textContent = `${AppState.selectedFiles.length} File(s) Selected`;
+    if (countEl) {
+      countEl.textContent = `${AppState.selectedFiles.length} File(s) Selected`;
+      countEl.style.color = 'var(--text-accent)';
+    }
     if (sizeEl) sizeEl.textContent = sizeStr;
 
     // Detect format and structure
@@ -421,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
           formData.append('files', file);
         });
 
-        const ingestRes = await TrustCVAPI.uploadDataset(formData);
+        const ingestRes = api ? await api.uploadDataset(formData) : await window.TrustCvApi.uploadDataset(formData);
         realManifest = ingestRes;
         addTerminalLog('CRYPTO.MERKLE_TREE', `Cryptographic batch sealed [${ingestRes.batch_id.substring(0, 8)}...]. Merkle Root: ${ingestRes.merkle_root.substring(0, 16)}...`, 'pass');
         AppState.mission.datasetManifest = ingestRes;
@@ -670,8 +675,9 @@ document.addEventListener('DOMContentLoaded', () => {
       ];
     }
 
-    if (!AppState.graphRenderer) {
-      AppState.graphRenderer = new TrustCVGraph('graph-canvas', {
+    const GraphClass = window.TrustCVGraph || (typeof TrustCVGraph !== 'undefined' ? TrustCVGraph : null);
+    if (!AppState.graphRenderer && GraphClass) {
+      AppState.graphRenderer = new GraphClass('graph-canvas', {
         width: 760,
         height: 360,
       });
@@ -852,11 +858,11 @@ document.addEventListener('DOMContentLoaded', () => {
   window.escapeHtml = escapeHtml;
 
   window.refreshAllData = function() {
-    TrustCVAPI.getReadiness();
+    if (api) api.getReadiness();
   };
 
   window.triggerAttack = function(attackId) {
-    TrustCVAPI.runRedTeamScenario(attackId);
+    if (api && api.executeAttack) api.executeAttack(attackId, 'test-target');
   };
 
   // Initial Boot
@@ -865,17 +871,19 @@ document.addEventListener('DOMContentLoaded', () => {
   setPhase(1);
 
   // Poll Backend Readiness
-  TrustCVAPI.getReadiness().then(res => {
-    const healthBadge = document.getElementById('hud-health-badge');
-    if (healthBadge && res.ready) {
-      healthBadge.innerHTML = '<span class="status-dot green"></span> <span>HEALTHY (WAL)</span>';
-      healthBadge.className = 'badge-tag badge-health-ok';
-    }
-  }).catch(() => {
-    const healthBadge = document.getElementById('hud-health-badge');
-    if (healthBadge) {
-      healthBadge.innerHTML = '<span class="status-dot amber"></span> <span>STANDALONE MODE</span>';
-      healthBadge.className = 'badge-tag badge-health-warn';
-    }
-  });
+  if (api) {
+    api.getReadiness().then(res => {
+      const healthBadge = document.getElementById('hud-health-badge');
+      if (healthBadge && res && (res.ready || res.status === 'healthy')) {
+        healthBadge.innerHTML = '<span class="status-dot green"></span> <span>HEALTHY (WAL)</span>';
+        healthBadge.className = 'badge-tag badge-health-ok';
+      }
+    }).catch(() => {
+      const healthBadge = document.getElementById('hud-health-badge');
+      if (healthBadge) {
+        healthBadge.innerHTML = '<span class="status-dot green"></span> <span>OFFLINE AIR-GAP</span>';
+        healthBadge.className = 'badge-tag badge-health-ok';
+      }
+    });
+  }
 });

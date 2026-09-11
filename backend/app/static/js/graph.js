@@ -21,7 +21,9 @@ class TrustCVGraph {
     this.particles = [];
     this.animFrameId = null;
     this.isVisible = true;
-    this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.prefersReducedMotion = (typeof window !== 'undefined' && typeof window.matchMedia === 'function') 
+      ? Boolean(window.matchMedia('(prefers-reduced-motion: reduce)')?.matches) 
+      : false;
 
     this.initDOM();
     this.initObservers();
@@ -38,9 +40,15 @@ class TrustCVGraph {
 
     // Remove any previous SVG or tooltip
     const oldSvg = this.container.querySelector('svg.trustcv-graph-svg');
-    if (oldSvg) oldSvg.remove();
+    if (oldSvg) {
+      if (typeof oldSvg.remove === 'function') oldSvg.remove();
+      else if (oldSvg.parentNode) oldSvg.parentNode.removeChild(oldSvg);
+    }
     const oldTip = this.container.querySelector('.graph-tooltip');
-    if (oldTip) oldTip.remove();
+    if (oldTip) {
+      if (typeof oldTip.remove === 'function') oldTip.remove();
+      else if (oldTip.parentNode) oldTip.parentNode.removeChild(oldTip);
+    }
 
     // Create Tooltip
     this.tooltip = document.createElement('div');
@@ -133,8 +141,10 @@ class TrustCVGraph {
     });
 
     // Match media reduced motion listener
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (mq.addEventListener) {
+    const mq = (typeof window !== 'undefined' && typeof window.matchMedia === 'function') 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)') 
+      : null;
+    if (mq && mq.addEventListener) {
       mq.addEventListener('change', (e) => {
         this.prefersReducedMotion = e.matches;
         if (this.prefersReducedMotion) this.stopParticleLoop();
@@ -289,10 +299,11 @@ class TrustCVGraph {
       this.edgesGroup.appendChild(path);
 
       // Register Particle System on Path
-      if (!isInterrupted && !this.prefersReducedMotion) {
+      const totalLen = (typeof path.getTotalLength === 'function') ? path.getTotalLength() : 100;
+      if (!isInterrupted && !this.prefersReducedMotion && totalLen > 0) {
         const particle = {
           pathElement: path,
-          length: path.getTotalLength(),
+          length: totalLen,
           t: (edgeIdx * 0.25) % 1.0,
           speed: isQuarantineEdge ? 0.007 : 0.005,
           color: isQuarantineEdge ? '#ef4444' : (isDrift ? '#f59e0b' : '#38bdf8'),
@@ -591,17 +602,34 @@ class TrustCVGraph {
         }
       });
 
-      this.animFrameId = requestAnimationFrame(animate);
+      const reqAnim = (typeof window !== 'undefined' && window.requestAnimationFrame) 
+        ? window.requestAnimationFrame 
+        : (typeof requestAnimationFrame !== 'undefined' ? requestAnimationFrame : null);
+      if (reqAnim) {
+        this.animFrameId = reqAnim(animate);
+      }
     };
 
-    this.animFrameId = requestAnimationFrame(animate);
+    const reqAnim = (typeof window !== 'undefined' && window.requestAnimationFrame) 
+      ? window.requestAnimationFrame 
+      : (typeof requestAnimationFrame !== 'undefined' ? requestAnimationFrame : null);
+    if (reqAnim) {
+      this.animFrameId = reqAnim(animate);
+    }
   }
 
   stopParticleLoop() {
     if (this.animFrameId) {
-      cancelAnimationFrame(this.animFrameId);
+      const cancelAnim = (typeof window !== 'undefined' && window.cancelAnimationFrame) 
+        ? window.cancelAnimationFrame 
+        : (typeof cancelAnimationFrame !== 'undefined' ? cancelAnimationFrame : null);
+      if (cancelAnim) cancelAnim(this.animFrameId);
       this.animFrameId = null;
     }
+  }
+
+  animateFlow() {
+    this.startParticleLoop();
   }
 
   loadGraphData(data) {

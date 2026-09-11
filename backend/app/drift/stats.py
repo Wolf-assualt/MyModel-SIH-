@@ -1,12 +1,5 @@
-"""Pure NumPy & SciPy statistical metrics for distribution shift, divergence, and distance testing."""
-from typing import Tuple
+"""Pure NumPy statistical metrics for distribution shift and divergence testing."""
 import numpy as np
-
-try:
-    from scipy.stats import ks_2samp
-    HAS_SCIPY = True
-except ImportError:
-    HAS_SCIPY = False
 
 
 def compute_ks_distance(baseline: np.ndarray, target: np.ndarray) -> float:
@@ -32,44 +25,7 @@ def compute_ks_distance(baseline: np.ndarray, target: np.ndarray) -> float:
     cdf_v = np.searchsorted(v_sorted, pooled, side="right") / len(v)
 
     ks_stat = float(np.max(np.abs(cdf_u - cdf_v)))
-    return float(max(0.0, min(1.0, ks_stat)))
-
-
-def compute_ks_p_value(baseline: np.ndarray, target: np.ndarray, ks_stat: float) -> float:
-    """Compute asymptotic 2-sample Kolmogorov-Smirnov p-value.
-    
-    Returns:
-        float: Two-sided p-value in range [0.0, 1.0].
-    """
-    n1 = len(baseline)
-    n2 = len(target)
-    if n1 == 0 or n2 == 0:
-        return 1.0
-
-    if HAS_SCIPY:
-        try:
-            res = ks_2samp(baseline, target)
-            return float(res.pvalue)
-        except Exception:
-            pass
-
-    # Asymptotic Kolmogorov-Smirnov two-sided p-value approximation
-    n_eff = (n1 * n2) / (n1 + n2)
-    lam = (np.sqrt(n_eff) + 0.12 + 0.11 / np.sqrt(n_eff)) * ks_stat
-    if lam <= 0.0:
-        return 1.0
-    if lam > 3.0:
-        return 0.0
-
-    # Kolmogorov series summation
-    p_val = 0.0
-    for k in range(1, 101):
-        term = 2.0 * ((-1) ** (k - 1)) * np.exp(-2.0 * (k * lam) ** 2)
-        p_val += term
-        if abs(term) < 1e-10:
-            break
-
-    return float(max(0.0, min(1.0, p_val)))
+    return max(0.0, min(1.0, ks_stat))
 
 
 def compute_psi(baseline: np.ndarray, target: np.ndarray, bins: int = 10) -> float:
@@ -89,8 +45,7 @@ def compute_psi(baseline: np.ndarray, target: np.ndarray, bins: int = 10) -> flo
     min_val = float(min(np.min(u), np.min(v)))
     max_val = float(max(np.max(u), np.max(v)))
 
-    # Zero-variance or identical constant distributions
-    if min_val == max_val or np.isclose(min_val, max_val, atol=1e-9):
+    if min_val == max_val:
         return 0.0
 
     # Discretize into uniform bins across the joint domain
@@ -109,7 +64,7 @@ def compute_psi(baseline: np.ndarray, target: np.ndarray, bins: int = 10) -> flo
 
 
 def wasserstein_distance_1d(u: np.ndarray, v: np.ndarray, num_quantiles: int = 100) -> float:
-    """Calculate 1D Earth Mover's Distance (Wasserstein-1 distance) using quantile sampling.
+    """Calculate 1D Earth Mover's Distance (Wasserstein distance) using quantile sampling.
     
     Returns:
         float: Mean absolute difference between quantile functions.
@@ -125,31 +80,3 @@ def wasserstein_distance_1d(u: np.ndarray, v: np.ndarray, num_quantiles: int = 1
     v_quant = np.quantile(arr_v, quantiles)
 
     return float(np.mean(np.abs(u_quant - v_quant)))
-
-
-def compute_energy_distance(u: np.ndarray, v: np.ndarray) -> float:
-    """Calculate the 1D Energy Distance between two empirical distributions.
-    
-    Energy distance is a metric statistical distance defined as:
-        E^2(u, v) = 2 E||u - v|| - E||u - u'|| - E||v - v'||
-    where E^2(u, v) >= 0 and equals 0 if and only if distributions are identical.
-    
-    Returns:
-        float: Energy distance between u and v (>= 0.0).
-    """
-    arr_u = np.asarray(u, dtype=np.float64).ravel()
-    arr_v = np.asarray(v, dtype=np.float64).ravel()
-
-    n = len(arr_u)
-    m = len(arr_v)
-    if n == 0 or m == 0:
-        return 0.0
-
-    # Cross difference E||u - v||
-    diff_uv = np.abs(arr_u[:, None] - arr_v[None, :])
-    # Self differences E||u - u'|| and E||v - v'||
-    diff_uu = np.abs(arr_u[:, None] - arr_u[None, :])
-    diff_vv = np.abs(arr_v[:, None] - arr_v[None, :])
-
-    e_val = 2.0 * np.mean(diff_uv) - np.mean(diff_uu) - np.mean(diff_vv)
-    return float(max(0.0, e_val))

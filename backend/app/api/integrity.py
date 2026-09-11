@@ -10,7 +10,6 @@ router = APIRouter(prefix="/integrity", tags=["Training-Data Integrity"])
 
 
 @router.post("/scan", response_model=ResponseEnvelope[DatasetIntegrityReport])
-@router.post("/audit", response_model=ResponseEnvelope[DatasetIntegrityReport])
 def scan_batch_integrity(payload: IntegrityScanRequest) -> ResponseEnvelope[DatasetIntegrityReport]:
     """Execute multi-detector integrity scan on an ingested dataset batch."""
     manifest = default_ingestion_engine.load_manifest(payload.batch_id)

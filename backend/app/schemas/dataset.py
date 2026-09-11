@@ -12,6 +12,7 @@ class DatasetFormat(str, Enum):
     YOLO = "YOLO"
     IMAGE_FOLDER = "IMAGE_FOLDER"
     BIGEARTHNET_S2 = "BIGEARTHNET_S2"
+    SENTINEL_2 = "SENTINEL_2"
 
 
 class SampleRecord(BaseModel):
@@ -32,10 +33,7 @@ class BatchManifest(BaseModel):
     sample_count: int
     merkle_root: str
     samples: List[SampleRecord]
-    signature: Optional[str] = None
-    public_key_pem: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
 
 
 class IngestDirectoryRequest(BaseModel):
@@ -60,8 +58,6 @@ class BatchVerificationResponse(BaseModel):
     calculated_root: str
     manifest_root: str
     tampered_samples: List[str] = Field(default_factory=list)
-    signature_valid: Optional[bool] = None
-
 
 
 # Retained for ORM entity compatibility

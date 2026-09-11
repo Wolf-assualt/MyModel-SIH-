@@ -67,3 +67,34 @@ venv.bak/
 # OS generated
 .DS_Store
 Thumbs.db
+
+# Runtime Data & Uploads
+backend/data/
+data/uploads/
+data/reports/
+data/models/manifests/
+data/models/baselines/
+data/redteam/
+data/manifests/
+data/merkle/
+data/drift/
+data/inference_dna/
+data/keys/
+data/fusion/
+data/fingerprints/
+test_data/
+scripts/check_page.py
+*.sqlite
+*.sqlite3
+*.db
+data/*.sqlite
+data/*.sqlite3
+data/*.db
+backend/*.db
+backend/*.sqlite*
+
+
+
+
+
+

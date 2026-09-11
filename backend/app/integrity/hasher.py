@@ -5,21 +5,10 @@ from PIL import Image
 
 
 def _load_image(img_input: Union[Path, str, Image.Image]) -> Image.Image:
-    """Helper to ensure input is a PIL Image object, supporting both image files and compound EO patch dirs."""
+    """Helper to ensure input is a PIL Image object."""
     if isinstance(img_input, Image.Image):
         return img_input
-    p = Path(img_input)
-    if p.is_dir():
-        # Check if it's a BigEarthNet patch directory or compound sample directory
-        from app.datasets.bigearthnet import BigEarthNetS2Adapter
-        composite = BigEarthNetS2Adapter.extract_composite_image(p)
-        if composite is not None:
-            return composite
-        for ext in [".tif", ".tiff", ".png", ".jpg", ".jpeg"]:
-            candidates = list(p.glob(f"*{ext}"))
-            if candidates:
-                return Image.open(candidates[0])
-    return Image.open(p)
+    return Image.open(img_input)
 
 
 def compute_ahash(image_path: Union[Path, str, Image.Image], hash_size: int = 8) -> str:

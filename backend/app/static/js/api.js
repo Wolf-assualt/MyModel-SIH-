@@ -1,176 +1,151 @@
 /**
- * TRUST-CV: Centralized REST API Client
- * Connects directly to FastAPI backend routes with error handling and envelopes.
- * 100% Offline / Air-Gapped / Zero Remote Telemetry.
+ * TRUST-CV API Client Wrapper
+ * Handles asynchronous REST communication with FastAPI backend endpoints.
  */
+class TrustCvApiClient {
+  constructor(baseUrl = "/api/v1") {
+    this.baseUrl = baseUrl;
+  }
 
-const API_BASE = '/api/v1';
-
-class TrustCVAPI {
-  static async request(endpoint, options = {}) {
-    const url = `${API_BASE}${endpoint}`;
+  async _request(path, options = {}) {
+    const url = `${this.baseUrl}${path}`;
     const defaultHeaders = {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    };
-
-    const config = {
-      ...options,
-      headers: {
-        ...defaultHeaders,
-        ...options.headers,
-      },
+      "Accept": "application/json",
+      "Content-Type": "application/json",
     };
 
     try {
-      const response = await fetch(url, config);
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...defaultHeaders,
+          ...(options.headers || {}),
+        },
+      });
+
       if (!response.ok) {
-        let errDetail = `HTTP ${response.status} ${response.statusText}`;
+        let errMessage = `HTTP error ${response.status}: ${response.statusText}`;
         try {
           const errData = await response.json();
-          if (errData.detail) errDetail = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
-          else if (errData.error) errDetail = errData.error;
+          if (errData.error) errMessage = errData.error;
+          else if (errData.detail) errMessage = errData.detail;
         } catch (_) {}
-        throw new Error(errDetail);
+        throw new Error(errMessage);
       }
 
       const envelope = await response.json();
       return envelope.data !== undefined ? envelope.data : envelope;
     } catch (error) {
-      console.error(`[API Error] ${endpoint}:`, error);
+      console.error(`[API Error] ${options.method || "GET"} ${path}:`, error);
       throw error;
     }
   }
 
-  // System & Health
-  static async getHealth() {
-    return this.request('/system/health');
+  /* SOC Dashboard & Overview */
+  async getOverview() {
+    return this._request("/dashboard/overview");
   }
 
-  static async getReadiness() {
-    return this.request('/system/readiness');
+  async getTimeline(limit = 25) {
+    return this._request(`/dashboard/timeline?limit=${limit}`);
   }
 
-  static async getOverview() {
-    return this.request('/dashboard/overview');
+  async getContributors() {
+    return this._request("/dashboard/contributors");
   }
 
-  // Datasets
-  static async listDatasets() {
-    return this.request('/datasets');
+  async investigateEntity(entityId) {
+    return this._request(`/dashboard/investigate/${encodeURIComponent(entityId)}`);
   }
 
-  static async ingestDataset(payload) {
-    return this.request('/datasets/ingest', {
-      method: 'POST',
-      body: JSON.stringify(payload),
+  /* Evidence & Lineage Graph */
+  async getGraph() {
+    return this._request("/graph/export");
+  }
+
+  async traceLineage(entityId) {
+    return this._request(`/graph/trace/${encodeURIComponent(entityId)}`);
+  }
+
+  async getContributorRisk(contributorId, name = "Unknown") {
+    return this._request(`/graph/contributor/${encodeURIComponent(contributorId)}/risk?name=${encodeURIComponent(name)}`);
+  }
+
+  /* Red-Team Adversarial Lab */
+  async executeAttack(attackType, targetEntityId, intensity = 0.5, customPayload = {}) {
+    return this._request("/redteam/attack/execute", {
+      method: "POST",
+      body: JSON.stringify({
+        attack_type: attackType,
+        target_entity_id: targetEntityId,
+        intensity: parseFloat(intensity),
+        custom_payload: customPayload,
+      }),
     });
   }
 
-  static async verifyDataset(batchId) {
-    return this.request(`/datasets/${batchId}/verify`, {
-      method: 'POST',
+  async verifyAttack(attackResult) {
+    return this._request("/redteam/attack/verify", {
+      method: "POST",
+      body: JSON.stringify(attackResult),
     });
   }
 
-  // Models
-  static async listModels() {
-    return this.request('/models');
+  /* System Hardening & Cryptographic Audit */
+  async auditChain() {
+    return this._request("/hardening/audit/chain");
   }
 
-  static async registerModel(payload) {
-    return this.request('/models/register', {
-      method: 'POST',
-      body: JSON.stringify(payload),
+  async getOfflineStatus() {
+    return this._request("/hardening/audit/offline");
+  }
+
+  async getBenchmarkMetrics() {
+    return this._request("/hardening/benchmark");
+  }
+
+  /* Assurance Reports */
+  async getReport(reportId, format = "JSON_MANIFEST") {
+    return this._request(`/reports/${encodeURIComponent(reportId)}?format=${format}`);
+  }
+
+  async verifyReport(report) {
+    return this._request("/reports/verify", {
+      method: "POST",
+      body: JSON.stringify({ report }),
     });
   }
-
-  static async verifyModelAgainstBaseline(modelId, baselineId) {
-    return this.request(`/models/${modelId}/verify-against-baseline/${baselineId}`, {
-      method: 'POST',
-    });
+  /* Dataset Upload & Ingestion */
+  async uploadDataset(formData) {
+    const url = `${this.baseUrl}/datasets/upload`;
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        let errMessage = `HTTP error ${response.status}: ${response.statusText}`;
+        try {
+          const errData = await response.json();
+          if (errData.error) errMessage = errData.error;
+          else if (errData.detail) errMessage = errData.detail;
+        } catch (_) {}
+        throw new Error(errMessage);
+      }
+      const envelope = await response.json();
+      return envelope.data !== undefined ? envelope.data : envelope;
+    } catch (error) {
+      console.error("[API Error] POST /datasets/upload:", error);
+      throw error;
+    }
   }
 
-  // Behavioral Fingerprinting
-  static async fingerprintModel(modelId, seed = 42) {
-    return this.request(`/fingerprint/${modelId}?seed=${seed}`, {
-      method: 'POST',
-    });
-  }
-
-  // Runtime Inference DNA
-  static async createInferenceDNA(payload) {
-    return this.request('/inference/dna', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  }
-
-  static async verifyInferenceChain(payload) {
-    return this.request('/inference/verify-chain', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  }
-
-  // Distribution Drift
-  static async evaluateDrift(payload) {
-    return this.request('/drift/evaluate', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  }
-
-  // Evidence Fusion & Hard-Veto Gatekeeper
-  static async fuseEvidence(payload) {
-    return this.request('/fusion/fuse', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  }
-
-  // Provenance Graph & Blast Radius
-  static async getLineage(entityId) {
-    return this.request(`/graph/lineage/${entityId}`);
-  }
-
-  static async getBlastRadius(entityId) {
-    return this.request(`/graph/blast-radius/${entityId}`);
-  }
-
-  static async getFullGraph() {
-    return this.request('/graph');
-  }
-
-  // Forensic Assurance Reports
-  static async generateReport(payload) {
-    return this.request('/reports/generate', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  }
-
-  static async verifyReport(reportPayload) {
-    return this.request('/reports/verify', {
-      method: 'POST',
-      body: JSON.stringify(reportPayload),
-    });
-  }
-
-  static async getReport(reportId) {
-    return this.request(`/reports/${reportId}`);
-  }
-
-  // Red Team Scenario Runner
-  static async runRedTeamScenario(scenarioId) {
-    return this.request('/redteam/run', {
-      method: 'POST',
-      body: JSON.stringify({ scenario_id: scenarioId }),
-    });
+  async getReadiness() {
+    return this._request("/system/readiness");
   }
 }
 
-class TrustCvApiClient extends TrustCVAPI {}
-window.TrustCVAPI = TrustCVAPI;
-window.TrustCvApi = TrustCVAPI;
+// Attach aliases to window for global access
 window.TrustCvApiClient = TrustCvApiClient;
+window.TrustCvApi = new TrustCvApiClient();
+window.TrustCVAPI = window.TrustCvApi;

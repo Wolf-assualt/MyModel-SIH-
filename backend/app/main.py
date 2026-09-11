@@ -31,6 +31,18 @@ from app.api.hardening import router as hardening_router
 from app.core.config import settings
 from app.core.logging import setup_logging
 
+import starlette.formparsers
+import starlette.requests
+
+# Configure authoritative multipart upload intake limits globally from settings
+if hasattr(starlette.formparsers.MultiPartParser.__init__, "__kwdefaults__") and starlette.formparsers.MultiPartParser.__init__.__kwdefaults__:
+    starlette.formparsers.MultiPartParser.__init__.__kwdefaults__["max_files"] = settings.MAX_UPLOAD_FILES
+    starlette.formparsers.MultiPartParser.__init__.__kwdefaults__["max_fields"] = settings.MAX_UPLOAD_FILES * 2
+
+if hasattr(starlette.requests.Request.form, "__kwdefaults__") and starlette.requests.Request.form.__kwdefaults__:
+    starlette.requests.Request.form.__kwdefaults__["max_files"] = settings.MAX_UPLOAD_FILES
+    starlette.requests.Request.form.__kwdefaults__["max_fields"] = settings.MAX_UPLOAD_FILES * 2
+
 logger = logging.getLogger("trust_cv")
 
 

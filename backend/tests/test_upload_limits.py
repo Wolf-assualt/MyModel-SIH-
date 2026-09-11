@@ -86,3 +86,15 @@ def test_invalid_empty_upload_rejected():
     """Verify empty file selection is rejected."""
     response = client.post("/api/v1/datasets/upload", files=[])
     assert response.status_code in [400, 422]
+
+
+def test_upload_1500_files_accepted_by_starlette_multipart_parser():
+    """Verify that batches larger than Starlette's default 1000 limit (e.g. 1500 files) are parsed successfully."""
+    # Create 1500 small in-memory files
+    files = [("files", (f"file_{i}.tif", BytesIO(b"data"), "image/tiff")) for i in range(1500)]
+    response = client.post("/api/v1/datasets/upload", files=files)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["data"]["sample_count"] == 1500
+

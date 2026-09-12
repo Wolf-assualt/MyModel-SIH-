@@ -226,7 +226,7 @@ class QualityAndOODDetector:
 class TriggerBackdoorDetector:
     """Detects recurring static patch patterns in corner regions across samples with identical target label."""
 
-    def detect(self, samples: List[SampleRecord], patch_size: int = 16) -> List[IntegrityFinding]:
+    def detect(self, samples: List[SampleRecord], patch_size: int = 4) -> List[IntegrityFinding]:
         findings: List[IntegrityFinding] = []
         if len(samples) < 2:
             return self._detect_isolated_trigger(samples, patch_size)
@@ -268,8 +268,9 @@ class TriggerBackdoorDetector:
                             patch = img.crop(box).convert("L")
                             arr = np.array(patch, dtype=np.uint8)
 
-                            # Only consider patches with noticeable contrast/structure
-                            if float(np.var(arr)) > 25.0:
+                            # Bug fix: A solid-colored trigger (like BadNets white square) has 0 variance.
+                            # We just ignore completely black patches (which might be standard image padding).
+                            if not (arr == 0).all():
                                 sig = hash_bytes(arr.tobytes())
                                 patch_signatures[sig].append(sample.sample_id)
                     except Exception:

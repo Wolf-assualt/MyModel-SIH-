@@ -1,0 +1,143 @@
+/* ==========================================================================
+   TRUST-CV Semantic Design Token System
+   Zero hardcoded black/white text. Defense-grade contrast in both modes.
+   ========================================================================== */
+
+:root,
+[data-theme="dark"] {
+  /* Surface & Background */
+  --bg-primary: #030712;
+  --bg-secondary: #080f1d;
+  --bg-tertiary: #0e172a;
+  --surface: #0b1324;
+  --surface-elevated: #111d35;
+  --surface-hover: #172645;
+  --surface-active: #1f3258;
+
+  /* Typography */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #030712;
+
+  /* Borders & Dividers */
+  --border: #1e2e48;
+  --border-subtle: #142036;
+  --border-strong: #33486d;
+
+  /* Accent (Tactical Cyan) */
+  --accent: #06b6d4;
+  --accent-hover: #0891b2;
+  --accent-surface: rgba(6, 182, 212, 0.12);
+  --accent-border: rgba(6, 182, 212, 0.4);
+  --accent-text: #38bdf8;
+  --accent-glow: 0 0 20px rgba(6, 182, 212, 0.35);
+
+  /* Status Tokens */
+  --success: #10b981;
+  --success-surface: rgba(16, 185, 129, 0.12);
+  --success-border: rgba(16, 185, 129, 0.4);
+  --success-text: #34d399;
+  --success-glow: 0 0 16px rgba(16, 185, 129, 0.3);
+
+  --warning: #f59e0b;
+  --warning-surface: rgba(245, 158, 11, 0.12);
+  --warning-border: rgba(245, 158, 11, 0.4);
+  --warning-text: #fbbf24;
+  --warning-glow: 0 0 16px rgba(245, 158, 11, 0.3);
+
+  --danger: #f43f5e;
+  --danger-surface: rgba(244, 63, 94, 0.12);
+  --danger-border: rgba(244, 63, 94, 0.4);
+  --danger-text: #fb7185;
+  --danger-glow: 0 0 16px rgba(244, 63, 94, 0.3);
+
+  --critical: #ef4444;
+  --critical-surface: rgba(239, 68, 68, 0.15);
+  --critical-border: rgba(239, 68, 68, 0.45);
+  --critical-text: #f87171;
+  --critical-glow: 0 0 20px rgba(239, 68, 68, 0.4);
+
+  --info: #3b82f6;
+  --info-surface: rgba(59, 130, 246, 0.12);
+  --info-border: rgba(59, 130, 246, 0.4);
+  --info-text: #60a5fa;
+
+  /* Tactical Elements */
+  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  --card-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.8);
+  --grid-line: rgba(255, 255, 255, 0.035);
+  --terminal-bg: #030814;
+  --terminal-border: #14233c;
+  --terminal-text: #e2e8f0;
+}
+
+[data-theme="light"] {
+  /* Surface & Background */
+  --bg-primary: #f0f4f8;
+  --bg-secondary: #e2e8f0;
+  --bg-tertiary: #cbd5e1;
+  --surface: #ffffff;
+  --surface-elevated: #f8fafc;
+  --surface-hover: #eef3f8;
+  --surface-active: #e2e8f0;
+
+  /* Typography */
+  --text-primary: #0a0f1d;
+  --text-secondary: #1e293b;
+  --text-tertiary: #475569;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+
+  /* Borders & Dividers */
+  --border: #cbd5e1;
+  --border-subtle: #e2e8f0;
+  --border-strong: #94a3b8;
+
+  /* Accent (Tactical Deep Blue/Cyan) */
+  --accent: #0284c7;
+  --accent-hover: #0369a1;
+  --accent-surface: rgba(2, 132, 199, 0.1);
+  --accent-border: rgba(2, 132, 199, 0.35);
+  --accent-text: #0369a1;
+  --accent-glow: 0 0 16px rgba(2, 132, 199, 0.18);
+
+  /* Status Tokens (WCAG High Contrast in Light Mode) */
+  --success: #059669;
+  --success-surface: rgba(5, 150, 105, 0.12);
+  --success-border: rgba(5, 150, 105, 0.35);
+  --success-text: #047857;
+  --success-glow: 0 0 12px rgba(5, 150, 105, 0.15);
+
+  --warning: #d97706;
+  --warning-surface: rgba(217, 119, 6, 0.12);
+  --warning-border: rgba(217, 119, 6, 0.35);
+  --warning-text: #b45309;
+  --warning-glow: 0 0 12px rgba(217, 119, 6, 0.15);
+
+  --danger: #e11d48;
+  --danger-surface: rgba(225, 29, 72, 0.1);
+  --danger-border: rgba(225, 29, 72, 0.35);
+  --danger-text: #be123c;
+  --danger-glow: 0 0 12px rgba(225, 29, 72, 0.15);
+
+  --critical: #dc2626;
+  --critical-surface: rgba(220, 38, 38, 0.12);
+  --critical-border: rgba(220, 38, 38, 0.4);
+  --critical-text: #991b1b;
+  --critical-glow: 0 0 16px rgba(220, 38, 38, 0.2);
+
+  --info: #2563eb;
+  --info-surface: rgba(37, 99, 235, 0.1);
+  --info-border: rgba(37, 99, 235, 0.35);
+  --info-text: #1d4ed8;
+
+  /* Tactical Elements */
+  --card-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+  --card-shadow-hover: 0 8px 30px rgba(15, 23, 42, 0.12);
+  --grid-line: rgba(15, 23, 42, 0.04);
+  --terminal-bg: #091122;
+  --terminal-border: #cbd5e1;
+  --terminal-text: #f1f5f9;
+}

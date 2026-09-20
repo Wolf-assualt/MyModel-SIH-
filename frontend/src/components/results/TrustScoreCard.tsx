@@ -5,20 +5,60 @@ import { Badge } from '../ui/Badge';
 export const TrustScoreCard: React.FC = () => {
   const { trustScore } = useInvestigation();
 
+  if (!trustScore) {
+    return (
+      <div
+        style={{
+          backgroundColor: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: '0.625rem',
+          padding: '1.5rem',
+          boxShadow: 'var(--card-shadow)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+        }}
+      >
+        <h3
+          style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.04em', textTransform: 'uppercase', margin: 0 }}
+          className="font-display"
+        >
+          Zero-Trust Assurance Score
+        </h3>
+        <div
+          style={{
+            padding: '1rem',
+            backgroundColor: 'var(--surface-elevated)',
+            border: '1px dashed var(--border)',
+            borderRadius: '0.375rem',
+            fontSize: '0.8125rem',
+            color: 'var(--text-muted)',
+          }}
+        >
+          UNAVAILABLE — the backend assurance pipeline has not returned a score for this asset.
+        </div>
+      </div>
+    );
+  }
+
   const radius = 48;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (trustScore.overall / 100) * circumference;
 
-  const isPassing = trustScore.overall >= 95;
-  const isReview = trustScore.overall >= 70 && trustScore.overall < 95;
+  const isPassing = trustScore.verdict === 'ACCEPTED' || trustScore.verdict === 'TRUSTED';
+  const isReview = trustScore.verdict === 'UNDER_REVIEW' || trustScore.verdict === 'CAUTION';
 
   const gaugeColor = isPassing ? 'var(--success)' : isReview ? 'var(--warning)' : 'var(--critical)';
 
+  // -1 is the backend sentinel for "module UNAVAILABLE" (never assessed).
   const getSubscoreColor = (val: number) => {
+    if (val < 0) return 'var(--text-muted)';
     if (val >= 95) return 'var(--success)';
     if (val >= 75) return 'var(--warning)';
     return 'var(--critical)';
   };
+
+  const formatSubscore = (val: number) => (val < 0 ? 'UNAVAILABLE' : `${val}%`);
 
   const subscores = [
     { label: 'Data Integrity', value: trustScore.dataIntegrity, color: getSubscoreColor(trustScore.dataIntegrity) },
@@ -63,15 +103,15 @@ export const TrustScoreCard: React.FC = () => {
 
         {isPassing ? (
           <Badge variant="success" size="sm">
-            ✓ DEPLOYMENT APPROVED
+            ✓ BACKEND DISPOSITION: {trustScore.verdict}
           </Badge>
         ) : isReview ? (
           <Badge variant="warning" size="sm">
-            ⚠ REVIEW RECOMMENDED
+            ⚠ BACKEND DISPOSITION: {trustScore.verdict}
           </Badge>
         ) : (
           <Badge variant="critical" size="sm">
-            ✕ QUARANTINE REQUIRED
+            ✕ BACKEND DISPOSITION: {trustScore.verdict}
           </Badge>
         )}
       </div>
@@ -151,7 +191,7 @@ export const TrustScoreCard: React.FC = () => {
                 className="font-mono"
               >
                 <span style={{ color: 'var(--text-secondary)' }}>{s.label}</span>
-                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{s.value}%</span>
+                <span style={{ fontWeight: 600, color: s.value < 0 ? 'var(--text-muted)' : 'var(--text-primary)' }}>{formatSubscore(s.value)}</span>
               </div>
               <div
                 style={{
@@ -163,7 +203,7 @@ export const TrustScoreCard: React.FC = () => {
               >
                 <div
                   style={{
-                    width: `${s.value}%`,
+                    width: `${s.value < 0 ? 0 : s.value}%`,
                     height: '100%',
                     backgroundColor: s.color,
                     borderRadius: '3px',

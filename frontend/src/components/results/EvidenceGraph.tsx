@@ -113,8 +113,11 @@ export const EvidenceGraph: React.FC = () => {
             >
               Directed Evidence & Lineage Property Graph
             </h3>
-            <Badge variant="accent" size="sm">
-              CRYPTOGRAPHICALLY SEALED
+            <Badge
+              variant={graphDigest ? 'accent' : 'warning'}
+              size="sm"
+            >
+              {graphDigest ? 'BACKEND GRAPH SEALED' : 'GRAPH UNAVAILABLE'}
             </Badge>
           </div>
           <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '0.25rem 0 0 0' }}>
@@ -188,6 +191,17 @@ export const EvidenceGraph: React.FC = () => {
             </defs>
 
             {/* Render Edges */}
+            {graphEdges.length === 0 && (
+              <text
+                x="570"
+                y="200"
+                textAnchor="middle"
+                style={{ fill: 'var(--text-muted)', fontSize: '13px', fontFamily: 'var(--font-mono, monospace)' }}
+              >
+                NO BACKEND EVIDENCE GRAPH DATA — relationships are NOT reconstructed client-side.
+              </text>
+            )}
+
             {graphEdges.map(edge => {
               const source = graphNodes.find(n => n.id === edge.sourceId);
               const target = graphNodes.find(n => n.id === edge.targetId);

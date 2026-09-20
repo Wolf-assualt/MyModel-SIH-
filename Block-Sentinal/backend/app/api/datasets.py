@@ -7,6 +7,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # pyrefly: ignore [missing-import]
+from typing import List, Optional
+# pyrefly: ignore [missing-import]
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, BackgroundTasks
 
 from app.core.config import settings
@@ -47,10 +49,15 @@ def _safe_extract(archive: Path, destination: Path) -> None:
 @router.post("/upload", response_model=ResponseEnvelope[ScanSession])
 async def upload_and_scan_dataset(
     background_tasks: BackgroundTasks,
-    file: UploadFile = File(...),
+    files: Optional[List[UploadFile]] = File(default=None),
+    file: Optional[UploadFile] = File(default=None),
     dataset_name: str = Form("uploaded-dataset"),
 ) -> ResponseEnvelope[ScanSession]:
     """Persist and immediately start a background scan session for an uploaded dataset.
+
+    Accepts EITHER form field `files` (list of images or a single .zip) OR legacy
+    form field `file` (single upload, for backward compatibility).  If both are
+    provided, `files` takes precedence.
 
     Pipeline: UPLOAD → PRESERVE ORIGINAL → HASH → PARSE → ANALYSE → REPORT
     Original files are NEVER modified, resized, deduplicated, or deleted.
@@ -58,16 +65,37 @@ async def upload_and_scan_dataset(
     upload_root = Path(settings.DATA_DIR) / "uploads" / str(uuid.uuid4())
     source_dir = upload_root / "samples"
     source_dir.mkdir(parents=True, exist_ok=True)
-    upload_path = upload_root / (Path(file.filename or "upload").name)
+
+    # Normalise both legacy (file) and new (files) form keys into a single list
+    uploads: List[UploadFile] = []
+    if files:
+        uploads.extend(files)
+    if not uploads and file is not None:
+        uploads.append(file)
+    if not uploads:
+        raise HTTPException(status_code=400, detail="No files provided for upload.")
 
     try:
-        with upload_path.open("wb") as destination:
-            shutil.copyfileobj(file.file, destination)
-
-        if upload_path.suffix.lower() == ".zip":
+        if len(uploads) == 1 and Path(uploads[0].filename or "").suffix.lower() == ".zip":
+            zip_file = uploads[0]
+            upload_path = upload_root / (Path(zip_file.filename or "upload").name)
+            with upload_path.open("wb") as destination:
+                shutil.copyfileobj(zip_file.file, destination)
             _safe_extract(upload_path, source_dir)
         else:
-            shutil.copy2(upload_path, source_dir / upload_path.name)
+            for uf in uploads:
+                raw_name = uf.filename or f"file_{uuid.uuid4().hex}"
+                # Drop any leading directory components (folder uploads)
+                leaf_name = Path(raw_name).name
+                target = source_dir / leaf_name
+                counter = 1
+                while target.exists():
+                    stem = Path(leaf_name).stem
+                    ext = Path(leaf_name).suffix
+                    target = source_dir / f"{stem}_{counter}{ext}"
+                    counter += 1
+                with target.open("wb") as destination:
+                    shutil.copyfileobj(uf.file, destination)
 
         # Phase 3: Auto-detect format from directory structure
         detected_format, annotation_path = detect_format(source_dir)

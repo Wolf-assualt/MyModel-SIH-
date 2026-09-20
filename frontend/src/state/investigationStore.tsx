@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { apiService, type ScanSession } from '../services/api';
-import type { SystemHealthOverview, ImageAssessment } from '../services/api';
+import type {
+  SystemHealthOverview,
+  ImageAssessment,
+  LedgerVerification,
+  LedgerEventRecord,
+  AnalystDecision,
+} from '../services/api';
 import type {
   Phase,
   ArtifactItem,
@@ -17,10 +23,38 @@ import {
   INITIAL_ARTIFACTS,
   PIPELINE_STAGES,
   INITIAL_METRICS,
-  CLEAN_TRUST_SCORE,
 } from '../data/mockScenario';
 
+/** Trigger a local, offline file download of a JSON document. */
+function downloadJson(payload: unknown, filename: string): void {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export type Theme = 'dark' | 'light';
+
+/**
+ * Ordered backend ScanStage values (app.schemas.scan.ScanStage) used to decide
+ * which frontend stage slot has been reached during polling. This is a purely
+ * positional mapping — it never asserts a security status.
+ */
+const BACKEND_STAGE_ORDER: string[] = [
+  'INGESTION',
+  'HASHING',
+  'DATA_INTEGRITY',
+  'MODEL_ASSURANCE',
+  'INFERENCE_ASSURANCE',
+  'DISTRIBUTION_SHIFT',
+  'EVIDENCE_FUSION',
+  'AUDIT',
+  'REPORT',
+  'COMPLETED',
+];
 
 interface InvestigationContextType {
   phase: Phase;
@@ -64,8 +98,8 @@ interface InvestigationContextType {
   setSearchQuery: (query: string) => void;
   selectedFinding: Finding | null;
   setSelectedFinding: (finding: Finding | null) => void;
-  trustScore: TrustScore;
-  setTrustScore: React.Dispatch<React.SetStateAction<TrustScore>>;
+  trustScore: TrustScore | null;
+  setTrustScore: React.Dispatch<React.SetStateAction<TrustScore | null>>;
   recommendations: Recommendation[];
   setRecommendations: React.Dispatch<React.SetStateAction<Recommendation[]>>;
   imageResults: ImageAssessment[];
@@ -76,6 +110,20 @@ interface InvestigationContextType {
   selectedGraphNode: any | null;
   setSelectedGraphNode: (node: any | null) => void;
   focusNodeInGraph: (nodeId: string) => void;
+  /** Backend ledger hash-chain verification result; null means UNAVAILABLE. */
+  ledgerVerification: LedgerVerification | null;
+  /** Analyst decisions persisted in the backend ledger (never frontend state). */
+  analystDecisions: LedgerEventRecord[];
+  /** Last backend/API error surfaced to the operator. */
+  backendError: string | null;
+  refreshLedgerVerification: () => Promise<void>;
+  loadEvidenceGraph: () => Promise<void>;
+  refreshAnalystDecisions: (entityId?: string) => Promise<void>;
+  submitAnalystDecision: (
+    decision: AnalystDecision,
+    actor: string,
+    opts?: { entityId?: string; scanId?: string; reason?: string },
+  ) => Promise<LedgerEventRecord | null>;
   resetInvestigation: () => void;
   exportReport: () => void;
   exportEvidencePackage: () => void;
@@ -144,9 +192,32 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const verifyArtifact = (_artifactId?: string) => {};
+  const verifyArtifact = (_artifactId?: string) => {
+    // Artifact acceptance is decided by the backend assurance pipeline on upload.
+    // No client-side verification verdict is produced here.
+  };
+
   const clearArtifacts = () => setArtifacts(INITIAL_ARTIFACTS);
-  const quarantineImage = async (_sampleId?: string) => {};
+
+  /**
+   * Quarantine a flagged sample. The backend copies the original into isolated
+   * storage, records a signed audit event and returns the updated assessment.
+   */
+  const quarantineImage = async (sampleId: string) => {
+    const batchId = scanSession?.batch_id;
+    if (!batchId) {
+      setBackendError('Quarantine UNAVAILABLE: no backend batch is loaded.');
+      return;
+    }
+    try {
+      const updated = await apiService.quarantineDatasetImage(batchId, sampleId);
+      setImageResults(prev => prev.map(img => (img.sample_id === updated.sample_id ? updated : img)));
+      setBackendError(null);
+      await refreshLedgerVerification();
+    } catch (e: any) {
+      setBackendError(e?.message || 'Quarantine failed.');
+    }
+  };
 
   const datasetVerified = artifacts.find(a => a.type === 'dataset')?.status === 'verified';
   const validationChecklist = { datasetDetected: datasetVerified, configValidated: true };
@@ -167,17 +238,187 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
   const [selectedSeverity, setSelectedSeverity] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFinding, setSelectedFinding] = useState<Finding | null>(null);
-  const [trustScore, setTrustScore] = useState<TrustScore>(CLEAN_TRUST_SCORE);
+  const [trustScore, setTrustScore] = useState<TrustScore | null>(null);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [graphNodes] = useState<any[]>([]);
-  const [graphEdges] = useState<any[]>([]);
-  const [graphDigest] = useState('');
+  const [graphNodes, setGraphNodes] = useState<any[]>([]);
+  const [graphEdges, setGraphEdges] = useState<any[]>([]);
+  const [graphDigest, setGraphDigest] = useState('');
   const [selectedGraphNode, setSelectedGraphNode] = useState<any | null>(null);
+  const [ledgerVerification, setLedgerVerification] = useState<LedgerVerification | null>(null);
+  const [analystDecisions, setAnalystDecisions] = useState<LedgerEventRecord[]>([]);
+  const [backendError, setBackendError] = useState<string | null>(null);
 
-  const focusNodeInGraph = (_nodeId?: string) => {};
-  const resetInvestigation = () => {};
-  const exportReport = () => {};
-  const exportEvidencePackage = () => {};
+  /**
+   * Pull the authoritative evidence graph from the backend.
+   * If the backend is unreachable the graph stays EMPTY (UNAVAILABLE) — the
+   * frontend never reconstructs authoritative relationships locally.
+   */
+  const loadEvidenceGraph = useCallback(async () => {
+    try {
+      const exportData = await apiService.fetchGraphExport();
+      if (exportData && Array.isArray(exportData.nodes) && Array.isArray(exportData.edges)) {
+        setGraphNodes(exportData.nodes.map(n => ({
+          id: n.id,
+          label: n.label || n.node_type,
+          nodeType: String(n.node_type || 'ENTITY').toUpperCase(),
+          properties: n.properties || {},
+          status: (n.properties && n.properties.status) ? n.properties.status : 'UNKNOWN',
+        })));
+        setGraphEdges(exportData.edges.map(e => ({
+          id: `${e.source_id}->${e.target_id}:${e.edge_type}`,
+          sourceId: e.source_id,
+          targetId: e.target_id,
+          edgeType: e.edge_type,
+          label: e.edge_type,
+        })));
+        setGraphDigest(exportData.graph_digest || '');
+      } else {
+        setGraphNodes([]); setGraphEdges([]); setGraphDigest('');
+      }
+    } catch {
+      setGraphNodes([]); setGraphEdges([]); setGraphDigest('');
+    }
+  }, []);
+
+  const refreshLedgerVerification = useCallback(async () => {
+    try {
+      setLedgerVerification(await apiService.verifyLedger());
+      setBackendError(null);
+    } catch (e: any) {
+      // UNAVAILABLE — never inferred as valid locally.
+      setLedgerVerification(null);
+      setBackendError(e?.message || 'Backend ledger unavailable');
+    }
+  }, []);
+
+  const refreshAnalystDecisions = useCallback(async (entityId?: string) => {
+    try {
+      const events = await apiService.fetchLedgerEvents({ entityId });
+      setAnalystDecisions(events.filter(e => e.event_type === 'analyst_decision'));
+    } catch {
+      setAnalystDecisions([]);
+    }
+  }, []);
+
+  /**
+   * Record an explicit analyst decision. The decision only becomes visible after
+   * the backend confirms and persists the signed ledger event.
+   */
+  const submitAnalystDecision = useCallback(async (
+    decision: AnalystDecision,
+    actor: string,
+    opts: { entityId?: string; scanId?: string; reason?: string } = {},
+  ): Promise<LedgerEventRecord | null> => {
+    const entityId = opts.entityId || currentScanId || '';
+    if (!entityId) {
+      setBackendError('No entity available to record an analyst decision against.');
+      return null;
+    }
+    try {
+      const event = await apiService.recordAnalystDecision(entityId, decision, actor, {
+        scanId: opts.scanId || currentScanId || undefined,
+        reason: opts.reason,
+      });
+      setBackendError(null);
+      await refreshAnalystDecisions(entityId);
+      return event;
+    } catch (e: any) {
+      setBackendError(e?.message || 'Analyst decision was not recorded.');
+      return null;
+    }
+  }, [currentScanId, refreshAnalystDecisions]);
+
+  const focusNodeInGraph = (nodeId: string) => {
+    const found = graphNodes.find(n => n.id === nodeId);
+    setSelectedGraphNode(found ?? null);
+  };
+
+  const resetInvestigation = () => {
+    setPhase('launch');
+    setFindings([]);
+    setImageResults([]);
+    setTrustScore(null);
+    setRecommendations([]);
+    setSelectedFinding(null);
+    setSelectedGraphNode(null);
+    setCurrentScanId(null);
+    setScanSession(null);
+    setLedgerVerification(null);
+    setAnalystDecisions([]);
+    setBackendError(null);
+    setGraphNodes([]);
+    setGraphEdges([]);
+    setGraphDigest('');
+    setArtifacts(INITIAL_ARTIFACTS);
+  };
+
+  /**
+   * Export the authoritative evidence package produced by the backend.
+   * Nothing is assembled or signed in the browser.
+   */
+  const exportEvidencePackage = async () => {
+    if (!scanSession) {
+      window.alert('Export UNAVAILABLE: no backend scan session is loaded.');
+      return;
+    }
+    try {
+      const [overview, graph, ledger] = await Promise.all([
+        apiService.fetchOverview(),
+        apiService.fetchGraphExport(),
+        apiService.verifyLedger(),
+      ]);
+      const payload = {
+        exported_at: new Date().toISOString(),
+        source: 'TRUST-CV backend (authoritative)',
+        scan_id: scanSession.scan_id,
+        batch_id: scanSession.batch_id ?? null,
+        scan_status: scanSession.status,
+        assessment: scanSession.assessment ?? null,
+        stage_results: scanSession.stage_results ?? {},
+        findings: scanSession.findings ?? [],
+        evidence_graph: graph ?? null,
+        ledger_verification: ledger,
+        system_overview: overview,
+        analyst_decisions: analystDecisions,
+      };
+      downloadJson(payload, `trustcv_evidence_${scanSession.scan_id}.json`);
+    } catch (e: any) {
+      setBackendError(e?.message || 'Evidence export failed.');
+      window.alert(`Evidence export FAILED: ${e?.message || 'backend unavailable'}`);
+    }
+  };
+
+  const exportReport = async () => {
+    if (!scanSession) {
+      window.alert('Export UNAVAILABLE: no backend scan session is loaded.');
+      return;
+    }
+    try {
+      const [ledger, graph] = await Promise.all([
+        apiService.verifyLedger(),
+        apiService.fetchGraphExport(),
+      ]);
+      const report = {
+        report_id: `REP-${scanSession.scan_id.substring(0, 10).toUpperCase()}`,
+        generated_at: new Date().toISOString(),
+        authority: 'TRUST-CV backend assurance pipeline',
+        scan_id: scanSession.scan_id,
+        batch_id: scanSession.batch_id ?? null,
+        status: scanSession.status,
+        stage_results: scanSession.stage_results ?? {},
+        assessment: scanSession.assessment ?? null,
+        findings: scanSession.findings ?? [],
+        evidence_graph_digest: graph?.graph_digest ?? null,
+        ledger_verification: ledger,
+        errors: scanSession.errors ?? [],
+        warnings: scanSession.warnings ?? [],
+      };
+      downloadJson(report, `${report.report_id}.json`);
+    } catch (e: any) {
+      setBackendError(e?.message || 'Report export failed.');
+      window.alert(`Report export FAILED: ${e?.message || 'backend unavailable'}`);
+    }
+  };
 
   const scanIntervalRef = useRef<number | null>(null);
   const timerIntervalRef = useRef<number | null>(null);
@@ -226,41 +467,81 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
 
         if (session.status === 'COMPLETED' || session.status === 'FAILED') {
           clearInterval(scanIntervalRef.current!);
+          // Map the backend pipeline stage to the frontend stage slots using the
+          // REAL backend component keys. No stage is ever assumed PASSED.
+          setStages(prev => prev.map(s => {
+            const componentState = session.stage_results?.[s.code];
+            if (componentState) {
+              return { ...s, status: componentState.status as any, summary: componentState.explanation || s.summary };
+            }
+            const reached = BACKEND_STAGE_ORDER.indexOf(session.stage) >= 0
+              && BACKEND_STAGE_ORDER.indexOf(session.stage) >= (BACKEND_STAGE_ORDER.indexOf(s.code) === -1 ? 99 : BACKEND_STAGE_ORDER.indexOf(s.code));
+            if (reached && session.status !== 'COMPLETED' && session.status !== 'FAILED') {
+              return { ...s, status: 'RUNNING', progress: 50 };
+            }
+            if (session.status === 'COMPLETED' || session.status === 'FAILED') {
+              return { ...s, status: 'UNAVAILABLE', progress: 0 };
+            }
+            return { ...s, status: 'WAITING', progress: 0 };
+          }));
+
           if (session.assessment) {
+            // Every value below is copied verbatim from the backend response.
+            // The frontend performs NO re-derivation of security semantics.
+            const assessment = session.assessment as Record<string, any>;
+            const assuranceScore = typeof assessment.assuranceScore === 'number' ? assessment.assuranceScore : null;
+            const dataRiskScore = typeof assessment.dataRiskScore === 'number' ? assessment.dataRiskScore : null;
+            const modelRiskScore = typeof assessment.modelRiskScore === 'number' ? assessment.modelRiskScore : -1;
+            const inferenceRiskScore = typeof assessment.inferenceRiskScore === 'number' ? assessment.inferenceRiskScore : -1;
+            const rawDisposition = String(assessment.disposition ?? session.status).toUpperCase();
+
             setTrustScore({
-              overall: session.assessment.assuranceScore * 100,
-              dataIntegrity: session.assessment.dataRiskScore * 100,
-              modelIntegrity: 0,
-              inferenceIntegrity: 0,
-              pipelineIntegrity: session.assessment.assuranceScore * 100,
-              verdict: session.assessment.disposition,
-              headline: 'Authoritative Backend Scan Completed',
-              summary: `Analyzed ${session.assessment.totalSamples} samples`
+              overall: assuranceScore === null ? 0 : assuranceScore * 100,
+              dataIntegrity: dataRiskScore === null ? 0 : dataRiskScore * 100,
+              // -1 is the backend's explicit "module UNAVAILABLE" sentinel.
+              modelIntegrity: modelRiskScore < 0 ? -1 : modelRiskScore * 100,
+              inferenceIntegrity: inferenceRiskScore < 0 ? -1 : inferenceRiskScore * 100,
+              pipelineIntegrity: assuranceScore === null ? 0 : assuranceScore * 100,
+              verdict: (rawDisposition === 'REVIEW' || rawDisposition === 'ALLOW_WITH_MONITORING')
+                ? 'UNDER_REVIEW'
+                : (rawDisposition as any),
+              headline: `Backend disposition: ${rawDisposition}`,
+              summary: `Analyzed ${assessment.totalSamples ?? 0} samples; backend status ${session.status}`,
             });
-            setImageResults(session.assessment.imageResults || []);
+            setImageResults(assessment.imageResults || []);
             setFindings((session.findings || []).map((f: any) => ({
               id: f.finding_id,
               title: f.check_type,
               category: 'DATA POISONING',
               severity: f.severity,
-              affectedArtifact: 'Uploaded dataset',
+              affectedArtifact: f.sample_ids?.[0] ? String(f.sample_ids[0]) : 'Uploaded dataset',
               evidenceSummary: f.description,
-              confidence: f.metric_score * 100,
-              status: 'Confirmed',
-              detectionMethod: 'Backend Engine',
+              confidence: (f.metric_score ?? 0) * 100,
+              status: rawDisposition === 'QUARANTINED' ? 'Quarantined' : 'Confirmed',
+              detectionMethod: 'Backend assurance engine',
               expectedValue: 'Clean',
               observedValue: f.description,
-              sha256Proof: 'N/A',
-              recommendedAction: 'Quarantine'
+              sha256Proof: f.details?.sha256_hash ?? 'N/A',
+              recommendedAction: f.details?.recommended_action ?? 'Analyst review required',
             })));
+          } else if (session.status === 'FAILED') {
+            // FAILED with no assessment — do NOT synthesise a happy-path score.
+            setTrustScore(null);
           }
+
+          // Ledger verification and evidence graph come from the backend only.
+          await refreshLedgerVerification();
+          await loadEvidenceGraph();
+          if (session.batch_id) await refreshAnalystDecisions(session.batch_id);
+
           completeScan();
         }
       } catch (err) {
         console.error('Scan polling error', err);
+        setBackendError(err instanceof Error ? err.message : 'Scan polling failed');
       }
     }, 1000);
-  }, [currentScanId, completeScan]);
+  }, [currentScanId, completeScan, refreshLedgerVerification, loadEvidenceGraph, refreshAnalystDecisions]);
 
   const startScan = useCallback(() => {
     setIsScanning(true);
@@ -286,7 +567,9 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
       searchQuery, setSearchQuery, selectedFinding, setSelectedFinding, trustScore,
       setTrustScore, recommendations, setRecommendations, imageResults, quarantineImage,
       graphNodes, graphEdges, graphDigest, selectedGraphNode, setSelectedGraphNode,
-      focusNodeInGraph, resetInvestigation, exportReport, exportEvidencePackage
+      focusNodeInGraph, ledgerVerification, analystDecisions, backendError,
+      refreshLedgerVerification, loadEvidenceGraph, refreshAnalystDecisions,
+      submitAnalystDecision, resetInvestigation, exportReport, exportEvidencePackage
     }}>
       {children}
     </InvestigationContext.Provider>

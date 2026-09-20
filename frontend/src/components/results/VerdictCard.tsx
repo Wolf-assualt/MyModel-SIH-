@@ -4,10 +4,58 @@ import { useInvestigation } from '../../state/investigationStore';
 import { Badge } from '../ui/Badge';
 
 export const VerdictCard: React.FC = () => {
-  const { trustScore, liveMetrics } = useInvestigation();
+  const { trustScore, liveMetrics, ledgerVerification } = useInvestigation();
 
-  const isAccepted = trustScore.verdict === 'ACCEPTED' || trustScore.overall >= 95;
-  const isUnderReview = trustScore.verdict === 'UNDER_REVIEW' || (trustScore.overall >= 70 && trustScore.overall < 95);
+  if (!trustScore) {
+    return (
+      <div
+        style={{
+          backgroundColor: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: '0.75rem',
+          padding: '1.5rem 2rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1.25rem',
+        }}
+      >
+        <div
+          style={{
+            width: '54px',
+            height: '54px',
+            borderRadius: '0.5rem',
+            backgroundColor: 'var(--surface-elevated)',
+            border: '1px solid var(--border)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--text-muted)',
+            flexShrink: 0,
+          }}
+        >
+          <AlertTriangle size={32} />
+        </div>
+        <div>
+          <span
+            style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em' }}
+            className="font-mono"
+          >
+            INTEGRITY VERDICT
+          </span>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-secondary)', margin: '0.25rem 0' }} className="font-display">
+            UNAVAILABLE — NO BACKEND ASSESSMENT
+          </h2>
+          <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', margin: 0 }}>
+            No authoritative assessment has been received from the backend assurance pipeline.
+            This client does not generate a verdict on its own.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const isAccepted = trustScore.verdict === 'ACCEPTED' || trustScore.verdict === 'TRUSTED';
+  const isUnderReview = trustScore.verdict === 'UNDER_REVIEW' || trustScore.verdict === 'CAUTION';
 
   const borderColor = isAccepted
     ? 'var(--success-border)'
@@ -156,7 +204,7 @@ export const VerdictCard: React.FC = () => {
             >
               <ShieldCheck size={15} style={{ color: 'var(--success-text)' }} />
               <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--success-text)' }} className="font-mono">
-                100% ZERO-TRUST INTEGRITY
+                {trustScore.overall}% BACKEND ASSURANCE SCORE
               </span>
             </div>
 
@@ -173,7 +221,11 @@ export const VerdictCard: React.FC = () => {
             >
               <Activity size={15} style={{ color: 'var(--accent-text)' }} />
               <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--accent-text)' }} className="font-mono">
-                CRYPTOGRAPHICALLY SEALED
+                {ledgerVerification?.valid === true
+                  ? `LEDGER VALID (${ledgerVerification.events_checked} EVENTS)`
+                  : ledgerVerification?.valid === false
+                  ? 'LEDGER VERIFICATION FAILED'
+                  : 'LEDGER VERIFICATION UNAVAILABLE'}
               </span>
             </div>
           </>

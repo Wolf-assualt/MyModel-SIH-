@@ -149,6 +149,7 @@ export interface AuditEvent {
 
 export interface ScanSession {
   scan_id: string;
+  batch_id?: string | null;
   created_at: string;
   status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
   stage: string;
@@ -160,6 +161,29 @@ export interface ScanSession {
   warnings: string[];
   stage_results?: Record<string, { status: string; error_code?: string; explanation?: string }>;
 }
+
+export interface LedgerVerification {
+  valid: boolean;
+  events_checked: number;
+  last_verified_sequence: number;
+  first_invalid_sequence: number | null;
+  failure_reason: string | null;
+}
+
+export interface LedgerEventRecord {
+  sequence: number;
+  timestamp: string | null;
+  event_type: string;
+  actor: string;
+  scan_id: string | null;
+  entity_id: string;
+  payload_hash: string;
+  previous_hash: string;
+  current_hash: string;
+  signature: string | null;
+}
+
+export type AnalystDecision = 'ACCEPT' | 'REVIEW' | 'QUARANTINE';
 
 // ── API Service ───────────────────────────────────────────────────────────────
 
@@ -192,6 +216,63 @@ class ApiService {
     const envelope: ApiResponse<ImageAssessment> = await response.json();
     if (!response.ok || !envelope.data) {
       throw new Error(envelope.error || `Quarantine failed with HTTP ${response.status}`);
+    }
+    return envelope.data;
+  }
+
+  // ── Tamper-Evident Assurance Ledger (authoritative) ──────────────────────────
+
+  /**
+   * Verify the backend ledger hash chain.
+   * Throws when the backend is unreachable so callers render UNAVAILABLE rather
+   * than inferring validity.
+   */
+  async verifyLedger(): Promise<LedgerVerification> {
+    const response = await fetch(`${this.baseUrl}/ledger/verify`);
+    const envelope: ApiResponse<LedgerVerification> = await response.json();
+    if (!response.ok || !envelope.data) {
+      throw new Error(envelope.error || `Ledger verification failed with HTTP ${response.status}`);
+    }
+    return envelope.data;
+  }
+
+  /** List ledger events (optionally limited / scoped to a scan or entity). */
+  async fetchLedgerEvents(opts: { limit?: number; scanId?: string; entityId?: string } = {}): Promise<LedgerEventRecord[]> {
+    let path = '/ledger/events';
+    if (opts.scanId) path = `/ledger/events/scan/${encodeURIComponent(opts.scanId)}`;
+    else if (opts.entityId) path = `/ledger/events/entity/${encodeURIComponent(opts.entityId)}`;
+    else if (typeof opts.limit === 'number') path = `/ledger/events?limit=${opts.limit}`;
+
+    const response = await fetch(`${this.baseUrl}${path}`);
+    const envelope: ApiResponse<LedgerEventRecord[]> = await response.json();
+    if (!response.ok) {
+      throw new Error(envelope.error || `Ledger event listing failed with HTTP ${response.status}`);
+    }
+    return envelope.data ?? [];
+  }
+
+  /**
+   * Record an explicit analyst decision in the backend ledger.
+   * Returns the persisted, signed ledger event. Throws when the backend cannot
+   * persist it — the caller must NOT treat an unconfirmed decision as recorded.
+   */
+  async recordAnalystDecision(
+    entityId: string,
+    decision: AnalystDecision,
+    actor: string,
+    opts: { scanId?: string; reason?: string } = {},
+  ): Promise<LedgerEventRecord> {
+    const qs = new URLSearchParams();
+    qs.set('entity_id', entityId);
+    qs.set('decision', decision);
+    qs.set('actor', actor);
+    if (opts.scanId) qs.set('scan_id', opts.scanId);
+    if (opts.reason) qs.set('reason', opts.reason);
+
+    const response = await fetch(`${this.baseUrl}/ledger/decision?${qs.toString()}`, { method: 'POST' });
+    const envelope: ApiResponse<LedgerEventRecord> = await response.json();
+    if (!response.ok || !envelope.data) {
+      throw new Error(envelope.error || `Analyst decision was not recorded (HTTP ${response.status})`);
     }
     return envelope.data;
   }
@@ -282,15 +363,22 @@ class ApiService {
 
   // ── Hardening & Audit ───────────────────────────────────────────────────────
 
-  /** Audit the sequential hash chain from genesis to current tip. */
+  /**
+   * Audit the sequential hash chain from genesis to current tip.
+   *
+   * Returns null when the backend is unreachable. A null result MUST be rendered
+   * as UNAVAILABLE — the client never asserts an affirmative cryptographic
+   * result it did not receive from the backend.
+   */
   async auditCryptographicChain(): Promise<any> {
     try {
       const res = await fetch(`${this.baseUrl}/hardening/audit/chain`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const envelope = await res.json();
-      return envelope.data ?? { status: 'AIR_GAPPED_VERIFIED', hashContinuity: true };
+      return envelope.data ?? null;
     } catch (e) {
-      return { status: 'AIR_GAPPED_VERIFIED', hashContinuity: true };
+      console.warn('[TRUST-CV Service] Chain audit UNAVAILABLE (backend unreachable):', e);
+      return null;
     }
   }
 

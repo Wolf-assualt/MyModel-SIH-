@@ -387,6 +387,52 @@
           </div>
         </div>
 
+        <!-- ================================================================
+             ANALYST DECISION PANEL
+             Kept strictly SEPARATE from the system assessment above.
+             Decisions are POSTed to the backend ledger and are only shown as
+             recorded once the backend confirms the signed ledger event.
+             ================================================================ -->
+        <div class="card-panel" id="analyst-decision-panel" style="margin-bottom:1rem;">
+          <div class="panel-header">
+            <span class="panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+              Analyst Disposition (Human Decision)
+            </span>
+            <span id="analyst-decision-status" class="badge-tag" style="background:var(--bg-surface); color:var(--text-muted); font-size:10px;">NO DECISION RECORDED</span>
+          </div>
+
+          <p style="font-size:11px; color:var(--text-secondary); margin:0 0 0.75rem 0; line-height:1.5;">
+            The system assessment above is produced by the assurance pipeline. An analyst disposition is a
+            separate, explicit human action. It is signed and persisted by the backend ledger; this interface
+            never fabricates a decision record.
+          </p>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:0.75rem;">
+            <div>
+              <label for="analyst-actor" style="display:block; font-size:10px; color:var(--text-muted); margin-bottom:0.25rem; font-family:var(--font-mono);">ANALYST IDENTITY</label>
+              <input type="text" id="analyst-actor" value="operator_ground_station"
+                     style="width:100%; padding:0.5rem; background:var(--bg-surface); border:1px solid var(--border-primary); border-radius:4px; color:var(--text-primary); font-family:var(--font-mono); font-size:12px;" />
+            </div>
+            <div>
+              <label for="analyst-reason" style="display:block; font-size:10px; color:var(--text-muted); margin-bottom:0.25rem; font-family:var(--font-mono);">JUSTIFICATION (OPTIONAL)</label>
+              <input type="text" id="analyst-reason" placeholder="e.g. cross-checked against source imagery"
+                     style="width:100%; padding:0.5rem; background:var(--bg-surface); border:1px solid var(--border-primary); border-radius:4px; color:var(--text-primary); font-family:var(--font-mono); font-size:12px;" />
+            </div>
+          </div>
+
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.75rem;">
+            <button class="btn btn-secondary" id="btn-decision-accept" style="flex:1; justify-content:center;">ACCEPT</button>
+            <button class="btn btn-secondary" id="btn-decision-review" style="flex:1; justify-content:center;">REVIEW</button>
+            <button class="btn btn-danger" id="btn-decision-quarantine" style="flex:1; justify-content:center;">QUARANTINE</button>
+          </div>
+
+          <div id="analyst-decision-record" class="report-prop" style="margin-top:0.75rem; display:none;">
+            <div class="report-prop-label">Recorded Ledger Event:</div>
+            <div class="report-prop-val" id="analyst-decision-detail" style="font-size:11px;">N/A</div>
+          </div>
+        </div>
+
         <!-- 5 Core Evidence Pillars Grid -->
         <div class="pillars-grid" id="evidence-pillars-grid">
           <!-- Populated by JavaScript -->

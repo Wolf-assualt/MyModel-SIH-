@@ -115,6 +115,40 @@ class TrustCvApiClient {
       body: JSON.stringify({ report }),
     });
   }
+
+  /**
+   * Cryptographically verify a sealed assurance report against the backend.
+   * Returns the authoritative VerifyReportResponse, or null when the backend
+   * cannot be reached (never fabricates a PASS/FAIL verdict client-side).
+   */
+  async auditReportSignature(report) {
+    if (!report || typeof report !== "object") return null;
+    try {
+      return await this.verifyReport(report);
+    } catch (error) {
+      console.warn("[API] Report signature audit unavailable:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Ask the backend to cryptographically re-audit a report whose payload was
+   * deliberately mutated. The verdict is produced by backend crypto only.
+   * Returns null if no report was supplied or the backend is unreachable.
+   */
+  async probeTamperedReport(report) {
+    if (!report || typeof report !== "object") return null;
+    const mutated = JSON.parse(JSON.stringify(report));
+    mutated.overall_verdict = "ACCEPTED";
+    mutated.report_digest = "0".repeat(64);
+    try {
+      return await this.verifyReport(mutated);
+    } catch (error) {
+      console.warn("[API] Report tamper probe unavailable:", error);
+      return null;
+    }
+  }
+
   /* Dataset Upload & Ingestion */
   async uploadDataset(formData) {
     const url = `${this.baseUrl}/datasets/upload`;
@@ -138,6 +172,62 @@ class TrustCvApiClient {
       console.error("[API Error] POST /datasets/upload:", error);
       throw error;
     }
+  }
+
+  async getDatasetManifest(batchId) {
+    return this._request(`/datasets/manifest/${encodeURIComponent(batchId)}`);
+  }
+
+  async verifyDatasetManifest(batchId) {
+    return this._request(`/datasets/manifest/${encodeURIComponent(batchId)}/verify`);
+  }
+
+  /* Scan Pipeline (authoritative backend execution) */
+  async startScan(batchId) {
+    return this._request(`/scan/start/${encodeURIComponent(batchId)}`, {
+      method: "POST",
+    });
+  }
+
+  async getScan(scanId) {
+    return this._request(`/scan/${encodeURIComponent(scanId)}`);
+  }
+
+  /* Tamper-Evident Assurance Ledger */
+  async verifyLedger() {
+    return this._request("/ledger/verify");
+  }
+
+  async listLedgerEvents(limit) {
+    const qs = limit !== undefined ? `?limit=${Number(limit)}` : "";
+    return this._request(`/ledger/events${qs}`);
+  }
+
+  async listLedgerEventsByScan(scanId) {
+    return this._request(`/ledger/events/scan/${encodeURIComponent(scanId)}`);
+  }
+
+  async listLedgerEventsByEntity(entityId) {
+    return this._request(`/ledger/events/entity/${encodeURIComponent(entityId)}`);
+  }
+
+  async recordAnalystDecision(entityId, decision, actor, opts = {}) {
+    const qs = new URLSearchParams();
+    qs.set("entity_id", entityId);
+    qs.set("decision", String(decision).toUpperCase());
+    qs.set("actor", actor || "operator_ground_station");
+    if (opts.scan_id) qs.set("scan_id", opts.scan_id);
+    if (opts.reason) qs.set("reason", opts.reason);
+    return this._request(`/ledger/decision?${qs.toString()}`, {
+      method: "POST",
+    });
+  }
+
+  /** Read back the persisted analyst decisions recorded for an entity. */
+  async listAnalystDecisions(entityId) {
+    const events = await this.listLedgerEventsByEntity(entityId);
+    if (!Array.isArray(events)) return [];
+    return events.filter(e => e && e.event_type === "analyst_decision");
   }
 
   async getReadiness() {

@@ -814,6 +814,16 @@ body {
   font-weight: 700;
 }
 
+/* Backend reported the module as UNAVAILABLE — rendered distinctly so it can
+   never be mistaken for a PASSED stage. */
+.pipeline-stage-item.unavailable {
+  background: var(--bg-surface);
+  border-color: var(--border-strong);
+  border-style: dashed;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 .stage-badge {
   font-size: 9px;
   padding: 1px 6px;

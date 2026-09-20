@@ -8,10 +8,16 @@ import { EvidenceGraph } from '../components/results/EvidenceGraph';
 import { Recommendations } from '../components/results/Recommendations';
 import { ExportActions } from '../components/results/ExportActions';
 import { ImageAssessments } from '../components/results/ImageAssessments';
+import { LedgerAuditPanel } from '../components/results/LedgerAuditPanel';
+import { AnalystDecisionPanel } from '../components/results/AnalystDecisionPanel';
+import { BackendErrorBanner } from '../components/results/BackendErrorBanner';
 
 export const ResultsPage: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Backend failures/partial states are surfaced, never hidden. */}
+      <BackendErrorBanner />
+
       {/* 1. Large Verdict Card */}
       <VerdictCard />
 
@@ -29,10 +35,16 @@ export const ResultsPage: React.FC = () => {
       {/* 5. Directed Evidence & Lineage Graph */}
       <EvidenceGraph />
 
-      {/* 6. Actionable Recommendations */}
+      {/* 6. Tamper-Evident Ledger Verification (backend authoritative) */}
+      <LedgerAuditPanel />
+
+      {/* 7. Analyst disposition — separate from the system assessment */}
+      <AnalystDecisionPanel />
+
+      {/* 8. Actionable Recommendations */}
       <Recommendations />
 
-      {/* 7. Export & Workflow Actions */}
+      {/* 9. Export & Workflow Actions */}
       <ExportActions />
 
       {/* Modal Drawer for clicked finding */}

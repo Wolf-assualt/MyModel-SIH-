@@ -147,19 +147,42 @@ export interface AuditEvent {
   action: string;
 }
 
+export interface ScanSession {
+  scan_id: string;
+  created_at: string;
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
+  stage: string;
+  progress: number;
+  input_artifacts: string[];
+  findings: any[];
+  assessment: any;
+  errors: string[];
+  warnings: string[];
+  stage_results?: Record<string, { status: string; error_code?: string; explanation?: string }>;
+}
+
 // ── API Service ───────────────────────────────────────────────────────────────
 
 class ApiService {
   private baseUrl = '/api/v1';
 
-  async uploadAndScanDataset(file: File): Promise<DatasetIntegrityReport> {
+  async uploadAndScanDataset(file: File): Promise<ScanSession> {
     const body = new FormData();
     body.append('file', file);
     body.append('dataset_name', file.name);
     const response = await fetch(`${this.baseUrl}/datasets/upload`, { method: 'POST', body });
-    const envelope: ApiResponse<DatasetIntegrityReport> = await response.json();
+    const envelope: ApiResponse<ScanSession> = await response.json();
     if (!response.ok || !envelope.data) {
       throw new Error(envelope.error || `Upload failed with HTTP ${response.status}`);
+    }
+    return envelope.data;
+  }
+
+  async getScanSession(scanId: string): Promise<ScanSession> {
+    const response = await fetch(`${this.baseUrl}/scan/${encodeURIComponent(scanId)}`);
+    const envelope: ApiResponse<ScanSession> = await response.json();
+    if (!response.ok || !envelope.data) {
+      throw new Error(envelope.error || `Failed to fetch scan session`);
     }
     return envelope.data;
   }

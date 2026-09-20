@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, Query
 from app.models_engine.registry import default_model_registry
 from app.schemas.base import ResponseEnvelope
 from app.schemas.model import (
+    ModelAssuranceFinding,
     ModelIdentityManifest,
     ModelIngestRequest,
     ModelVerifyResponse,
@@ -31,6 +32,7 @@ def register_model(payload: ModelIngestRequest) -> ResponseEnvelope[ModelIdentit
             model_path=model_path,
             format=payload.format,
             is_reference=payload.is_reference,
+            access_mode=payload.access_mode,
         )
     except Exception as exc:
         raise HTTPException(status_code=400, detail=f"Model registration failed: {str(exc)}")
@@ -63,3 +65,20 @@ def verify_model_integrity(
         raise HTTPException(status_code=404, detail=f"Model '{model_id}' not found in registry.")
 
     return ResponseEnvelope(data=result)
+
+
+@router.get("/{model_id}/assurance", response_model=ResponseEnvelope[ModelAssuranceFinding])
+def get_model_assurance(
+    model_id: str,
+    baseline_id: Optional[str] = Query(None, description="Optional specific baseline manifest ID"),
+) -> ResponseEnvelope[ModelAssuranceFinding]:
+    """Retrieve comprehensive standardized model assurance finding."""
+    try:
+        finding = default_model_registry.generate_assurance_finding(
+            model_id=model_id,
+            baseline_id=baseline_id,
+        )
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Model '{model_id}' not found in registry.")
+
+    return ResponseEnvelope(data=finding)

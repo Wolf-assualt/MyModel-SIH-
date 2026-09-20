@@ -1,4 +1,4 @@
-"""Pure NumPy statistical metrics for distribution shift and divergence testing."""
+"""Pure NumPy statistical metrics for distribution shift, divergence testing, and statistical distance."""
 import numpy as np
 
 
@@ -26,6 +26,38 @@ def compute_ks_distance(baseline: np.ndarray, target: np.ndarray) -> float:
 
     ks_stat = float(np.max(np.abs(cdf_u - cdf_v)))
     return max(0.0, min(1.0, ks_stat))
+
+
+def compute_ks_p_value(baseline: np.ndarray, target: np.ndarray, ks_stat: float) -> float:
+    """Calculate asymptotic p-value for the 2-sample Kolmogorov-Smirnov statistic.
+    
+    Returns:
+        float: Two-sided p-value in [0.0, 1.0].
+    """
+    u = np.asarray(baseline, dtype=np.float64).ravel()
+    v = np.asarray(target, dtype=np.float64).ravel()
+
+    n1, n2 = len(u), len(v)
+    if n1 == 0 or n2 == 0 or ks_stat <= 0.0:
+        return 1.0
+
+    en = np.sqrt(n1 * n2 / (n1 + n2))
+    lam = (en + 0.12 + 0.11 / en) * ks_stat
+
+    if lam >= 4.0:
+        return 0.0
+    if lam <= 0.0:
+        return 1.0
+
+    # Kolmogorov distribution series
+    p = 0.0
+    for j in range(1, 101):
+        term = 2.0 * ((-1) ** (j - 1)) * np.exp(-2.0 * (j ** 2) * (lam ** 2))
+        p += term
+        if abs(term) < 1e-12:
+            break
+
+    return float(max(0.0, min(1.0, p)))
 
 
 def compute_psi(baseline: np.ndarray, target: np.ndarray, bins: int = 10) -> float:
@@ -75,8 +107,44 @@ def wasserstein_distance_1d(u: np.ndarray, v: np.ndarray, num_quantiles: int = 1
     if len(arr_u) == 0 or len(arr_v) == 0:
         return 0.0
 
+    # If identical arrays
+    if len(arr_u) == len(arr_v) and np.array_equal(arr_u, arr_v):
+        return 0.0
+
     quantiles = np.linspace(0.01, 0.99, num_quantiles)
     u_quant = np.quantile(arr_u, quantiles)
     v_quant = np.quantile(arr_v, quantiles)
 
     return float(np.mean(np.abs(u_quant - v_quant)))
+
+
+def compute_energy_distance(u: np.ndarray, v: np.ndarray) -> float:
+    """Calculate 1D Statistical Energy Distance: 2*E|U - V| - E|U - U'| - E|V - V'|.
+    
+    Returns:
+        float: Energy distance (>= 0.0, with 0.0 representing identical distributions).
+    """
+    arr_u = np.asarray(u, dtype=np.float64).ravel()
+    arr_v = np.asarray(v, dtype=np.float64).ravel()
+
+    if len(arr_u) == 0 or len(arr_v) == 0:
+        return 0.0
+
+    # If identical arrays
+    if len(arr_u) == len(arr_v) and np.array_equal(arr_u, arr_v):
+        return 0.0
+
+    # Subsample if sample count is large for efficiency
+    if len(arr_u) > 200:
+        quantiles = np.linspace(0.005, 0.995, 200)
+        arr_u = np.quantile(arr_u, quantiles)
+    if len(arr_v) > 200:
+        quantiles = np.linspace(0.005, 0.995, 200)
+        arr_v = np.quantile(arr_v, quantiles)
+
+    diff_uv = float(np.mean(np.abs(arr_u[:, None] - arr_v[None, :])))
+    diff_uu = float(np.mean(np.abs(arr_u[:, None] - arr_u[None, :])))
+    diff_vv = float(np.mean(np.abs(arr_v[:, None] - arr_v[None, :])))
+
+    energy_dist = 2.0 * diff_uv - diff_uu - diff_vv
+    return float(max(0.0, energy_dist))

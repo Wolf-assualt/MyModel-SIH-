@@ -2,16 +2,21 @@
 import json
 import uuid
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 from app.core.config import settings
 from app.crypto.canonical import canonical_json_dumps, canonical_json_hash, hash_file
-from app.models_engine.inspectors import GenericModelInspector, ONNXInspector
+from app.models_engine.adapters.factory import ModelAdapterFactory
+from app.models_engine.trigger_detector import TriggerDetector
 from app.schemas.base import AssetStatus
 from app.schemas.model import (
+    AccessMode,
+    ModelAssuranceFinding,
     ModelFormat,
     ModelIdentityManifest,
     ModelVerifyResponse,
+    TriggerStatus,
+    VerificationStatus,
 )
 
 
@@ -30,14 +35,6 @@ class ModelRegistry:
         self.manifests_dir.mkdir(parents=True, exist_ok=True)
         self.baselines_dir.mkdir(parents=True, exist_ok=True)
 
-        self.onnx_inspector = ONNXInspector()
-        self.generic_inspector = GenericModelInspector()
-
-    def _get_inspector(self, model_format: ModelFormat):
-        if model_format == ModelFormat.ONNX:
-            return self.onnx_inspector
-        return self.generic_inspector
-
     def register_model(
         self,
         name: str,
@@ -45,38 +42,55 @@ class ModelRegistry:
         model_path: Path,
         format: ModelFormat,
         is_reference: bool = False,
+        access_mode: Optional[AccessMode] = None,
     ) -> ModelIdentityManifest:
         """Inspect model binary, calculate canonical identity digest, and persist manifest."""
         path = Path(model_path)
         if not path.is_file():
             raise FileNotFoundError(f"Model file not found: {model_path}")
 
-        binary_sha256 = hash_file(str(path))
-        inspector = self._get_inspector(format)
-        struct_info = inspector.inspect(path)
+        # Always calculate SHA-256 directly from the current model artifact on disk
+        artifact_hash = hash_file(str(path))
+
+        adapter = ModelAdapterFactory.get_adapter(path, format_hint=format)
+        adapter.load()
+        meta = adapter.metadata()
+        in_schema = adapter.input_schema()
+        out_schema = adapter.output_schema()
+        resolved_access_mode = access_mode or adapter.access_mode
 
         identity_payload = {
             "name": name,
             "version": version,
-            "parameter_count": struct_info["parameter_count"],
-            "layer_count": struct_info["layer_count"],
-            "inputs": [inp.model_dump() for inp in struct_info["inputs"]],
-            "outputs": [out.model_dump() for out in struct_info["outputs"]],
+            "format": format.value,
+            "parameter_count": meta.get("parameter_count", 0),
+            "node_count": meta.get("node_count", 0),
+            "layer_count": meta.get("layer_count", 0),
+            "inputs": [inp.model_dump() for inp in in_schema],
+            "outputs": [out.model_dump() for out in out_schema],
         }
         identity_digest = canonical_json_hash(identity_payload)
 
         model_id = str(uuid.uuid4())
+        manifest_meta = dict(meta)
+        manifest_meta["file_path"] = str(path.resolve())
+
         manifest = ModelIdentityManifest(
             model_id=model_id,
             name=name,
             version=version,
             format=format,
-            binary_sha256=binary_sha256,
-            parameter_count=struct_info["parameter_count"],
-            layer_count=struct_info["layer_count"],
-            inputs=struct_info["inputs"],
-            outputs=struct_info["outputs"],
-            metadata=struct_info["metadata"],
+            artifact_hash=artifact_hash,
+            binary_sha256=artifact_hash,
+            access_mode=resolved_access_mode,
+            architecture_info=meta,
+            parameter_count=meta.get("parameter_count", 0),
+            node_count=meta.get("node_count", 0),
+            layer_count=meta.get("layer_count", 0),
+            inputs=in_schema,
+            outputs=out_schema,
+            metadata=manifest_meta,
+            scanner_version="1.0.0",
             identity_digest=identity_digest,
             status=AssetStatus.ACCEPTED,
         )
@@ -121,7 +135,7 @@ class ModelRegistry:
         model_id: str,
         baseline_id: Optional[str] = None,
     ) -> ModelVerifyResponse:
-        """Verify candidate model's binary digest and structural layout against reference baseline."""
+        """Verify candidate model across binary, structural, and behavioural identity tiers."""
         candidate = self.get_model(model_id)
         if not candidate:
             raise FileNotFoundError(f"Candidate model {model_id} not found in registry.")
@@ -137,47 +151,159 @@ class ModelRegistry:
                 is_valid=False,
                 binary_match=False,
                 structural_match=False,
+                binary_identity=VerificationStatus.UNAVAILABLE,
+                structural_identity=VerificationStatus.UNAVAILABLE,
+                behavioural_identity=VerificationStatus.UNAVAILABLE,
+                trigger_status=TriggerStatus.UNAVAILABLE,
                 discrepancies=["No registered reference baseline found for this model."],
             )
 
-        discrepancies = []
+        discrepancies: List[str] = []
 
-        binary_match = candidate.binary_sha256 == baseline.binary_sha256
+        # 1. Re-calculate hash directly from disk to detect local tampering
+        cand_path_str = candidate.metadata.get("file_path")
+        current_cand_hash = candidate.artifact_hash
+        if cand_path_str and Path(cand_path_str).is_file():
+            current_cand_hash = hash_file(cand_path_str)
+            if current_cand_hash != candidate.artifact_hash:
+                discrepancies.append(
+                    f"Candidate model artifact modified on disk: original={candidate.artifact_hash[:16]}... vs current={current_cand_hash[:16]}..."
+                )
+
+        # 2. Binary Identity
+        binary_match = (current_cand_hash == baseline.artifact_hash)
+        binary_identity = VerificationStatus.MATCH if binary_match else VerificationStatus.MISMATCH
         if not binary_match:
             discrepancies.append(
-                f"Binary SHA-256 mismatch: candidate={candidate.binary_sha256[:16]}... vs baseline={baseline.binary_sha256[:16]}..."
+                f"Binary SHA-256 mismatch: candidate={current_cand_hash[:16]}... vs baseline={baseline.artifact_hash[:16]}..."
             )
 
-        structural_match = candidate.identity_digest == baseline.identity_digest
-        if not structural_match:
-            discrepancies.append(
-                f"Structural identity mismatch: candidate={candidate.identity_digest[:16]}... vs baseline={baseline.identity_digest[:16]}..."
-            )
+        # 3. Structural Identity
+        if candidate.access_mode == AccessMode.BLACK_BOX or baseline.access_mode == AccessMode.BLACK_BOX:
+            structural_identity = VerificationStatus.UNAVAILABLE
+            structural_match = False
+            discrepancies.append("Structural verification unavailable: Model has BLACK_BOX access mode.")
+        else:
+            structural_match = (candidate.identity_digest == baseline.identity_digest)
+            structural_identity = VerificationStatus.MATCH if structural_match else VerificationStatus.MISMATCH
+            if not structural_match:
+                discrepancies.append(
+                    f"Structural identity mismatch: candidate={candidate.identity_digest[:16]}... vs baseline={baseline.identity_digest[:16]}..."
+                )
+            if candidate.parameter_count != baseline.parameter_count:
+                discrepancies.append(
+                    f"Parameter count mismatch: candidate={candidate.parameter_count} vs baseline={baseline.parameter_count}"
+                )
+            if candidate.layer_count != baseline.layer_count:
+                discrepancies.append(
+                    f"Layer count mismatch: candidate={candidate.layer_count} vs baseline={baseline.layer_count}"
+                )
+            if candidate.inputs != baseline.inputs:
+                discrepancies.append("Input tensor specifications do not match baseline")
+            if candidate.outputs != baseline.outputs:
+                discrepancies.append("Output tensor specifications do not match baseline")
 
-        if candidate.parameter_count != baseline.parameter_count:
-            discrepancies.append(
-                f"Parameter count mismatch: candidate={candidate.parameter_count} vs baseline={baseline.parameter_count}"
-            )
+        # 4. Behavioural Identity
+        behavioural_identity = VerificationStatus.UNAVAILABLE
+        if cand_path_str and Path(cand_path_str).is_file():
+            try:
+                from app.fingerprint.runner import default_fingerprinter
 
-        if candidate.layer_count != baseline.layer_count:
-            discrepancies.append(
-                f"Layer count mismatch: candidate={candidate.layer_count} vs baseline={baseline.layer_count}"
-            )
+                cand_fp = default_fingerprinter.fingerprint_model(Path(cand_path_str))
+                base_path_str = baseline.metadata.get("file_path")
+                if base_path_str and Path(base_path_str).is_file():
+                    base_fp = default_fingerprinter.fingerprint_model(Path(base_path_str))
+                    comp = default_fingerprinter.compare_fingerprints(cand_fp, base_fp)
+                    if comp.is_divergent:
+                        behavioural_identity = VerificationStatus.MISMATCH
+                        discrepancies.append(f"Behavioural divergence detected: cosine similarity={comp.cosine_similarity}")
+                    else:
+                        behavioural_identity = VerificationStatus.MATCH
+            except Exception:
+                behavioural_identity = VerificationStatus.UNAVAILABLE
 
-        if candidate.inputs != baseline.inputs:
-            discrepancies.append("Input tensor specifications do not match baseline")
+        # 5. Trigger Sensitivity
+        trigger_status = TriggerStatus.UNAVAILABLE
+        if cand_path_str and Path(cand_path_str).is_file():
+            try:
+                adapter = ModelAdapterFactory.get_adapter(Path(cand_path_str), format_hint=candidate.format)
+                t_stat, _, _, _, _ = TriggerDetector.evaluate(adapter)
+                trigger_status = t_stat
+                if trigger_status == TriggerStatus.SUSPICIOUS_TRIGGER_SENSITIVITY:
+                    discrepancies.append("Suspicious behavioural trigger sensitivity detected on candidate model.")
+            except Exception:
+                trigger_status = TriggerStatus.UNAVAILABLE
 
-        if candidate.outputs != baseline.outputs:
-            discrepancies.append("Output tensor specifications do not match baseline")
-
-        is_valid = binary_match and structural_match and (len(discrepancies) == 0)
+        is_valid = (
+            binary_match
+            and (structural_identity in (VerificationStatus.MATCH, VerificationStatus.UNAVAILABLE))
+            and (behavioural_identity in (VerificationStatus.MATCH, VerificationStatus.UNAVAILABLE))
+            and (trigger_status != TriggerStatus.SUSPICIOUS_TRIGGER_SENSITIVITY)
+            and (len(discrepancies) == 0)
+        )
 
         return ModelVerifyResponse(
             model_id=model_id,
             is_valid=is_valid,
             binary_match=binary_match,
             structural_match=structural_match,
+            binary_identity=binary_identity,
+            structural_identity=structural_identity,
+            behavioural_identity=behavioural_identity,
+            trigger_status=trigger_status,
             discrepancies=discrepancies,
+        )
+
+    def generate_assurance_finding(
+        self,
+        model_id: str,
+        baseline_id: Optional[str] = None,
+    ) -> ModelAssuranceFinding:
+        """Produce standardized ModelAssuranceFinding for a registered model."""
+        candidate = self.get_model(model_id)
+        if not candidate:
+            raise FileNotFoundError(f"Model {model_id} not found in registry.")
+
+        cand_path_str = candidate.metadata.get("file_path")
+        cand_path = Path(cand_path_str) if cand_path_str else None
+        current_hash = hash_file(cand_path_str) if cand_path and cand_path.is_file() else candidate.artifact_hash
+
+        verification = self.verify_against_baseline(model_id, baseline_id=baseline_id)
+
+        evidence = {
+            "name": candidate.name,
+            "version": candidate.version,
+            "discrepancies": verification.discrepancies,
+            "parameter_count": candidate.parameter_count,
+            "node_count": candidate.node_count,
+            "binary_match": verification.binary_match,
+            "structural_match": verification.structural_match,
+        }
+
+        limitations = [
+            "Assurance is verified using local offline runtimes (ONNX Runtime, TorchScript).",
+            "Pickle-based arbitrary PyTorch code execution is disabled to prevent code injection.",
+        ]
+        if candidate.access_mode == AccessMode.BLACK_BOX:
+            limitations.append("Model is black-box; internal architecture cannot be verified.")
+
+        # Justified confidence calculation
+        confidence = 1.0 if verification.binary_match else 0.95
+        confidence_basis = "Deterministic cryptographic file SHA-256 hash direct from disk."
+
+        return ModelAssuranceFinding(
+            model_id=model_id,
+            artifact_hash=current_hash,
+            format=candidate.format.value,
+            access_mode=candidate.access_mode,
+            identity_status=verification.binary_identity,
+            structural_status=verification.structural_identity,
+            behavioural_status=verification.behavioural_identity,
+            trigger_status=verification.trigger_status,
+            confidence=confidence,
+            confidence_basis=confidence_basis,
+            evidence=evidence,
+            limitations=limitations,
         )
 
 

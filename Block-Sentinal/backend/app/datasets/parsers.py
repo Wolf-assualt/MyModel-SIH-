@@ -3,10 +3,11 @@ import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Dict, List, Optional
+# pyrefly: ignore [missing-import]
 from PIL import Image
 
 from app.crypto.canonical import hash_file
-from app.schemas.dataset import SampleRecord
+from app.schemas.dataset import DatasetFormat, SampleRecord
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tif", ".tiff"}
 SENTINEL2_BANDS = ["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B09", "B11", "B12"]
@@ -242,3 +243,37 @@ class BigEarthNetS2Parser(BaseParser):
             records.append(record)
 
         return records
+
+
+class DatasetParserFactory:
+    """Factory for dataset parsers with auto-detection."""
+
+    _PARSERS = {
+        DatasetFormat.IMAGE_FOLDER: DirectoryParser,
+        DatasetFormat.COCO: COCOParser,
+        DatasetFormat.YOLO: YOLOParser,
+        DatasetFormat.BIGEARTHNET_S2: BigEarthNetS2Parser,
+    }
+
+    @classmethod
+    def get_parser(cls, format: DatasetFormat) -> BaseParser:
+        parser_cls = cls._PARSERS.get(format)
+        if not parser_cls:
+            raise ValueError(f"Unsupported dataset format: {format}")
+        return parser_cls()
+
+    @classmethod
+    def detect_format(cls, source_dir: Path, annotation_path: Optional[Path] = None) -> DatasetFormat:
+        if annotation_path and Path(annotation_path).is_file():
+            ann_p = Path(annotation_path)
+            if ann_p.suffix.lower() == ".json":
+                try:
+                    with open(ann_p, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    if isinstance(data, dict) and "annotations" in data and "images" in data:
+                        return DatasetFormat.COCO
+                except Exception:
+                    pass
+        from app.datasets.format_detector import detect_format
+        fmt, _ = detect_format(source_dir)
+        return fmt

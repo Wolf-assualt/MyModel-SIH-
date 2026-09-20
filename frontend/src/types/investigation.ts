@@ -20,7 +20,7 @@ export interface ArtifactItem {
   };
 }
 
-export type StageStatus = 'WAITING' | 'RUNNING' | 'PASSED' | 'WARNING' | 'FAILED';
+export type StageStatus = 'WAITING' | 'RUNNING' | 'PASSED' | 'WARNING' | 'FAILED' | 'UNAVAILABLE';
 
 export interface PipelineStage {
   id: number;

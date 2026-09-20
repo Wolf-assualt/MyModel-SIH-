@@ -1,10 +1,11 @@
 """Distribution-Shift and Out-of-Distribution (OOD) Analysis API Endpoints."""
-from typing import Any, Dict
+from typing import Any, Dict, List
 from fastapi import APIRouter, HTTPException
 
 from app.drift.engine import default_drift_engine
 from app.schemas.base import ResponseEnvelope
 from app.schemas.drift import (
+    BaselineProfile,
     DistributionShiftReport,
     DistributionShiftRequest,
     RegisterBaselineRequest,
@@ -13,44 +14,59 @@ from app.schemas.drift import (
 router = APIRouter(prefix="/drift", tags=["Distribution-Shift Engine"])
 
 
-@router.post("/baselines/register", response_model=ResponseEnvelope[Dict[str, Any]])
+@router.post("/baselines/register", response_model=ResponseEnvelope[BaselineProfile])
 def register_baseline_features(
     payload: RegisterBaselineRequest,
-) -> ResponseEnvelope[Dict[str, Any]]:
-    """Register reference image feature distributions for subsequent drift evaluations."""
+) -> ResponseEnvelope[BaselineProfile]:
+    """Register and cryptographically seal reference image feature distributions."""
     try:
-        default_drift_engine.register_baseline(
+        profile = default_drift_engine.register_baseline(
             baseline_id=payload.baseline_id,
+            name=payload.name,
             features=payload.features,
             metadata=payload.metadata,
+            sign_baseline=payload.sign_baseline,
         )
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
-    return ResponseEnvelope(
-        data={
-            "baseline_id": payload.baseline_id,
-            "features_registered": list(payload.features.keys()),
-            "status": "REGISTERED",
-        }
-    )
+    return ResponseEnvelope(data=profile)
+
+
+@router.get("/baselines", response_model=ResponseEnvelope[List[Dict[str, Any]]])
+def list_registered_baselines() -> ResponseEnvelope[List[Dict[str, Any]]]:
+    """List all registered reference baseline profiles."""
+    baselines = default_drift_engine.list_baselines()
+    return ResponseEnvelope(data=baselines)
+
+
+@router.get("/baselines/{baseline_id}", response_model=ResponseEnvelope[BaselineProfile])
+def get_registered_baseline(
+    baseline_id: str,
+) -> ResponseEnvelope[BaselineProfile]:
+    """Retrieve full details of a registered baseline profile by baseline_id."""
+    try:
+        profile = default_drift_engine.load_baseline_profile(baseline_id)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Baseline '{baseline_id}' not found.")
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    return ResponseEnvelope(data=profile)
 
 
 @router.post("/evaluate", response_model=ResponseEnvelope[DistributionShiftReport])
 def evaluate_distribution_shift(
     payload: DistributionShiftRequest,
 ) -> ResponseEnvelope[DistributionShiftReport]:
-    """Quantify distribution divergence between a candidate batch and a registered baseline."""
-    # Resolve target features: from payload if provided, or synthetic fallback based on batch ID
+    """Quantify distribution divergence between a candidate batch and a registered reference baseline."""
+    # Enforce invariant: Never copy the target dataset as its own baseline
     target_features = payload.target_features
     if not target_features:
-        # If not supplied explicitly, attempt to load baseline to match keys or return error
-        try:
-            base_feats = default_drift_engine.load_baseline(payload.baseline_id)
-            # Duplicate baseline features as a neutral comparison if none supplied
-            target_features = base_feats
-        except Exception as exc:
-            raise HTTPException(status_code=400, detail=f"Cannot resolve target features: {str(exc)}")
+        raise HTTPException(
+            status_code=400,
+            detail="target_features is required. Cannot evaluate drift without candidate distribution.",
+        )
 
     try:
         report = default_drift_engine.evaluate_shift(
@@ -58,11 +74,14 @@ def evaluate_distribution_shift(
             target_features=target_features,
             target_batch_id=payload.target_batch_id,
             threshold=payload.drift_threshold,
+            expected_baseline_digest=payload.expected_baseline_digest,
         )
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
-    except Exception as exc:
+    except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
 
     return ResponseEnvelope(data=report)
 

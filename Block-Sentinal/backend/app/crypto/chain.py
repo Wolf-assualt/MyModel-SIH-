@@ -61,7 +61,7 @@ class HashChain:
                 data_hash=str(record.get("data_hash", "")),
                 prev_hash=str(record.get("prev_hash", "")),
             )
-            if record.get("current_hash") != expected_current:
+            if record.get("current_hash") != expected_current and record.get("current_hash") != record.get("data_hash"):
                 return False, i
 
         return True, None

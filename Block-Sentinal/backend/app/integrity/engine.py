@@ -1,6 +1,7 @@
-"""Training-Data Integrity Engine orchestrating duplicate, quality, label, and backdoor analysis."""
+"""Training-Data Integrity Engine orchestrating duplicate, quality, label, OOD, and trigger analysis."""
 import json
 import base64
+from collections import defaultdict
 from io import BytesIO
 from pathlib import Path
 from typing import Optional
@@ -10,12 +11,14 @@ from app.crypto.canonical import canonical_json_dumps, canonical_json_hash
 from app.integrity.detectors import (
     DuplicateDetector,
     LabelInconsistencyDetector,
-    QualityAndOODDetector,
-    TriggerBackdoorDetector,
+    QualityDetector,
+    OODDetector,
+    TriggerCandidateDetector,
 )
 from app.schemas.base import AssetStatus
 from app.schemas.dataset import BatchManifest
 from app.schemas.integrity import (
+    ContributorRisk,
     DatasetIntegrityReport,
     AuditEvent,
     ImageAssessment,
@@ -43,11 +46,13 @@ class DataIntegrityEngine:
 
         self.duplicate_detector = DuplicateDetector()
         self.label_detector = LabelInconsistencyDetector()
-        self.quality_detector = QualityAndOODDetector()
-        self.trigger_detector = TriggerBackdoorDetector()
+        self.quality_detector = QualityDetector()
+        self.ood_detector = OODDetector()
+        self.trigger_detector = TriggerCandidateDetector()
 
     def _preview_data_url(self, file_path: Path) -> Optional[str]:
         try:
+            # pyrefly: ignore [missing-import]
             from PIL import Image
 
             with Image.open(file_path) as image:
@@ -80,11 +85,45 @@ class DataIntegrityEngine:
                 previous.setdefault(event.artifact_id, set()).add(event.sha256_hash)
         return previous
 
+    def _aggregate_contributor_risk(
+        self,
+        manifest: BatchManifest,
+        findings: list[IntegrityFinding],
+    ) -> list[ContributorRisk]:
+        """Aggregate findings by contributor. Only when contributor identity exists."""
+        contributor_id = manifest.contributor_id
+        if not contributor_id or contributor_id == "UNKNOWN":
+            # Do not produce risk score from fabricated identity
+            return []
+
+        severity_dist: dict[str, int] = defaultdict(int)
+        finding_types: set[str] = set()
+        risk_indicators: list[str] = []
+
+        for f in findings:
+            severity_dist[f.severity.value] += 1
+            finding_types.add(f.check_type.value)
+
+        if severity_dist.get("CRITICAL", 0) > 0:
+            risk_indicators.append("CRITICAL_FINDINGS_PRESENT")
+        if severity_dist.get("HIGH", 0) > 3:
+            risk_indicators.append("HIGH_FINDING_CONCENTRATION")
+
+        return [ContributorRisk(
+            contributor_id=contributor_id,
+            sample_count=len(manifest.samples),
+            finding_count=len(findings),
+            finding_types=sorted(finding_types),
+            severity_distribution=dict(severity_dist),
+            risk_indicators=risk_indicators,
+        )]
+
     def scan(
         self,
         manifest: BatchManifest,
         duplicate_threshold: int = 4,
         trigger_detection_enabled: bool = True,
+        ood_reference_stats: Optional[dict] = None,
     ) -> DatasetIntegrityReport:
         """Run all integrity checks and synthesize an actionable integrity report."""
         findings: list[IntegrityFinding] = []
@@ -92,13 +131,18 @@ class DataIntegrityEngine:
         # 1. Exact & Near Duplicate Detection
         findings.extend(self.duplicate_detector.detect(manifest.samples, duplicate_threshold))
 
-        # 2. Label Inconsistency Detection
+        # 2. Label Inconsistency + Missing Labels + Malformed Annotations
         findings.extend(self.label_detector.detect(manifest.samples))
 
-        # 3. Quality, Variance & Out-Of-Distribution Detection
+        # 3. Quality Detection (variance, aspect ratio, corruption)
         findings.extend(self.quality_detector.detect(manifest.samples))
 
-        # 4. Trigger & Backdoor Detection
+        # 4. OOD Detection (reference-based only; UNAVAILABLE without reference)
+        # The OOD detector returns empty findings when reference_stats is None.
+        # The scan pipeline (scan.py) reports UNAVAILABLE for this component.
+        findings.extend(self.ood_detector.detect(manifest.samples, ood_reference_stats))
+
+        # 5. Trigger Candidate Detection
         if trigger_detection_enabled:
             findings.extend(self.trigger_detector.detect(manifest.samples))
 
@@ -117,7 +161,7 @@ class DataIntegrityEngine:
                 finding for finding in sample_findings
                 if finding.severity in (IntegritySeverity.CRITICAL, IntegritySeverity.HIGH)
                 and (
-                    finding.check_type != "TRIGGER_BACKDOOR"
+                    finding.check_type.value != "TRIGGER_CANDIDATE"
                     or finding.details.get("isolated_sample") is True
                     or len(finding.sample_ids) <= 2
                 )
@@ -128,7 +172,9 @@ class DataIntegrityEngine:
                 integrity_status = "FAIL"
                 trust_status = "UNTRUSTED"
                 action = "QUARANTINE"
-            elif changed_fingerprint or medium or any(finding.check_type != "NEAR_DUPLICATE" for finding in sample_findings):
+            elif changed_fingerprint or medium or any(
+                finding.check_type.value not in ("NEAR_DUPLICATE",) for finding in sample_findings
+            ):
                 result = "SUSPICIOUS"
                 integrity_status = "REVIEW REQUIRED"
                 trust_status = "UNTRUSTED"
@@ -164,6 +210,7 @@ class DataIntegrityEngine:
                     integrity_status=integrity_status,
                     reason="; ".join(image_results[-1].evidence) or "Uploaded artifact verified by integrity pipeline.",
                     action="UPLOADED",
+                    contributor_id=manifest.contributor_id,
                 ),
                 AuditEvent(
                     timestamp=manifest.created_at,
@@ -173,6 +220,7 @@ class DataIntegrityEngine:
                     integrity_status=integrity_status,
                     reason="; ".join(image_results[-1].evidence) or "No integrity findings detected.",
                     action="VERIFIED",
+                    contributor_id=manifest.contributor_id,
                 ),
             ])
         self._append_audit_events(audit_events)
@@ -192,6 +240,9 @@ class DataIntegrityEngine:
             recommendation = AssetStatus.UNDER_REVIEW
         else:
             recommendation = AssetStatus.QUARANTINED
+
+        # Phase 3: Contributor Risk Aggregation
+        contributor_risks = self._aggregate_contributor_risk(manifest, findings)
 
         # Construct Report
         report_data = {
@@ -215,6 +266,7 @@ class DataIntegrityEngine:
             report_digest=report_digest,
             image_results=image_results,
             audit_events=audit_events,
+            contributor_risks=contributor_risks,
         )
 
         # Persist report canonically to disk

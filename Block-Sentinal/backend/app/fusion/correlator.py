@@ -43,8 +43,13 @@ class ThreatCorrelator:
 
         has_adversarial_drift = any(
             e.severity in (IntegritySeverity.HIGH, IntegritySeverity.CRITICAL)
-            and any(k in e.description.lower() for k in ["adversarial", "anomaly", "entropy", "collapse"])
+            and any(k in e.description.lower() for k in ["adversarial", "anomaly", "entropy", "collapse", "severe", "shift", "drift"])
             for e in by_source[EvidenceSource.DISTRIBUTION_SHIFT]
+        )
+
+        has_model_weight_discrepancy = any(
+            e.severity in (IntegritySeverity.HIGH, IntegritySeverity.CRITICAL)
+            for e in by_source[EvidenceSource.MODEL_IDENTITY]
         )
 
         has_operational_drift = any(
@@ -71,6 +76,13 @@ class ThreatCorrelator:
             findings.append(
                 "Coordinated Evasion / Adversarial Perturbation Attack detected: Severe distribution anomaly "
                 "correlates with model output divergence across perturbation batteries."
+            )
+
+        # Rule 3b: Drift + Model integrity discrepancy
+        if has_adversarial_drift and has_model_weight_discrepancy:
+            findings.append(
+                "Input distribution anomalies accompany model weight integrity discrepancies: "
+                "Suspicious model divergence under distributional shifts."
             )
 
         # 4. Rule 4: Benign Operational Environmental Drift

@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
+# pyrefly: ignore [missing-import]
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.base import AssetStatus
@@ -30,9 +31,13 @@ class BatchManifest(BaseModel):
     dataset_name: str
     format: DatasetFormat
     contributor_id: str
+    contributor_source: str = "UNKNOWN"  # how contributor was resolved
     sample_count: int
     merkle_root: str
+    dataset_sha256: str = ""  # canonical hash of (rel_path, size, sha256) tuples
     samples: List[SampleRecord]
+    signature: Optional[str] = None
+    public_key_pem: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -58,6 +63,7 @@ class BatchVerificationResponse(BaseModel):
     calculated_root: str
     manifest_root: str
     tampered_samples: List[str] = Field(default_factory=list)
+    signature_valid: Optional[bool] = None
 
 
 # Retained for ORM entity compatibility

@@ -11,23 +11,26 @@ from app.schemas.model import ModelFormat
 client = TestClient(app)
 
 
-def create_dummy_model(path: Path, content: bytes = b"MOCK_MODEL_WEIGHTS_TENSOR_LAYOUT_DATA_V1"):
-    """Helper to create a reproducible binary model file."""
+from app.models_engine.fixtures import generate_real_onnx_model
+
+
+def create_dummy_model(path: Path, seed: int = 42):
+    """Helper to create a reproducible real model file."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(content)
+    generate_real_onnx_model(path, seed=seed)
 
 
 def test_model_identity_digest_generation(tmp_path):
     """Verify model file SHA-256 calculation and canonical identity digest generation."""
-    model_file = tmp_path / "models" / "detector.bin"
-    create_dummy_model(model_file, content=b"TACTICAL_TARGET_DETECTOR_WEIGHTS_ABC123")
+    model_file = tmp_path / "models" / "detector.onnx"
+    create_dummy_model(model_file, seed=123)
 
     registry = ModelRegistry(base_dir=tmp_path / "model_store")
     manifest = registry.register_model(
         name="TacticalDetector",
         version="1.0.0",
         model_path=model_file,
-        format=ModelFormat.GENERIC_BINARY,
+        format=ModelFormat.ONNX,
     )
 
     assert manifest.name == "TacticalDetector"
@@ -43,12 +46,11 @@ def test_model_identity_digest_generation(tmp_path):
 def test_baseline_verification_success(tmp_path):
     """Verify model passes integrity verification against an identical reference baseline."""
     models_dir = tmp_path / "models"
-    base_file = models_dir / "golden_baseline.bin"
-    cand_file = models_dir / "approved_candidate.bin"
+    base_file = models_dir / "golden_baseline.onnx"
+    cand_file = models_dir / "approved_candidate.onnx"
 
-    model_bytes = b"VERIFIED_GOLDEN_WEIGHTS_COEFFICIENTS_2026"
-    create_dummy_model(base_file, content=model_bytes)
-    create_dummy_model(cand_file, content=model_bytes)
+    create_dummy_model(base_file, seed=42)
+    cand_file.write_bytes(base_file.read_bytes())
 
     registry = ModelRegistry(base_dir=tmp_path / "registry")
 
@@ -82,11 +84,11 @@ def test_baseline_verification_success(tmp_path):
 def test_baseline_verification_tampering_failure(tmp_path):
     """Verify model verification fails with descriptive discrepancies when weights are altered."""
     models_dir = tmp_path / "models"
-    base_file = models_dir / "reference_model.bin"
-    tampered_file = models_dir / "backdoored_candidate.bin"
+    base_file = models_dir / "reference_model.onnx"
+    tampered_file = models_dir / "backdoored_candidate.onnx"
 
-    create_dummy_model(base_file, content=b"ORIGINAL_AUTHENTIC_DEFENCE_WEIGHTS")
-    create_dummy_model(tampered_file, content=b"TAMPERED_MODIFIED_POISONED_WEIGHTS")
+    create_dummy_model(base_file, seed=42)
+    create_dummy_model(tampered_file, seed=99)
 
     registry = ModelRegistry(base_dir=tmp_path / "registry")
 
@@ -94,7 +96,7 @@ def test_baseline_verification_tampering_failure(tmp_path):
         name="TargetClassifier",
         version="1.5.0",
         model_path=base_file,
-        format=ModelFormat.GENERIC_BINARY,
+        format=ModelFormat.ONNX,
         is_reference=True,
     )
 
@@ -102,7 +104,7 @@ def test_baseline_verification_tampering_failure(tmp_path):
         name="TargetClassifier",
         version="1.5.0",
         model_path=tampered_file,
-        format=ModelFormat.GENERIC_BINARY,
+        format=ModelFormat.ONNX,
         is_reference=False,
     )
 
@@ -115,8 +117,8 @@ def test_baseline_verification_tampering_failure(tmp_path):
 
 def test_api_models_endpoints(tmp_path):
     """Verify /api/v1/models/register, manifest retrieval, and verification endpoints."""
-    model_file = tmp_path / "api_test_model.bin"
-    create_dummy_model(model_file, content=b"REST_API_MODEL_BINARY_PAYLOAD")
+    model_file = tmp_path / "api_test_model.onnx"
+    create_dummy_model(model_file, seed=42)
 
     # 1. Register reference baseline via API
     reg_payload = {

@@ -6,13 +6,17 @@ import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+# pyrefly: ignore [missing-import]
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile, BackgroundTasks
 
 from app.core.config import settings
 from app.crypto.canonical import canonical_json_dumps
 from app.datasets.engine import default_ingestion_engine
+from app.datasets.format_detector import detect_format
+from app.datasets.contributor import resolve_contributor
 from app.integrity.engine import default_integrity_engine
 from app.schemas.base import AssetStatus, ResponseEnvelope
+from app.schemas.scan import ScanSession
 from app.schemas.dataset import (
     BatchManifest,
     BatchVerificationResponse,
@@ -34,29 +38,23 @@ def _safe_extract(archive: Path, destination: Path) -> None:
         zipped.extractall(destination)
 
 
-def _remove_exact_duplicate_images(source_dir: Path) -> int:
-    """Keep one copy of each identical image while preserving distinct files."""
-    image_extensions = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
-    seen_hashes: set[str] = set()
-    removed = 0
-    for image_path in sorted(source_dir.rglob("*")):
-        if not image_path.is_file() or image_path.suffix.lower() not in image_extensions:
-            continue
-        digest = hashlib.sha256(image_path.read_bytes()).hexdigest()
-        if digest in seen_hashes:
-            image_path.unlink()
-            removed += 1
-        else:
-            seen_hashes.add(digest)
-    return removed
+# NOTE: _remove_exact_duplicate_images has been REMOVED in Phase 3.
+# Original evidence must never be modified, deleted, or deduplicated before analysis.
+# The duplicate detector reports duplicates; the quarantine endpoint handles isolation
+# after analysis, preserving original provenance.
 
 
-@router.post("/upload", response_model=ResponseEnvelope[DatasetIntegrityReport])
+@router.post("/upload", response_model=ResponseEnvelope[ScanSession])
 async def upload_and_scan_dataset(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     dataset_name: str = Form("uploaded-dataset"),
-) -> ResponseEnvelope[DatasetIntegrityReport]:
-    """Persist and immediately scan an uploaded image or ZIP dataset."""
+) -> ResponseEnvelope[ScanSession]:
+    """Persist and immediately start a background scan session for an uploaded dataset.
+
+    Pipeline: UPLOAD → PRESERVE ORIGINAL → HASH → PARSE → ANALYSE → REPORT
+    Original files are NEVER modified, resized, deduplicated, or deleted.
+    """
     upload_root = Path(settings.DATA_DIR) / "uploads" / str(uuid.uuid4())
     source_dir = upload_root / "samples"
     source_dir.mkdir(parents=True, exist_ok=True)
@@ -71,15 +69,28 @@ async def upload_and_scan_dataset(
         else:
             shutil.copy2(upload_path, source_dir / upload_path.name)
 
-        _remove_exact_duplicate_images(source_dir)
+        # Phase 3: Auto-detect format from directory structure
+        detected_format, annotation_path = detect_format(source_dir)
+
+        # Phase 3: Resolve contributor identity (never invent one)
+        contributor_id, contributor_source = resolve_contributor(source_dir)
+
         manifest = default_ingestion_engine.ingest(
             dataset_name=dataset_name,
-            format="IMAGE_FOLDER",
-            contributor_id="frontend-upload",
+            format=detected_format,
+            contributor_id=contributor_id,
+            contributor_source=contributor_source,
             source_path=str(source_dir),
+            annotation_path=str(annotation_path) if annotation_path else None,
         )
-        report = default_integrity_engine.scan(manifest)
-        return ResponseEnvelope(data=report)
+
+        from app.api.scan import _run_scan_pipeline, _scan_sessions
+        scan_id = str(uuid.uuid4())
+        session = ScanSession(scan_id=scan_id, batch_id=manifest.batch_id)
+        _scan_sessions[scan_id] = session
+        background_tasks.add_task(_run_scan_pipeline, scan_id, manifest.batch_id)
+
+        return ResponseEnvelope(data=session)
     except (zipfile.BadZipFile, ValueError) as exc:
         raise HTTPException(status_code=400, detail=f"Dataset upload failed: {exc}")
     except Exception as exc:
@@ -87,8 +98,16 @@ async def upload_and_scan_dataset(
 
 
 @router.post("/quarantine/{batch_id}/{sample_id:path}", response_model=ResponseEnvelope[ImageAssessment])
-def quarantine_dataset_image(batch_id: str, sample_id: str) -> ResponseEnvelope[ImageAssessment]:
-    """Copy a flagged sample into isolated storage and block it from trusted use."""
+def quarantine_dataset_image(
+    batch_id: str,
+    sample_id: str,
+    scan_id: str = "",
+) -> ResponseEnvelope[ImageAssessment]:
+    """Copy a flagged sample into isolated storage and block it from trusted use.
+
+    Phase 3: Quarantine preserves original hash, path, contributor, finding IDs,
+    scan ID, and creates an audit event.
+    """
     manifest = default_ingestion_engine.load_manifest(batch_id)
     report = default_integrity_engine.load_report(batch_id)
     if not manifest or not report:
@@ -104,7 +123,14 @@ def quarantine_dataset_image(batch_id: str, sample_id: str) -> ResponseEnvelope[
     quarantine_dir = Path(settings.DATA_DIR) / "quarantine" / "uploads" / batch_id
     quarantine_dir.mkdir(parents=True, exist_ok=True)
     destination = quarantine_dir / Path(sample.file_path).name
+    # Copy, never move — preserve original evidence at original path
     shutil.copy2(sample.file_path, destination)
+
+    # Collect finding IDs that triggered this quarantine
+    related_finding_ids = [
+        f.finding_id for f in report.findings
+        if sample_id in f.sample_ids
+    ]
 
     assessment.quarantined = True
     assessment.action = "BLOCKED: EXCLUDED FROM INFERENCE"
@@ -117,6 +143,9 @@ def quarantine_dataset_image(batch_id: str, sample_id: str) -> ResponseEnvelope[
         integrity_status=assessment.integrity_status,
         reason="Integrity/poisoning violation",
         action="QUARANTINED",
+        scan_id=scan_id or None,
+        finding_ids=related_finding_ids,
+        contributor_id=manifest.contributor_id,
     )
     report.audit_events.append(event)
     audit_file = Path(settings.DATA_DIR) / "audit" / "image_events.jsonl"

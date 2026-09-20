@@ -15,6 +15,8 @@ export const PipelineStages: React.FC = () => {
         return <AlertTriangle size={15} style={{ color: 'var(--warning-text)' }} />;
       case 'FAILED':
         return <XCircle size={15} style={{ color: 'var(--critical-text)' }} />;
+      case 'UNAVAILABLE':
+        return <XCircle size={15} style={{ color: 'var(--text-muted)' }} />;
       case 'RUNNING':
         return <Loader2 size={15} style={{ color: 'var(--accent-text)', animation: 'radar-sweep 1s linear infinite' }} />;
       case 'WAITING':
@@ -31,6 +33,8 @@ export const PipelineStages: React.FC = () => {
         return <Badge variant="warning" size="sm">WARNING</Badge>;
       case 'FAILED':
         return <Badge variant="critical" size="sm">FAILED</Badge>;
+      case 'UNAVAILABLE':
+        return <Badge variant="default" size="sm">UNAVAIL</Badge>;
       case 'RUNNING':
         return <Badge variant="accent" size="sm" pulse>RUNNING</Badge>;
       case 'WAITING':
@@ -97,6 +101,7 @@ export const PipelineStages: React.FC = () => {
           const isFailed = stage.status === 'FAILED';
           const isWarning = stage.status === 'WARNING';
           const isPassed = stage.status === 'PASSED';
+          const isUnavailable = stage.status === 'UNAVAILABLE';
 
           return (
             <div
@@ -110,6 +115,8 @@ export const PipelineStages: React.FC = () => {
                   ? 'var(--warning-surface)'
                   : isPassed
                   ? 'var(--surface-elevated)'
+                  : isUnavailable
+                  ? 'var(--surface)'
                   : 'var(--surface)',
                 borderWidth: '1px',
                 borderStyle: 'solid',
@@ -121,6 +128,8 @@ export const PipelineStages: React.FC = () => {
                   ? 'var(--warning-border)'
                   : isPassed
                   ? 'var(--success-border)'
+                  : isUnavailable
+                  ? 'var(--border-subtle)'
                   : 'var(--border)',
                 borderRadius: '0.375rem',
                 padding: '0.625rem 0.875rem',
@@ -129,6 +138,7 @@ export const PipelineStages: React.FC = () => {
                 justifyContent: 'space-between',
                 gap: '0.5rem',
                 boxShadow: isRunning ? 'var(--accent-glow)' : 'none',
+                opacity: isUnavailable ? 0.6 : 1,
                 transition: 'all 0.2s ease',
               }}
             >

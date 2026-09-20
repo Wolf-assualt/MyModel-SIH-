@@ -1,7 +1,7 @@
 """Pydantic schemas for Model Behavioural Fingerprinting."""
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from app.schemas.base import AssetStatus
@@ -15,6 +15,14 @@ class PerturbationType(str, Enum):
     ROTATION = "ROTATION"
 
 
+class ProbeRecord(BaseModel):
+    probe_id: str
+    input_hash: str = Field(..., min_length=64, max_length=64)
+    output_hash: str = Field(..., min_length=64, max_length=64)
+    canonical_output: List[float] = Field(default_factory=list)
+    model_hash: str = Field(..., min_length=64, max_length=64)
+
+
 class PerturbationResult(BaseModel):
     perturbation: PerturbationType
     output_digest: str = Field(..., min_length=64, max_length=64)
@@ -25,8 +33,10 @@ class PerturbationResult(BaseModel):
 class ModelFingerprint(BaseModel):
     fingerprint_id: str
     model_id: str
+    model_hash: Optional[str] = None
     battery_seed: int
     battery_size: int
+    probe_records: List[ProbeRecord] = Field(default_factory=list)
     results: List[PerturbationResult]
     aggregate_digest: str = Field(..., min_length=64, max_length=64)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

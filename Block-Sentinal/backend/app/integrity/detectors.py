@@ -1,9 +1,16 @@
-"""Detectors for exact duplicates, near duplicates, label inconsistency, quality/OOD, and backdoors."""
+"""Detectors for exact duplicates, near duplicates, label integrity, quality, OOD, and triggers.
+
+Phase 3: All detectors emit findings with full provenance (detector_id, detector_version,
+detector_parameters, created_at) and justified confidence (or null with documented basis).
+"""
 import uuid
 from collections import defaultdict
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
+# pyrefly: ignore [missing-import]
 import numpy as np
+# pyrefly: ignore [missing-import]
 from PIL import Image
 
 from app.crypto.canonical import hash_bytes
@@ -15,9 +22,62 @@ from app.schemas.integrity import (
     IntegritySeverity,
 )
 
+DHASH_BITS = 64  # 8x8 dHash = 64 bits
+
+
+def _now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Union-Find for near-duplicate clustering
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class _UnionFind:
+    """Disjoint-set for grouping near-duplicate samples into clusters."""
+
+    def __init__(self) -> None:
+        self.parent: Dict[str, str] = {}
+        self.rank: Dict[str, int] = {}
+
+    def find(self, x: str) -> str:
+        if x not in self.parent:
+            self.parent[x] = x
+            self.rank[x] = 0
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+
+    def union(self, a: str, b: str) -> None:
+        ra, rb = self.find(a), self.find(b)
+        if ra == rb:
+            return
+        if self.rank[ra] < self.rank[rb]:
+            ra, rb = rb, ra
+        self.parent[rb] = ra
+        if self.rank[ra] == self.rank[rb]:
+            self.rank[ra] += 1
+
+    def clusters(self) -> Dict[str, List[str]]:
+        groups: Dict[str, List[str]] = defaultdict(list)
+        for item in self.parent:
+            groups[self.find(item)].append(item)
+        return {root: sorted(members) for root, members in groups.items() if len(members) > 1}
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Duplicate Detector
+# ═══════════════════════════════════════════════════════════════════════════════
 
 class DuplicateDetector:
-    """Detects exact byte-level duplicates (SHA-256) and perceptual near-duplicates (dHash)."""
+    """Detects exact byte-level duplicates (SHA-256) and perceptual near-duplicate clusters (dHash).
+
+    Exact duplicates: confidence = 1.0 (SHA-256 byte-identity is deterministic).
+    Near-duplicates:  confidence = 1.0 - (hamming_distance / 64), normalized over dHash space.
+    """
+
+    DETECTOR_ID = "DUPLICATE_DETECTOR"
+    DETECTOR_VERSION = "2.0.0"
 
     def detect(
         self,
@@ -25,17 +85,16 @@ class DuplicateDetector:
         duplicate_threshold: int = 4,
     ) -> List[IntegrityFinding]:
         findings: List[IntegrityFinding] = []
+        params = {"duplicate_threshold": duplicate_threshold}
 
         # 1. Exact Duplicate Detection via SHA-256
         sha_groups: Dict[str, List[SampleRecord]] = defaultdict(list)
         for s in samples:
             sha_groups[s.sha256_hash].append(s)
 
-        exact_duplicate_sample_ids = set()
         for sha, group in sha_groups.items():
             if len(group) > 1:
                 ids = [s.sample_id for s in group]
-                exact_duplicate_sample_ids.update(ids)
                 findings.append(
                     IntegrityFinding(
                         finding_id=str(uuid.uuid4()),
@@ -45,11 +104,17 @@ class DuplicateDetector:
                         description=f"Identified {len(group)} exact byte-level duplicate samples with identical SHA-256 digest ({sha[:16]}...).",
                         metric_score=0.0,
                         details={"sha256": sha, "duplicate_count": len(group)},
+                        detector_id=self.DETECTOR_ID,
+                        detector_version=self.DETECTOR_VERSION,
+                        detector_parameters=params,
+                        created_at=_now(),
+                        confidence=1.0,
+                        confidence_basis="SHA-256 byte-identity is deterministic",
+                        recommended_action="Review for data flooding; do not use duplicates for training without deduplication",
                     )
                 )
 
-        # 2. Near-Duplicate Detection via dHash
-        # Precompute dHash for samples
+        # 2. Near-Duplicate Clustering via dHash + Union-Find
         sample_hashes: List[tuple[SampleRecord, Optional[str]]] = []
         for s in samples:
             try:
@@ -58,45 +123,79 @@ class DuplicateDetector:
             except Exception:
                 sample_hashes.append((s, None))
 
+        uf = _UnionFind()
+        pair_distances: Dict[tuple[str, str], int] = {}
         n = len(sample_hashes)
         for i in range(n):
             s_i, h_i = sample_hashes[i]
             if not h_i:
                 continue
-
             for j in range(i + 1, n):
                 s_j, h_j = sample_hashes[j]
                 if not h_j:
                     continue
-
-                # Skip if already flagged as exact duplicate pair
+                # Skip if already exact duplicate pair
                 if s_i.sha256_hash == s_j.sha256_hash:
                     continue
-
                 dist = hamming_distance(h_i, h_j)
                 if dist <= duplicate_threshold:
-                    findings.append(
-                        IntegrityFinding(
-                            finding_id=str(uuid.uuid4()),
-                            check_type=IntegrityCheckType.NEAR_DUPLICATE,
-                            severity=IntegritySeverity.LOW,
-                            sample_ids=[s_i.sample_id, s_j.sample_id],
-                            description=f"Perceptual near-duplicate image pair detected (Hamming distance {dist} <= {duplicate_threshold}).",
-                            metric_score=float(dist),
-                            details={
-                                "sample_a": s_i.sample_id,
-                                "sample_b": s_j.sample_id,
-                                "hamming_distance": dist,
-                                "threshold": duplicate_threshold,
-                            },
-                        )
-                    )
+                    uf.union(s_i.sample_id, s_j.sample_id)
+                    pair_key = (min(s_i.sample_id, s_j.sample_id), max(s_i.sample_id, s_j.sample_id))
+                    pair_distances[pair_key] = dist
+
+        # Emit one finding per cluster (not per pair)
+        for cluster_root, members in uf.clusters().items():
+            # Compute representative distance for the cluster
+            cluster_dists = [
+                d for (a, b), d in pair_distances.items()
+                if a in members and b in members
+            ]
+            avg_dist = sum(cluster_dists) / len(cluster_dists) if cluster_dists else 0.0
+            max_dist = max(cluster_dists) if cluster_dists else 0
+            confidence = round(1.0 - (avg_dist / DHASH_BITS), 4)
+
+            findings.append(
+                IntegrityFinding(
+                    finding_id=str(uuid.uuid4()),
+                    check_type=IntegrityCheckType.NEAR_DUPLICATE,
+                    severity=IntegritySeverity.LOW,
+                    sample_ids=members,
+                    description=f"Perceptual near-duplicate cluster of {len(members)} images detected (avg Hamming distance {avg_dist:.1f}, threshold {duplicate_threshold}).",
+                    metric_score=avg_dist,
+                    details={
+                        "cluster_id": cluster_root,
+                        "member_count": len(members),
+                        "avg_hamming_distance": round(avg_dist, 2),
+                        "max_hamming_distance": max_dist,
+                        "threshold": duplicate_threshold,
+                    },
+                    detector_id=self.DETECTOR_ID,
+                    detector_version=self.DETECTOR_VERSION,
+                    detector_parameters=params,
+                    created_at=_now(),
+                    confidence=confidence,
+                    confidence_basis=f"1.0 - (avg_hamming_distance / {DHASH_BITS}), normalized over 64-bit dHash space",
+                    recommended_action="Review cluster for data flooding or augmentation artifacts",
+                )
+            )
 
         return findings
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# Label Inconsistency Detector
+# ═══════════════════════════════════════════════════════════════════════════════
+
 class LabelInconsistencyDetector:
-    """Detects near-duplicate or identical images that have conflicting label annotations."""
+    """Detects label conflicts, missing labels, and malformed annotations.
+
+    Label conflict confidence: 1.0 - (hamming / 64), visual similarity of conflicting pair.
+    Missing label confidence: 1.0 (deterministic check).
+    Malformed annotation confidence: 1.0 (deterministic check).
+    """
+
+    DETECTOR_ID = "LABEL_INCONSISTENCY_DETECTOR"
+    DETECTOR_VERSION = "2.0.0"
 
     def detect(
         self,
@@ -104,7 +203,65 @@ class LabelInconsistencyDetector:
         distance_threshold: int = 3,
     ) -> List[IntegrityFinding]:
         findings: List[IntegrityFinding] = []
+        params = {"distance_threshold": distance_threshold}
 
+        # 1. Missing labels
+        has_any_labels = any(bool(s.labels) for s in samples)
+        is_unannotated_image_folder = (
+            not has_any_labels and all(s.metadata.get("format") == "IMAGE_FOLDER" for s in samples)
+        )
+        if not is_unannotated_image_folder:
+            for s in samples:
+                if not s.labels or len(s.labels) == 0:
+                    findings.append(
+                    IntegrityFinding(
+                        finding_id=str(uuid.uuid4()),
+                        check_type=IntegrityCheckType.MISSING_LABEL,
+                        severity=IntegritySeverity.MEDIUM,
+                        sample_ids=[s.sample_id],
+                        description=f"Image has no annotation labels.",
+                        metric_score=0.0,
+                        details={"file_path": s.file_path},
+                        detector_id=self.DETECTOR_ID,
+                        detector_version=self.DETECTOR_VERSION,
+                        detector_parameters=params,
+                        created_at=_now(),
+                        confidence=1.0,
+                        confidence_basis="Deterministic check: annotation list is empty",
+                        recommended_action="Add annotations or exclude from supervised training",
+                    )
+                )
+
+        # 2. Malformed annotations (YOLO bbox out of [0,1] range)
+        for s in samples:
+            for label in s.labels:
+                bbox = label.get("bbox_normalized")
+                if bbox and isinstance(bbox, list) and len(bbox) == 4:
+                    try:
+                        vals = [float(v) for v in bbox]
+                        if any(v < 0.0 or v > 1.0 for v in vals):
+                            findings.append(
+                                IntegrityFinding(
+                                    finding_id=str(uuid.uuid4()),
+                                    check_type=IntegrityCheckType.MALFORMED_ANNOTATION,
+                                    severity=IntegritySeverity.HIGH,
+                                    sample_ids=[s.sample_id],
+                                    description=f"Malformed YOLO bbox: normalized coordinates out of [0,1] range: {vals}",
+                                    metric_score=0.0,
+                                    details={"bbox_normalized": vals, "label": label},
+                                    detector_id=self.DETECTOR_ID,
+                                    detector_version=self.DETECTOR_VERSION,
+                                    detector_parameters=params,
+                                    created_at=_now(),
+                                    confidence=1.0,
+                                    confidence_basis="Deterministic check: bbox coordinates outside valid [0,1] range",
+                                    recommended_action="Fix annotation coordinates",
+                                )
+                            )
+                    except (ValueError, TypeError):
+                        pass
+
+        # 3. Label conflicts on near-identical images
         sample_hashes: List[tuple[SampleRecord, Optional[str]]] = []
         for s in samples:
             try:
@@ -126,8 +283,8 @@ class LabelInconsistencyDetector:
 
                 dist = hamming_distance(h_i, h_j)
                 if dist <= distance_threshold:
-                    # Check if labels conflict
                     if s_i.labels != s_j.labels:
+                        confidence = round(1.0 - (dist / DHASH_BITS), 4)
                         findings.append(
                             IntegrityFinding(
                                 finding_id=str(uuid.uuid4()),
@@ -143,17 +300,37 @@ class LabelInconsistencyDetector:
                                     "labels_b": s_j.labels,
                                     "distance": dist,
                                 },
+                                detector_id=self.DETECTOR_ID,
+                                detector_version=self.DETECTOR_VERSION,
+                                detector_parameters=params,
+                                created_at=_now(),
+                                confidence=confidence,
+                                confidence_basis=f"1.0 - (hamming_distance / {DHASH_BITS}), visual similarity of conflicting pair",
+                                recommended_action="Review labels for annotation error or adversarial label flip",
                             )
                         )
 
         return findings
 
 
-class QualityAndOODDetector:
-    """Detects solid/zero-variance images, corrupt files, or extreme aspect ratio anomalies."""
+# ═══════════════════════════════════════════════════════════════════════════════
+# Quality Detector (split from QualityAndOODDetector)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class QualityDetector:
+    """Detects quality anomalies: solid/zero-variance images, corrupt files, extreme aspect ratios.
+
+    Zero-variance confidence: 1.0 (deterministic pixel analysis).
+    Aspect ratio confidence: null (heuristic threshold, no statistical basis).
+    Corrupt file confidence: 1.0 (deterministic: PIL cannot decode).
+    """
+
+    DETECTOR_ID = "QUALITY_DETECTOR"
+    DETECTOR_VERSION = "2.0.0"
 
     def detect(self, samples: List[SampleRecord]) -> List[IntegrityFinding]:
         findings: List[IntegrityFinding] = []
+        params: Dict = {}
 
         for s in samples:
             img_path = Path(s.file_path)
@@ -161,12 +338,19 @@ class QualityAndOODDetector:
                 findings.append(
                     IntegrityFinding(
                         finding_id=str(uuid.uuid4()),
-                        check_type=IntegrityCheckType.CORRUPT_OR_OOD,
+                        check_type=IntegrityCheckType.QUALITY_ANOMALY,
                         severity=IntegritySeverity.CRITICAL,
                         sample_ids=[s.sample_id],
                         description=f"Image file missing or unreadable on disk: {img_path}",
                         metric_score=0.0,
                         details={"file_path": str(img_path)},
+                        detector_id=self.DETECTOR_ID,
+                        detector_version=self.DETECTOR_VERSION,
+                        detector_parameters=params,
+                        created_at=_now(),
+                        confidence=1.0,
+                        confidence_basis="Deterministic: file does not exist on disk",
+                        recommended_action="Locate or exclude missing file",
                     )
                 )
                 continue
@@ -180,16 +364,23 @@ class QualityAndOODDetector:
                         findings.append(
                             IntegrityFinding(
                                 finding_id=str(uuid.uuid4()),
-                                check_type=IntegrityCheckType.CORRUPT_OR_OOD,
+                                check_type=IntegrityCheckType.QUALITY_ANOMALY,
                                 severity=IntegritySeverity.MEDIUM,
                                 sample_ids=[s.sample_id],
                                 description=f"Extreme aspect ratio anomaly detected: {aspect_ratio:.2f}",
                                 metric_score=float(aspect_ratio),
                                 details={"width": width, "height": height, "aspect_ratio": aspect_ratio},
+                                detector_id=self.DETECTOR_ID,
+                                detector_version=self.DETECTOR_VERSION,
+                                detector_parameters=params,
+                                created_at=_now(),
+                                confidence=None,
+                                confidence_basis="Heuristic threshold (>20 or <0.05); no statistical basis for exact boundary",
+                                recommended_action="Review image dimensions",
                             )
                         )
 
-                    # Check zero/near-zero variance (solid black/white/blank)
+                    # Check zero/near-zero variance
                     gray = img.convert("L")
                     arr = np.array(gray, dtype=np.float32)
                     var = float(np.var(arr))
@@ -198,12 +389,19 @@ class QualityAndOODDetector:
                         findings.append(
                             IntegrityFinding(
                                 finding_id=str(uuid.uuid4()),
-                                check_type=IntegrityCheckType.CORRUPT_OR_OOD,
+                                check_type=IntegrityCheckType.QUALITY_ANOMALY,
                                 severity=IntegritySeverity.HIGH,
                                 sample_ids=[s.sample_id],
                                 description=f"Zero-variance flat image detected (variance: {var:.4f}). Image appears to be solid color or sensor blackout.",
                                 metric_score=var,
                                 details={"variance": var, "dimensions": [width, height]},
+                                detector_id=self.DETECTOR_ID,
+                                detector_version=self.DETECTOR_VERSION,
+                                detector_parameters=params,
+                                created_at=_now(),
+                                confidence=1.0,
+                                confidence_basis="Deterministic pixel analysis: variance < 1.0",
+                                recommended_action="Exclude from training; likely corrupt or uninformative",
                             )
                         )
 
@@ -211,27 +409,153 @@ class QualityAndOODDetector:
                 findings.append(
                     IntegrityFinding(
                         finding_id=str(uuid.uuid4()),
-                        check_type=IntegrityCheckType.CORRUPT_OR_OOD,
+                        check_type=IntegrityCheckType.QUALITY_ANOMALY,
                         severity=IntegritySeverity.HIGH,
                         sample_ids=[s.sample_id],
                         description=f"Corrupt or invalid image payload: {str(exc)}",
                         metric_score=0.0,
                         details={"error": str(exc)},
+                        detector_id=self.DETECTOR_ID,
+                        detector_version=self.DETECTOR_VERSION,
+                        detector_parameters=params,
+                        created_at=_now(),
+                        confidence=1.0,
+                        confidence_basis="Deterministic: PIL cannot decode image file",
+                        recommended_action="Replace or exclude corrupt file",
                     )
                 )
 
         return findings
 
 
-class TriggerBackdoorDetector:
-    """Detects recurring static patch patterns in corner regions across samples with identical target label."""
+# ═══════════════════════════════════════════════════════════════════════════════
+# OOD Detector (reference-based; UNAVAILABLE without reference)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class OODDetector:
+    """Reference-based Out-of-Distribution detection.
+
+    Compares candidate image features (brightness, contrast, entropy, color
+    statistics, dimensions) against an independently provided reference dataset.
+
+    If no reference dataset is provided, returns OOD_STATUS = UNAVAILABLE.
+    Never fabricates a baseline from the candidate data being evaluated.
+    """
+
+    DETECTOR_ID = "OOD_DETECTOR"
+    DETECTOR_VERSION = "1.0.0"
+
+    def detect(
+        self,
+        samples: List[SampleRecord],
+        reference_stats: Optional[Dict] = None,
+    ) -> List[IntegrityFinding]:
+        """Run OOD detection against a reference baseline.
+
+        Args:
+            samples: Candidate samples to evaluate.
+            reference_stats: Pre-computed reference distribution statistics.
+                Must be independently sourced, NOT derived from samples.
+                Expected keys: mean_brightness, std_brightness, mean_entropy,
+                std_entropy, mean_contrast, std_contrast, etc.
+
+        Returns:
+            List of findings. Empty if reference_stats is None (UNAVAILABLE).
+        """
+        # If no reference exists, return empty — the scan pipeline reports UNAVAILABLE
+        if reference_stats is None:
+            return []
+
+        findings: List[IntegrityFinding] = []
+        params = {"reference_keys": list(reference_stats.keys())}
+
+        for s in samples:
+            img_path = Path(s.file_path)
+            if not img_path.is_file():
+                continue
+
+            try:
+                with Image.open(img_path) as img:
+                    gray = img.convert("L")
+                    arr = np.array(gray, dtype=np.float32)
+
+                    candidate_brightness = float(np.mean(arr))
+                    candidate_entropy = float(-np.sum(
+                        (np.histogram(arr, bins=256, range=(0, 256))[0] / arr.size + 1e-12)
+                        * np.log2(np.histogram(arr, bins=256, range=(0, 256))[0] / arr.size + 1e-12)
+                    ))
+
+                    # Z-score comparison against reference
+                    ref_mean_b = reference_stats.get("mean_brightness", candidate_brightness)
+                    ref_std_b = reference_stats.get("std_brightness", 1.0)
+                    z_brightness = abs(candidate_brightness - ref_mean_b) / max(ref_std_b, 1e-6)
+
+                    ref_mean_e = reference_stats.get("mean_entropy", candidate_entropy)
+                    ref_std_e = reference_stats.get("std_entropy", 1.0)
+                    z_entropy = abs(candidate_entropy - ref_mean_e) / max(ref_std_e, 1e-6)
+
+                    max_z = max(z_brightness, z_entropy)
+                    if max_z > 3.0:  # >3 standard deviations
+                        findings.append(
+                            IntegrityFinding(
+                                finding_id=str(uuid.uuid4()),
+                                check_type=IntegrityCheckType.OOD_ANOMALY,
+                                severity=IntegritySeverity.MEDIUM,
+                                sample_ids=[s.sample_id],
+                                description=f"Out-of-distribution candidate: max z-score {max_z:.2f} (brightness z={z_brightness:.2f}, entropy z={z_entropy:.2f})",
+                                metric_score=max_z,
+                                details={
+                                    "z_brightness": round(z_brightness, 4),
+                                    "z_entropy": round(z_entropy, 4),
+                                    "candidate_brightness": round(candidate_brightness, 2),
+                                    "candidate_entropy": round(candidate_entropy, 4),
+                                },
+                                detector_id=self.DETECTOR_ID,
+                                detector_version=self.DETECTOR_VERSION,
+                                detector_parameters=params,
+                                created_at=_now(),
+                                confidence=None,
+                                confidence_basis="Z-score magnitude indicates deviation from reference distribution but is not a calibrated probability",
+                                limitations="Feature-based OOD uses brightness and entropy only; does not capture semantic or structural distribution shift",
+                                recommended_action="Review against reference dataset for distribution compatibility",
+                            )
+                        )
+            except Exception:
+                continue
+
+        return findings
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Trigger Candidate Detector
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class TriggerCandidateDetector:
+    """Detects recurring static patch patterns in corner regions.
+
+    Finding type: TRIGGER_CANDIDATE (not TRIGGER_BACKDOOR).
+    This detector identifies localized trigger candidates, NOT confirmed backdoors.
+
+    Repeated patch confidence: affected_count / group_size (proportion of samples
+    with matching patch signature in the same label group).
+    Isolated high-contrast confidence: null (heuristic thresholds, no ground truth).
+
+    Coverage limitations:
+    - Only inspects 4 corner regions of fixed patch_size
+    - Cannot detect non-localized or semantic backdoor triggers
+    - Cannot detect triggers that vary per sample
+    - A positive finding indicates a CANDIDATE requiring human review
+    """
+
+    DETECTOR_ID = "TRIGGER_CANDIDATE_DETECTOR"
+    DETECTOR_VERSION = "2.0.0"
 
     def detect(self, samples: List[SampleRecord], patch_size: int = 4) -> List[IntegrityFinding]:
         findings: List[IntegrityFinding] = []
-        if len(samples) < 2:
-            return self._detect_isolated_trigger(samples, patch_size)
+        params = {"patch_size": patch_size}
 
-        findings.extend(self._detect_isolated_trigger(samples, patch_size))
+        if len(samples) < 2:
+            return self._detect_isolated_trigger(samples, patch_size, params)
 
         # Group samples by primary label class
         label_groups: Dict[str, List[SampleRecord]] = defaultdict(list)
@@ -243,7 +567,7 @@ class TriggerBackdoorDetector:
 
         for label_key, group in label_groups.items():
             if len(group) < 2:
-                continue            # Check each corner for identical static high-contrast patch signatures
+                continue
             for c_name in corner_names:
                 patch_signatures: Dict[str, List[str]] = defaultdict(list)
 
@@ -260,29 +584,33 @@ class TriggerBackdoorDetector:
                                 box = (w - patch_size, 0, w, patch_size)
                             elif c_name == "bottom_left":
                                 box = (0, h - patch_size, patch_size, h)
-                            else:  # bottom_right
+                            else:
                                 box = (w - patch_size, h - patch_size, w, h)
 
                             patch = img.crop(box).convert("L")
                             arr = np.array(patch, dtype=np.uint8)
 
-                            # Bug fix: A solid-colored trigger (like BadNets white square) has 0 variance.
-                            # We just ignore completely black patches (which might be standard image padding).
                             if not (arr == 0).all():
                                 sig = hash_bytes(arr.tobytes())
                                 patch_signatures[sig].append(sample.sample_id)
                     except Exception:
                         continue
 
+                sample_by_id = {s.sample_id: s for s in group}
                 for sig, sample_ids in patch_signatures.items():
                     if len(sample_ids) >= 2:
+                        distinct_image_hashes = {sample_by_id[sid].sha256_hash for sid in sample_ids}
+                        if len(distinct_image_hashes) < 2:
+                            # Identical duplicate files — handled by DuplicateDetector, not a cross-image trigger
+                            continue
+                        confidence = round(len(sample_ids) / len(group), 4)
                         findings.append(
                             IntegrityFinding(
                                 finding_id=str(uuid.uuid4()),
-                                check_type=IntegrityCheckType.TRIGGER_BACKDOOR,
+                                check_type=IntegrityCheckType.TRIGGER_CANDIDATE,
                                 severity=IntegritySeverity.CRITICAL,
                                 sample_ids=sample_ids,
-                                description=f"Suspicious repeated static localized patch pattern detected in {c_name} corner across multiple samples sharing label '{label_key}'.",
+                                description=f"Suspicious repeated static localized patch pattern detected in {c_name} corner across {len(sample_ids)} samples sharing label '{label_key}'.",
                                 metric_score=float(len(sample_ids)),
                                 details={
                                     "corner": c_name,
@@ -291,6 +619,14 @@ class TriggerBackdoorDetector:
                                     "target_label": label_key,
                                     "patch_signature": sig[:16],
                                 },
+                                detector_id=self.DETECTOR_ID,
+                                detector_version=self.DETECTOR_VERSION,
+                                detector_parameters=params,
+                                created_at=_now(),
+                                confidence=confidence,
+                                confidence_basis=f"affected_count ({len(sample_ids)}) / group_size ({len(group)}): proportion of samples with matching patch signature",
+                                limitations="Only inspects 4 corner regions; cannot detect non-localized, semantic, or per-sample-variable triggers",
+                                recommended_action="Human review required — this is a CANDIDATE, not a confirmed backdoor",
                             )
                         )
 
@@ -300,6 +636,7 @@ class TriggerBackdoorDetector:
         self,
         samples: List[SampleRecord],
         patch_size: int,
+        params: Dict,
     ) -> List[IntegrityFinding]:
         """Detect a measured high-contrast trigger patch when no comparison sample exists."""
         findings: List[IntegrityFinding] = []
@@ -328,7 +665,7 @@ class TriggerBackdoorDetector:
                             findings.append(
                                 IntegrityFinding(
                                     finding_id=str(uuid.uuid4()),
-                                    check_type=IntegrityCheckType.TRIGGER_BACKDOOR,
+                                    check_type=IntegrityCheckType.TRIGGER_CANDIDATE,
                                     severity=IntegritySeverity.CRITICAL,
                                     sample_ids=[sample.sample_id],
                                     description=(
@@ -344,9 +681,43 @@ class TriggerBackdoorDetector:
                                         "light_ratio": light_ratio,
                                         "isolated_sample": True,
                                     },
+                                    detector_id=self.DETECTOR_ID,
+                                    detector_version=self.DETECTOR_VERSION,
+                                    detector_parameters=params,
+                                    created_at=_now(),
+                                    confidence=None,
+                                    confidence_basis="Heuristic thresholds (variance>=5000, dark>=0.20, light>=0.20); no statistical ground truth",
+                                    limitations="Single-sample heuristic; requires human review to confirm",
+                                    recommended_action="Human review required — isolated trigger candidate",
                                 )
                             )
                             break
             except Exception:
                 continue
+        return findings
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Backwards compatibility aliases & wrappers
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class QualityAndOODDetector(QualityDetector):
+    """Backwards-compatible wrapper mapping QUALITY_ANOMALY to CORRUPT_OR_OOD."""
+
+    def detect(self, samples: List[SampleRecord]) -> List[IntegrityFinding]:
+        findings = super().detect(samples)
+        for f in findings:
+            if f.check_type == IntegrityCheckType.QUALITY_ANOMALY:
+                f.check_type = IntegrityCheckType.CORRUPT_OR_OOD
+        return findings
+
+
+class TriggerBackdoorDetector(TriggerCandidateDetector):
+    """Backwards-compatible wrapper mapping TRIGGER_CANDIDATE to TRIGGER_BACKDOOR."""
+
+    def detect(self, samples: List[SampleRecord], patch_size: int = 4) -> List[IntegrityFinding]:
+        findings = super().detect(samples, patch_size=patch_size)
+        for f in findings:
+            if f.check_type == IntegrityCheckType.TRIGGER_CANDIDATE:
+                f.check_type = IntegrityCheckType.TRIGGER_BACKDOOR
         return findings

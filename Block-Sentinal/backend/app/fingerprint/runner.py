@@ -1,51 +1,77 @@
-"""Model execution abstraction and behavioural fingerprinting engine."""
-import hashlib
+"""Model execution abstraction and behavioural fingerprinting engine using real local inference."""
 import json
 import uuid
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 import numpy as np
-from PIL import Image
 
 from app.core.config import settings
 from app.crypto.canonical import canonical_json_dumps, canonical_json_hash, hash_bytes
 from app.fingerprint.battery import TestBatteryGenerator
+from app.models_engine.adapters.base import BaseModelAdapter
+from app.models_engine.adapters.factory import ModelAdapterFactory
 from app.schemas.base import AssetStatus
 from app.schemas.fingerprint import (
     FingerprintComparisonResponse,
     ModelFingerprint,
     PerturbationResult,
     PerturbationType,
+    ProbeRecord,
 )
 
 
 class ModelExecutor:
-    """Provides model inference execution with deterministic surrogate evaluation."""
+    """Executes real local inference via model adapters, removing surrogate simulations."""
 
-    def predict(self, model_id: str, image_batch: List[np.ndarray]) -> np.ndarray:
-        """Run forward pass returning softmax probabilities of shape (N, 10)."""
-        # Deterministic projection matrix seeded by model_id
-        model_seed = int(hashlib.sha256(model_id.encode("utf-8")).hexdigest()[:8], 16)
-        proj = np.random.default_rng(model_seed).normal(0.0, 1.0, size=(16, 10))
+    def __init__(self, models_dir: Optional[Path] = None):
+        self.models_dir = Path(models_dir or (Path(settings.DATA_DIR) / "models"))
+        self.models_dir.mkdir(parents=True, exist_ok=True)
+        self._cached_adapters: Dict[str, BaseModelAdapter] = {}
 
-        batch_outputs: List[np.ndarray] = []
-        for img in image_batch:
-            # Extract 4x4 spatial pooling features
-            pil_img = Image.fromarray(img).resize((4, 4)).convert("L")
-            feats = np.array(pil_img, dtype=np.float32).flatten() / 255.0
-            logits = feats @ proj
+    def resolve_adapter(self, model: Union[str, Path, BaseModelAdapter]) -> BaseModelAdapter:
+        """Resolve a BaseModelAdapter from an adapter instance, path, or registered ID."""
+        if isinstance(model, BaseModelAdapter):
+            return model
 
-            # Softmax
-            shifted = logits - np.max(logits)
-            exp_l = np.exp(shifted)
-            probs = exp_l / np.sum(exp_l)
-            batch_outputs.append(probs)
+        path = Path(model)
+        if path.is_file():
+            adapter = ModelAdapterFactory.get_adapter(path)
+            adapter.load()
+            return adapter
 
-        return np.array(batch_outputs, dtype=np.float32)
+        # Check registered model manifest from registry
+        from app.models_engine.registry import default_model_registry
+
+        manifest = default_model_registry.get_model(str(model))
+        if manifest:
+            m_path = manifest.metadata.get("file_path")
+            if m_path and Path(m_path).is_file():
+                adapter = ModelAdapterFactory.get_adapter(Path(m_path), format_hint=manifest.format)
+                adapter.load()
+                return adapter
+
+        # Check file in models_dir
+        cand_path = self.models_dir / f"{model}.onnx"
+        if cand_path.is_file():
+            adapter = ModelAdapterFactory.get_adapter(cand_path)
+            adapter.load()
+            return adapter
+
+        # Model not found - raise explicit error instead of generating fallback
+        raise FileNotFoundError(
+            f"Model '{model}' not found in registry, on disk, or in models_dir. "
+            f"Cannot execute inference without a real model artifact."
+        )
+
+    def predict(self, model: Union[str, Path, BaseModelAdapter], image_batch: List[np.ndarray]) -> np.ndarray:
+        """Execute real model forward pass returning softmax probabilities or logits."""
+        adapter = self.resolve_adapter(model)
+        batch_arr = np.array(image_batch)
+        return adapter.predict(batch_arr)
 
 
 class BehaviouralFingerprinter:
-    """Runs perturbation battery against models and computes behavioral fingerprints."""
+    """Runs perturbation battery against real models and computes behavioral fingerprints."""
 
     def __init__(
         self,
@@ -62,24 +88,48 @@ class BehaviouralFingerprinter:
 
     def fingerprint_model(
         self,
-        model_id: str,
+        model: Optional[Union[str, Path, BaseModelAdapter]] = None,
         seed: int = 42,
         count: int = 8,
+        model_id: Optional[str] = None,
     ) -> ModelFingerprint:
-        """Execute test battery across all perturbation types and generate fingerprint."""
+        """Execute test battery across all perturbation types and generate real fingerprint."""
+        target_model = model if model is not None else model_id
+        if target_model is None:
+            raise ValueError("model or model_id must be provided for fingerprinting.")
+        adapter = self.executor.resolve_adapter(target_model)
+        # Use a clean ID for filename - either model_id from registry or stem of path
+        if isinstance(target_model, (str, Path)):
+            if isinstance(target_model, str):
+                # Try to get from registry first
+                from app.models_engine.registry import default_model_registry
+                manifest = default_model_registry.get_model(target_model)
+                if manifest:
+                    resolved_id = manifest.model_id
+                else:
+                    # Use the string as-is if it's not a path
+                    resolved_id = target_model
+            else:
+                # It's a Path - use the stem
+                resolved_id = target_model.stem
+        else:
+            resolved_id = getattr(adapter, "model_id", "adapter_model")
+        model_hash = adapter.artifact_hash
+
         probe_images = TestBatteryGenerator.generate_probe_images(seed=seed, count=count)
         results: List[PerturbationResult] = []
+        probe_records: List[ProbeRecord] = []
 
         for p_type in PerturbationType:
             perturbed = [
                 TestBatteryGenerator.apply_perturbation(img, p_type)
                 for img in probe_images
             ]
-            outputs = self.executor.predict(model_id, perturbed)
+            outputs = adapter.predict(np.array(perturbed))
 
             output_digest = hash_bytes(outputs.tobytes())
-            mean_conf = float(np.mean(np.max(outputs, axis=1)))
-            top_class_id = int(np.argmax(np.mean(outputs, axis=0)))
+            mean_conf = float(np.mean(np.max(outputs, axis=1))) if outputs.ndim > 1 else float(np.mean(outputs))
+            top_class_id = int(np.argmax(np.mean(outputs, axis=0))) if outputs.ndim > 1 else 0
 
             results.append(
                 PerturbationResult(
@@ -90,21 +140,43 @@ class BehaviouralFingerprinter:
                 )
             )
 
-        # Aggregate digest over all perturbation output digests
-        aggregate_payload = [r.model_dump(mode="json") for r in results]
-        aggregate_digest = canonical_json_hash({"results": aggregate_payload})
+            # Store individual probe records with canonical output representation
+            for idx, (p_img, p_out) in enumerate(zip(perturbed, outputs)):
+                p_id = f"{p_type.value}_probe_{idx}"
+                in_hash = hash_bytes(p_img.tobytes())
+                out_hash = hash_bytes(p_out.tobytes())
+                canonical_out = [round(float(v), 6) for v in p_out.flatten()[:32]]
+                probe_records.append(
+                    ProbeRecord(
+                        probe_id=p_id,
+                        input_hash=in_hash,
+                        output_hash=out_hash,
+                        canonical_output=canonical_out,
+                        model_hash=model_hash,
+                    )
+                )
+
+        # Aggregate digest over all probe output digests and results
+        aggregate_payload = {
+            "model_hash": model_hash,
+            "results": [r.model_dump(mode="json") for r in results],
+            "probe_hashes": [pr.output_hash for pr in probe_records],
+        }
+        aggregate_digest = canonical_json_hash(aggregate_payload)
 
         fingerprint = ModelFingerprint(
             fingerprint_id=str(uuid.uuid4()),
-            model_id=model_id,
+            model_id=str(resolved_id),
+            model_hash=model_hash,
             battery_seed=seed,
             battery_size=count,
+            probe_records=probe_records,
             results=results,
             aggregate_digest=aggregate_digest,
         )
 
         # Persist to disk
-        out_file = self.fingerprints_dir / f"{model_id}_{seed}.json"
+        out_file = self.fingerprints_dir / f"{resolved_id}_{seed}.json"
         with open(out_file, "w", encoding="utf-8") as f:
             f.write(canonical_json_dumps(fingerprint.model_dump(mode="json")))
 
@@ -140,13 +212,23 @@ class BehaviouralFingerprinter:
                 details=[{"perturbation": r.perturbation, "match": True} for r in candidate_fp.results],
             )
 
-        # Build comparison feature vectors
+        # Build comparison feature vectors from canonical outputs
         cand_vec: List[float] = []
         ref_vec: List[float] = []
         details = []
 
         ref_map = {r.perturbation: r for r in reference_fp.results}
 
+        # Compare canonical probe records if available
+        if candidate_fp.probe_records and reference_fp.probe_records:
+            ref_probes = {p.probe_id: p for p in reference_fp.probe_records}
+            for c_probe in candidate_fp.probe_records:
+                r_probe = ref_probes.get(c_probe.probe_id)
+                if r_probe and len(c_probe.canonical_output) == len(r_probe.canonical_output):
+                    cand_vec.extend(c_probe.canonical_output)
+                    ref_vec.extend(r_probe.canonical_output)
+
+        # Also compare perturbation summary statistics
         for cand_res in candidate_fp.results:
             ref_res = ref_map.get(cand_res.perturbation)
             if not ref_res:

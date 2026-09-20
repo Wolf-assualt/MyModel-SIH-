@@ -13,6 +13,26 @@ class ModelFormat(str, Enum):
     TORCHSCRIPT = "TORCHSCRIPT"
     PYTORCH_WEIGHTS = "PYTORCH_WEIGHTS"
     GENERIC_BINARY = "GENERIC_BINARY"
+    BLACK_BOX = "BLACK_BOX"
+    UNSUPPORTED = "UNSUPPORTED"
+
+
+class AccessMode(str, Enum):
+    WHITE_BOX = "WHITE_BOX"
+    BLACK_BOX = "BLACK_BOX"
+    PARTIAL = "PARTIAL"
+
+
+class VerificationStatus(str, Enum):
+    MATCH = "MATCH"
+    MISMATCH = "MISMATCH"
+    UNAVAILABLE = "UNAVAILABLE"
+
+
+class TriggerStatus(str, Enum):
+    CLEAN = "CLEAN"
+    SUSPICIOUS_TRIGGER_SENSITIVITY = "SUSPICIOUS_TRIGGER_SENSITIVITY"
+    UNAVAILABLE = "UNAVAILABLE"
 
 
 class ModelInputSpec(BaseModel):
@@ -32,12 +52,17 @@ class ModelIdentityManifest(BaseModel):
     name: str
     version: str
     format: ModelFormat
+    artifact_hash: str = Field(..., min_length=64, max_length=64)
     binary_sha256: str = Field(..., min_length=64, max_length=64)
+    access_mode: AccessMode = AccessMode.WHITE_BOX
+    architecture_info: Dict[str, Any] = Field(default_factory=dict)
     parameter_count: int = Field(default=0, ge=0)
+    node_count: int = Field(default=0, ge=0)
     layer_count: int = Field(default=0, ge=0)
     inputs: List[ModelInputSpec] = Field(default_factory=list)
     outputs: List[ModelOutputSpec] = Field(default_factory=list)
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    scanner_version: str = "1.0.0"
     identity_digest: str = Field(..., min_length=64, max_length=64)
     status: AssetStatus = AssetStatus.ACCEPTED
     registered_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -49,6 +74,7 @@ class ModelIngestRequest(BaseModel):
     model_path: str = Field(..., min_length=1)
     format: ModelFormat
     is_reference: bool = False
+    access_mode: Optional[AccessMode] = None
 
 
 class ModelVerifyResponse(BaseModel):
@@ -56,7 +82,27 @@ class ModelVerifyResponse(BaseModel):
     is_valid: bool
     binary_match: bool
     structural_match: bool
+    binary_identity: VerificationStatus = VerificationStatus.UNAVAILABLE
+    structural_identity: VerificationStatus = VerificationStatus.UNAVAILABLE
+    behavioural_identity: VerificationStatus = VerificationStatus.UNAVAILABLE
+    trigger_status: TriggerStatus = TriggerStatus.UNAVAILABLE
     discrepancies: List[str] = Field(default_factory=list)
+
+
+class ModelAssuranceFinding(BaseModel):
+    model_id: str
+    artifact_hash: str
+    format: str
+    access_mode: AccessMode
+    identity_status: VerificationStatus
+    structural_status: VerificationStatus
+    behavioural_status: VerificationStatus
+    trigger_status: TriggerStatus
+    confidence: Optional[float] = None
+    confidence_basis: Optional[str] = None
+    evidence: Dict[str, Any] = Field(default_factory=dict)
+    limitations: List[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 # Retained for ORM entity compatibility

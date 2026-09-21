@@ -1,6 +1,7 @@
 """Safe Generic Binary Model Adapter for unparsed model weights or proprietary binaries."""
 from pathlib import Path
 from typing import Any, Dict, List
+# pyrefly: ignore [missing-import]
 import numpy as np
 
 from app.crypto.canonical import canonical_json_hash

@@ -1,0 +1,59 @@
+{
+  "assessment_id": "fused_41ca054917f2",
+  "target_entity_id": "ds_exec_6f2",
+  "overall_status": "UNDER_REVIEW",
+  "verdict": "UNDER_REVIEW",
+  "risk_level": "HIGH",
+  "risk_score": 0.5,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "REVIEW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "FLAG for security officer and ML engineer secondary review."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 1 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_del_91b87d2f",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.8,
+      "description": "Merkle tree root discrepancy: Sample missing from manifest catalog.",
+      "subject_id": "synthetic_dataset_batch",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "3046022100eb249fe0bf875835712f01d0e3d6deff4725955762d2869542866d351a825260022100c3c90bbcb4252e4dbdc86fd8dc5ea3850f92943f49355810c03dbf8e6e149647",
+  "assessment_digest": "7aab15a839c2927844cb758fd85602e1dfb253745db9ecd765e9bc50d9159874",
+  "created_at": "2026-09-21T07:20:49.298584Z"
+}

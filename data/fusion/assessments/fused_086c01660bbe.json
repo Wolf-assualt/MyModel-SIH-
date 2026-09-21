@@ -1,0 +1,59 @@
+{
+  "assessment_id": "fused_086c01660bbe",
+  "target_entity_id": "report_test_asset",
+  "overall_status": "ACCEPTED",
+  "verdict": "ACCEPTED",
+  "risk_level": "LOW",
+  "risk_score": 0.0225,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "ALLOW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "ALLOW asset promotion to operational pipeline."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 1 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_report_tamper_01",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "report_test_asset",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "304402206e3092b095684d97e929ad2f963f1f77ed84dd8dec5837bfb467b3527a0bdfee02204aa32d6fd55fd20d8d1d9f410a55c4b0cb8d8968c4f3aa38f9fdb8781c4d9f83",
+  "assessment_digest": "9c93e9a1448a34eb58a8a6fb432df4afe97d13506795d8257507b10550b2c601",
+  "created_at": "2026-09-21T07:20:16.226684Z"
+}

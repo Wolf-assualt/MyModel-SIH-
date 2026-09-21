@@ -1,0 +1,59 @@
+{
+  "assessment_id": "fused_7662337dfe56",
+  "target_entity_id": "ds_bigearthnet_01",
+  "overall_status": "ACCEPTED",
+  "verdict": "ACCEPTED",
+  "risk_level": "LOW",
+  "risk_score": 0.0225,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "ALLOW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "ALLOW asset promotion to operational pipeline."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 1 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_eo_integrity_01",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "ds_bigearthnet_01",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": 0.95,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "30450220307ba991ca4872f950744ad86ab929d1a06039b87b95c94611cbc8d6e12a5de5022100b0290a81995949219adf67d588699ae6b1dbb059772141470b0c699b3857425b",
+  "assessment_digest": "8d006720b0135c1ef989846747c2ac51328dfce8f502a67380a49368475e91fd",
+  "created_at": "2026-09-21T07:19:00.260715Z"
+}

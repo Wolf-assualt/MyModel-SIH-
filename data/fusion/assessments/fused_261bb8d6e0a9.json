@@ -1,0 +1,73 @@
+{
+  "assessment_id": "fused_261bb8d6e0a9",
+  "target_entity_id": "27742f7f-a64a-47f2-aef7-4fe04a7f1b64",
+  "overall_status": "ACCEPTED",
+  "verdict": "ACCEPTED",
+  "risk_level": "LOW",
+  "risk_score": 0.0525,
+  "confidence": 0.28,
+  "confidence_score": 0.28,
+  "action": "ALLOW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY"
+    ],
+    "coverage_ratio": 0.4,
+    "missing_sources": [
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "ALLOW asset promotion to operational pipeline."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 40%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 2 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_data_integ_01",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "dc1d7252-1344-4fc9-8829-be0816027771",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": 0.98,
+      "metadata": {}
+    },
+    {
+      "evidence_id": "ev_model_weights_01",
+      "source": "MODEL_IDENTITY",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "27742f7f-a64a-47f2-aef7-4fe04a7f1b64",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": 1.0,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "304502204d15b4f5795c40852bead268d57733aa2830f4c5545bc9b6883cf4f8f0f65ba0022100cf2603cca793c0c322a34c63d4311ed432b0edfa806c0447b1df05e47fcbdb2a",
+  "assessment_digest": "ecbcb832f2a4e26de1c69acb0de8f20f40617280befd5bcc799f1b06d847331b",
+  "created_at": "2026-09-21T07:19:33.621698Z"
+}

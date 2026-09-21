@@ -1,0 +1,64 @@
+{
+  "assessment_id": "fused_0e97c5a81af6",
+  "target_entity_id": "model_exec_24c",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "INFERENCE_DNA"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+    "Investigate Inference provenance chain broken or replay attack detected."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "HARD VETO: Inference provenance chain broken or replay attack detected.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_chain_e39b6ba9",
+      "source": "INFERENCE_DNA",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "Hash chain break: Previous DNA hash linkage does not match parent record.",
+      "subject_id": "inference_hash_chain",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [
+    "ev_chain_e39b6ba9"
+  ],
+  "hard_veto_triggered": true,
+  "veto_reasons": [
+    "Inference provenance chain broken or replay attack detected."
+  ],
+  "signature": "3046022100c50d2e1d926f2ac91de5d637e04a44dd4749b1b2090eefdb6fd2cc72d714d43b022100ccb1c0e7805e08aecda34fe2cb580e926329a3048991de5a94a4fd48770c7c98",
+  "assessment_digest": "16b75299ea4c4ac371cfd0b1137112d83ebe80f0e1f6375c913a32f5ea10e519",
+  "created_at": "2026-09-21T07:20:52.813662Z"
+}

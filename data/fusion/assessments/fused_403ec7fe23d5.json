@@ -1,0 +1,60 @@
+{
+  "assessment_id": "fused_403ec7fe23d5",
+  "target_entity_id": "model_exec_940",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "SYSTEM_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 1 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_sys_tamper_b59c4675",
+      "source": "SYSTEM_INTEGRITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "Integrity audit failure: Attempts to attach foreign evidence to unrelated target model.",
+      "subject_id": "evidence_store",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "3045022100ac25c8e21873b71893bf702fab32357af8ad8770f88596811c73d8883cccecbe022034d4c3bff3e6990c4765793f525d38d7dabce2a0b3ba3d9ca590cf5b342889c7",
+  "assessment_digest": "96e3abab6e9fe2f28e71de2ab76e8c69d6c46c8d567db07eba8eee55c8b882c6",
+  "created_at": "2026-09-21T07:20:52.899214Z"
+}

@@ -1,5 +1,6 @@
 """Distribution-Shift and Out-of-Distribution (OOD) Analysis API Endpoints."""
 from typing import Any, Dict, List
+# pyrefly: ignore [missing-import]
 from fastapi import APIRouter, HTTPException
 
 from app.drift.engine import default_drift_engine

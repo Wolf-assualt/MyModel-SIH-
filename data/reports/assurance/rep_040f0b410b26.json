@@ -1,0 +1,61 @@
+{
+  "report_id": "rep_040f0b410b26",
+  "target_asset_id": "ds_bigearthnet_01",
+  "target_asset_type": "DATASET",
+  "assessment_id": "fused_7662337dfe56",
+  "overall_verdict": "ACCEPTED",
+  "risk_score": 0.0225,
+  "confidence_score": 0.12,
+  "coverage_ratio": 0.2,
+  "findings_summary": {
+    "CRITICAL": 0,
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 1
+  },
+  "threat_narratives": [],
+  "limitations_and_disclaimers": [
+    "Uninspected assurance layers: [MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT]. Risk scores represent partial assurance.",
+    "Integrity and drift metrics are bounded by operational camera sensor dynamics and calibration.",
+    "Zero-trust provenance assurance assumes asymmetric root signing key confidentiality.",
+    "Assurance coverage is limited to evidence sources registered in the current fusion session; uninspected layers may conceal latent threats."
+  ],
+  "report_digest": "a742d10dbb258f29d7362a8b9ec7f24767557608215b645babb8ab21e23ba74d",
+  "signature": "304502204e6dfdd9fe092f15f5fae34ffc9508dd8c2a4a6d2760454807cedb66601c8728022100fa1237938b2ef45c38fa24d4c9f71a95cb2bdcd3d04e2a0d379adc3ae426ce80",
+  "signer_public_key_pem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE63JSD5lX04gTkSJqebMzCX80ZLas\n53xA/8Gvvc26rj3F1yaToDGOadCAaBHAfg+NatNXRt0hplg7+ivLecfvKQ==\n-----END PUBLIC KEY-----\n",
+  "created_at": "2026-09-21T07:19:00.269578Z",
+  "gatekeeper_action": "ALLOW",
+  "risk_level": "LOW",
+  "hard_veto_triggered": false,
+  "section_overviews": [
+    {
+      "layer_name": "Dataset & Training Data Integrity",
+      "status": "ACCEPTED",
+      "risk_contribution": 0.0225
+    }
+  ],
+  "upstream_lineage": [],
+  "downstream_blast_radius": {},
+  "dataset_findings": [
+    {
+      "evidence_id": "ev_eo_integrity_01",
+      "description": "",
+      "severity": "LOW",
+      "metric_value": 0.0
+    }
+  ],
+  "model_findings": [],
+  "behavioral_findings": [],
+  "inference_findings": [],
+  "drift_findings": [],
+  "quarantine_records": [
+    {
+      "subject_id": "ds_bigearthnet_01",
+      "reason": "Critical layer weight discrepancy and runtime replay detection."
+    }
+  ],
+  "cryptographic_proofs": {
+    "canonical_report_digest": "a742d10dbb258f29d7362a8b9ec7f24767557608215b645babb8ab21e23ba74d",
+    "ecdsa_signature": "304502204e6dfdd9fe092f15f5fae34ffc9508dd8c2a4a6d2760454807cedb66601c8728022100fa1237938b2ef45c38fa24d4c9f71a95cb2bdcd3d04e2a0d379adc3ae426ce80"
+  }
+}

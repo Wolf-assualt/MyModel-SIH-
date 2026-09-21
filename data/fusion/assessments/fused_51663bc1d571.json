@@ -1,0 +1,60 @@
+{
+  "assessment_id": "fused_51663bc1d571",
+  "target_entity_id": "model_exec_226",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "SYSTEM_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 1 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_sys_tamper_0f202781",
+      "source": "SYSTEM_INTEGRITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "Integrity audit failure: Alters risk score in sealed assessment without re-signing.",
+      "subject_id": "fused_assessment_record",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "3046022100d260ec2948cdcc9062736a78bba7de6c279dab60faa4c3fee39c92afbe8eaded0221009fe8919acc7a58d32a0b0f12292b03ce1ebaf0620d5287e4e13f4e0ae9d8e273",
+  "assessment_digest": "4a00a571d9a62c6b0957a7524fc2e1e738a553522d2512b0efde56194047941a",
+  "created_at": "2026-09-21T07:20:50.531028Z"
+}

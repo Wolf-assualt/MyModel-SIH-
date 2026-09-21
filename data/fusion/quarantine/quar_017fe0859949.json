@@ -1,0 +1,16 @@
+{
+  "quarantine_id": "quar_017fe0859949",
+  "subject_id": "d5038a3b-590a-4e7b-98e8-a988ac6ad35e",
+  "subject_type": "ASSET",
+  "reason": "Risk score 0.9000 exceeded threshold 0.70",
+  "evidence_ids": [
+    "ev_tamper_alert_01",
+    "ev_benign_sensor_01"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T07:19:37.113630Z",
+  "created_at": "2026-09-21T07:19:37.113630Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

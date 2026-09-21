@@ -1,0 +1,60 @@
+{
+  "assessment_id": "fused_a9f4bef09ef6",
+  "target_entity_id": "model_exec_602",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "SYSTEM_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 1 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_sys_tamper_46beb2ab",
+      "source": "SYSTEM_INTEGRITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "Integrity audit failure: Attempts to attach foreign evidence to unrelated target model.",
+      "subject_id": "evidence_store",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "304402200a35bb1637587ed2e92b5d5d209d59cbde8fdfdc188c0e3881f241320049b6ae0220027748f3f82df8459a88af3fd6de5ce1621e2145b3a53eba760e74cfd9d8f007",
+  "assessment_digest": "ac1c06592e2cd7722d63a48f8def81291dc406e53ba6d88637b53a3e8b737a7b",
+  "created_at": "2026-09-21T07:20:50.447664Z"
+}

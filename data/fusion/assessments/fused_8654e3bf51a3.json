@@ -1,0 +1,64 @@
+{
+  "assessment_id": "fused_8654e3bf51a3",
+  "target_entity_id": "ds_exec_e26",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+    "Investigate Critical training data tampering or backdoor trigger pattern detected."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "HARD VETO: Critical training data tampering or backdoor trigger pattern detected.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_byte_2b284cd5",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "Per-sample SHA-256 mismatch: Image payload bytes tampered post-ingestion.",
+      "subject_id": "synthetic_dataset_batch",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [
+    "ev_byte_2b284cd5"
+  ],
+  "hard_veto_triggered": true,
+  "veto_reasons": [
+    "Critical training data tampering or backdoor trigger pattern detected."
+  ],
+  "signature": "3045022100faaa36bbcfd9f1635138f1fa63722c36666cbe30f243fa14da66aacc525ee0c102207c607d4fa79938d33486a94ca03fe5f8f3ac8e6cfb7b9e80550e8d28fe634af3",
+  "assessment_digest": "60fe9dfb0cca0d72089d37fdb21fccb8dd6e6197fb61951a51bf8234c3d87f36",
+  "created_at": "2026-09-21T07:20:51.422232Z"
+}

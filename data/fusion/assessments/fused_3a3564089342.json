@@ -1,0 +1,59 @@
+{
+  "assessment_id": "fused_3a3564089342",
+  "target_entity_id": "target_rep_01",
+  "overall_status": "ACCEPTED",
+  "verdict": "ACCEPTED",
+  "risk_level": "LOW",
+  "risk_score": 0.0225,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "ALLOW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "ALLOW asset promotion to operational pipeline."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 1 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_rep_test",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "target_rep_01",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "304502205e51b888b7570b7e2965845ffe075fb7611b25a2625353f1e1a4a7a66a12f392022100e7b0e10729eb013582cad88324419270563f5ceb9b7e93cd98a1d01502a68c88",
+  "assessment_digest": "97d6c5d099594c63bbfcf830eb53f3abc0dc9b14a4ba9603fd749674661a73d1",
+  "created_at": "2026-09-21T07:19:39.704052Z"
+}

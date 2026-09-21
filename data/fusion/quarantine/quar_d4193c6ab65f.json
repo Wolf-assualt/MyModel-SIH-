@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_d4193c6ab65f",
+  "subject_id": "model_exec_d6a",
+  "subject_type": "ASSET",
+  "reason": "Model identity hash mismatch: unauthorized model substitution or weight modification detected.",
+  "evidence_ids": [
+    "ev_sub_6a801aee"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T07:20:52.700946Z",
+  "created_at": "2026-09-21T07:20:52.700946Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

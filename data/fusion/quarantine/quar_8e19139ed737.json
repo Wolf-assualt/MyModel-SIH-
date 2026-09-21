@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_8e19139ed737",
+  "subject_id": "ds_exec_3a1",
+  "subject_type": "REDTEAM_SANDBOX_ASSET",
+  "reason": "Defensive Red-Team Detection: Synthetic Corner Backdoor Poisoning Trigger. HARD VETO: Critical training data tampering or backdoor trigger pattern detected. | CORRELATED FINDINGS: Data Poisoning ",
+  "evidence_ids": [
+    "ev_trig_79c63834"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T07:20:49.620514Z",
+  "created_at": "2026-09-21T07:20:49.620514Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_64f5cb8a2f1a",
+  "subject_id": "ds_exec_b57",
+  "subject_type": "REDTEAM_SANDBOX_ASSET",
+  "reason": "Defensive Red-Team Detection: Single Image Byte Tampering. HARD VETO: Critical training data tampering or backdoor trigger pattern detected.",
+  "evidence_ids": [
+    "ev_byte_423f8bd3"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T07:20:49.253710Z",
+  "created_at": "2026-09-21T07:20:49.253710Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

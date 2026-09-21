@@ -1,0 +1,98 @@
+{
+  "assessment_id": "fused_55531c970cef",
+  "target_entity_id": "ds_exec_2e5",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.48,
+  "confidence_score": 0.48,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "BEHAVIOURAL_FINGERPRINT",
+      "DATA_INTEGRITY",
+      "DISTRIBUTION_SHIFT"
+    ],
+    "coverage_ratio": 0.6,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "INFERENCE_DNA"
+    ]
+  },
+  "findings": [
+    "Correlated Targeted Backdoor Poisoning Campaign detected: Training data contains synthetic trigger artifacts that directly correlate with model behavioural divergence.",
+    "Coordinated Evasion / Adversarial Perturbation Attack detected: Severe distribution anomaly correlates with model output divergence across perturbation batteries."
+  ],
+  "correlated_findings": [
+    "Correlated Targeted Backdoor Poisoning Campaign detected: Training data contains synthetic trigger artifacts that directly correlate with model behavioural divergence.",
+    "Coordinated Evasion / Adversarial Perturbation Attack detected: Severe distribution anomaly correlates with model output divergence across perturbation batteries."
+  ],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+    "Investigate Critical training data tampering or backdoor trigger pattern detected."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 60%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, INFERENCE_DNA."
+  ],
+  "explanation": "HARD VETO: Critical training data tampering or backdoor trigger pattern detected. | CORRELATED FINDINGS: Correlated Targeted Backdoor Poisoning Campaign detected: Training data contains synthetic trigger artifacts that directly correlate with model behavioural divergence.; Coordinated Evasion / Adversarial Perturbation Attack detected: Severe distribution anomaly correlates with model output divergence across perturbation batteries.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_m_data_abe2bb72",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 0.98,
+      "description": "Stage 1: Training dataset backdoor trigger pattern detected.",
+      "subject_id": "full_pipeline_chain",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    },
+    {
+      "evidence_id": "ev_m_model_974aa6ad",
+      "source": "BEHAVIOURAL_FINGERPRINT",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.78,
+      "description": "Stage 2: Model behavioral divergence observed on occlusion probes.",
+      "subject_id": "full_pipeline_chain",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    },
+    {
+      "evidence_id": "ev_m_drift_ef4af9bc",
+      "source": "DISTRIBUTION_SHIFT",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.65,
+      "description": "Stage 3: Corroborating distribution shift in runtime telemetry.",
+      "subject_id": "full_pipeline_chain",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [
+    "ev_m_data_abe2bb72"
+  ],
+  "hard_veto_triggered": true,
+  "veto_reasons": [
+    "Critical training data tampering or backdoor trigger pattern detected."
+  ],
+  "signature": "3044022033f558f4000d622ded46648514694169f86688767bede5df0c9f754259bd621b022023baffd2e93ca4cea860ab6cc8054c659825a972579f05ef5dc306a7b37a2eef",
+  "assessment_digest": "de379c791006d9ce88b79e2615e9b88240cf0ad1c92b098afddd9603f8a61785",
+  "created_at": "2026-09-21T07:20:52.960236Z"
+}

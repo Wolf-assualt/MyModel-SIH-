@@ -1,0 +1,64 @@
+{
+  "assessment_id": "fused_d1c113b8c934",
+  "target_entity_id": "model_exec_770",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "INFERENCE_DNA"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+    "Investigate Inference provenance chain broken or replay attack detected."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "HARD VETO: Inference provenance chain broken or replay attack detected.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_nonce_2b4c5c84",
+      "source": "INFERENCE_DNA",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "Nonce reuse attack detected: Cryptographic nonce already exists in historical telemetry.",
+      "subject_id": "inference_dna_record",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [
+    "ev_nonce_2b4c5c84"
+  ],
+  "hard_veto_triggered": true,
+  "veto_reasons": [
+    "Inference provenance chain broken or replay attack detected."
+  ],
+  "signature": "304502205632d659150b199e295833ffd37b3ed2e2d4ca4779e79e0bad547fc362bf57dc022100b56f4d6111ddf45aa2ce8d35b55c0461b8246c0cb49f494f37103fa0afc5f751",
+  "assessment_digest": "9d3e2b22750a530ac2c72aab62824222acbf065f46c9110795aca6588199af1d",
+  "created_at": "2026-09-21T07:20:49.972270Z"
+}

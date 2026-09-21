@@ -1,0 +1,192 @@
+{
+  "assessment_id": "fused_df82a0e551f2",
+  "target_entity_id": "a9ddc513-6b79-4e35-9b3a-eae98c8275c2",
+  "overall_status": "UNDER_REVIEW",
+  "verdict": "UNDER_REVIEW",
+  "risk_level": "HIGH",
+  "risk_score": 0.5,
+  "confidence": 0.4,
+  "confidence_score": 0.4,
+  "action": "REVIEW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY",
+      "DISTRIBUTION_SHIFT"
+    ],
+    "coverage_ratio": 0.4,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "FLAG for security officer and ML engineer secondary review."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 40%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA."
+  ],
+  "explanation": "All 7 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "integrity_fa05dd13-62b9-4876-9cd4-d8ad851e4e34",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.5,
+      "description": "Perceptual near-duplicate cluster of 5 images detected (avg Hamming distance 0.0, threshold 4).",
+      "subject_id": "a9ddc513-6b79-4e35-9b3a-eae98c8275c2",
+      "related_model_id": null,
+      "related_dataset_id": "a9ddc513-6b79-4e35-9b3a-eae98c8275c2",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "NEAR_DUPLICATE",
+        "sample_ids": [
+          "AnnualCrop_0.jpg",
+          "AnnualCrop_1.jpg",
+          "AnnualCrop_2.jpg",
+          "AnnualCrop_3.jpg",
+          "AnnualCrop_4.jpg"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_050b0e36-9200-4994-8228-b46e00221346",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Zero-variance flat image detected (variance: 0.0000). Image appears to be solid color or sensor blackout.",
+      "subject_id": "a9ddc513-6b79-4e35-9b3a-eae98c8275c2",
+      "related_model_id": null,
+      "related_dataset_id": "a9ddc513-6b79-4e35-9b3a-eae98c8275c2",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "AnnualCrop_0.jpg"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_f98936be-6c53-47a9-83c3-c7be9d3c1100",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Zero-variance flat image detected (variance: 0.0000). Image appears to be solid color or sensor blackout.",
+      "subject_id": "a9ddc513-6b79-4e35-9b3a-eae98c8275c2",
+      "related_model_id": null,
+      "related_dataset_id": "a9ddc513-6b79-4e35-9b3a-eae98c8275c2",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "AnnualCrop_1.jpg"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_f2ee7f9f-486b-4a92-ad20-2559766e17b9",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Zero-variance flat image detected (variance: 0.0000). Image appears to be solid color or sensor blackout.",
+      "subject_id": "a9ddc513-6b79-4e35-9b3a-eae98c8275c2",
+      "related_model_id": null,
+      "related_dataset_id": "a9ddc513-6b79-4e35-9b3a-eae98c8275c2",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "AnnualCrop_2.jpg"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_570410f0-1d22-4b5c-86f5-5102c45e17d5",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Zero-variance flat image detected (variance: 0.0000). Image appears to be solid color or sensor blackout.",
+      "subject_id": "a9ddc513-6b79-4e35-9b3a-eae98c8275c2",
+      "related_model_id": null,
+      "related_dataset_id": "a9ddc513-6b79-4e35-9b3a-eae98c8275c2",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "AnnualCrop_3.jpg"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_1e5364ac-ee0d-417c-95e4-cb2010a270ff",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Zero-variance flat image detected (variance: 0.0000). Image appears to be solid color or sensor blackout.",
+      "subject_id": "a9ddc513-6b79-4e35-9b3a-eae98c8275c2",
+      "related_model_id": null,
+      "related_dataset_id": "a9ddc513-6b79-4e35-9b3a-eae98c8275c2",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "AnnualCrop_4.jpg"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "drift_shift_e111ec72d1d5",
+      "source": "DISTRIBUTION_SHIFT",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 0.778,
+      "description": "Distribution shift: ADVERSARIAL_ANOMALY",
+      "subject_id": "a9ddc513-6b79-4e35-9b3a-eae98c8275c2",
+      "related_model_id": null,
+      "related_dataset_id": "a9ddc513-6b79-4e35-9b3a-eae98c8275c2",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "drift_type": "ADVERSARIAL_ANOMALY",
+        "affected_features": [
+          "brightness",
+          "channel_entropy",
+          "color_temperature",
+          "contrast",
+          "sharpness"
+        ]
+      }
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "304402202fb76e201b4ec6982670086647a5b4aa9765e7cfa9776a288f6778c4104f419602205742c9589ab35782866da0e748d363d8568b6a8a50512556251e2a818c6a67d2",
+  "assessment_digest": "0718f65e114a214e34a4077f8ed23b099c85c565be6cf06dbf1aab0e243bb587",
+  "created_at": "2026-09-21T07:22:56.577775Z"
+}

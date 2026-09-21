@@ -1,0 +1,59 @@
+{
+  "assessment_id": "fused_85a6439fef58",
+  "target_entity_id": "model_exec_caa",
+  "overall_status": "UNDER_REVIEW",
+  "verdict": "UNDER_REVIEW",
+  "risk_level": "HIGH",
+  "risk_score": 0.5,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "REVIEW",
+  "coverage": {
+    "sources_checked": [
+      "BEHAVIOURAL_FINGERPRINT"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "FLAG for security officer and ML engineer secondary review."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 1 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_behav_8742090f",
+      "source": "BEHAVIOURAL_FINGERPRINT",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.72,
+      "description": "Behavioral divergence metric 0.72 > threshold 0.20 on Gaussian noise & contrast probes.",
+      "subject_id": "candidate_model_probe",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "3045022100cb5e65494d60147672f5ea88391078090605dd03c7ecdc96d15f4d8aa24078a30220328a88e0efe77902d8c548c606cb33dc3c32085913960c9b19fd1d7f5f20abc4",
+  "assessment_digest": "ef66dccba5976bb92dee5594e290f31b953263093d7a7904d88a8707ab32c867",
+  "created_at": "2026-09-21T07:20:49.870322Z"
+}

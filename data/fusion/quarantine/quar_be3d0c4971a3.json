@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_be3d0c4971a3",
+  "subject_id": "model_exec_4af",
+  "subject_type": "REDTEAM_SANDBOX_ASSET",
+  "reason": "Defensive Red-Team Detection: Fused Assessment Canonical Digest Modification. All 1 evidence items verified without critical security violations.",
+  "evidence_ids": [
+    "ev_sys_tamper_fa3a6e8e"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T07:20:52.923182Z",
+  "created_at": "2026-09-21T07:20:52.923182Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

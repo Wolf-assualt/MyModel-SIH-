@@ -1,0 +1,13 @@
+{
+  "quarantine_id": "quar_85ececf3de81",
+  "subject_id": "cli_sensor_09",
+  "subject_type": "SENSOR_NODE",
+  "reason": "Optical cover blocked",
+  "evidence_ids": [],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T07:16:21.414872Z",
+  "created_at": "2026-09-21T07:16:21.414872Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

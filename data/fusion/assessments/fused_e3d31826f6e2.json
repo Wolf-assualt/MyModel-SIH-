@@ -1,0 +1,43 @@
+{
+  "assessment_id": "fused_e3d31826f6e2",
+  "target_entity_id": "model_exec_842",
+  "overall_status": "ACCEPTED",
+  "verdict": "ACCEPTED",
+  "risk_level": "LOW",
+  "risk_score": 0.0,
+  "confidence": 0.0,
+  "confidence_score": 0.0,
+  "action": "ALLOW",
+  "coverage": {
+    "sources_checked": [],
+    "coverage_ratio": 0.0,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "ALLOW asset promotion to operational pipeline."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 0%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 0 evidence items verified without critical security violations.",
+  "raw_evidence": [],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "304402201d01225b97d8cfa18979061e9f5df814c34aacf7adb6c14675995df108ff66f30220652899eece6c0e54d3c2c6bb3ad6e88a638f763262a54a0b0c94015a2c6a1cc5",
+  "assessment_digest": "35938c6cc2e76a61116bc4007220b86df352a17ba6055fd7ad53a164cdeaa3b4",
+  "created_at": "2026-09-21T07:20:53.006663Z"
+}

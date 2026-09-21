@@ -1,0 +1,59 @@
+{
+  "assessment_id": "fused_9b46105ec259",
+  "target_entity_id": "54fd3542-3a26-4b9e-8989-06761f1002cd",
+  "overall_status": "ACCEPTED",
+  "verdict": "ACCEPTED",
+  "risk_level": "LOW",
+  "risk_score": 0.015,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "ALLOW",
+  "coverage": {
+    "sources_checked": [
+      "DISTRIBUTION_SHIFT"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "ALLOW asset promotion to operational pipeline."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA."
+  ],
+  "explanation": "All 1 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "e2e_drift",
+      "source": "DISTRIBUTION_SHIFT",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "Drift=NO_DRIFT",
+      "subject_id": "54fd3542-3a26-4b9e-8989-06761f1002cd",
+      "related_model_id": null,
+      "related_dataset_id": "54fd3542-3a26-4b9e-8989-06761f1002cd",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "304502201affd2f59e8db597199d7eff113fc8c7d094802201ae85925d75338f8daba7c5022100c0e3217f6995625be5945f56cccc8fbb784fd7860dda1d0f6b341401f3e2357d",
+  "assessment_digest": "8671bd60f652c4f6a148188a7d85ae0e9a0d8f4b1747d3086be61f193ba950f3",
+  "created_at": "2026-09-21T07:21:05.084646Z"
+}

@@ -1,0 +1,61 @@
+{
+  "assessment_id": "fused_d1fef3576795",
+  "target_entity_id": "bc1954a0-9af2-4245-a6d7-e636ce87daf6",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "MODEL_IDENTITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 1 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_weight_tamper_01",
+      "source": "MODEL_IDENTITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "bc1954a0-9af2-4245-a6d7-e636ce87daf6",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": 1.0,
+      "metadata": {
+        "hard_veto": true
+      }
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "304502210091bf410569556532cfa9c473fcb381d904ca449ec0f314f189ca9d2b40f281d9022038cb7ab3ce5cea00e523311ba598fa4a1a7f16f2abdca341336263801b49f7b4",
+  "assessment_digest": "4584acc9ee245940835f36b2d7fdb0020b617f664accc895daf9c38c7b1621f3",
+  "created_at": "2026-09-21T07:19:39.295466Z"
+}

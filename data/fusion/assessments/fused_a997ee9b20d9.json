@@ -1,0 +1,61 @@
+{
+  "assessment_id": "fused_a997ee9b20d9",
+  "target_entity_id": "compromised_model_01",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "MODEL_IDENTITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 1 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_crypto_tamper_01",
+      "source": "MODEL_IDENTITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "compromised_model_01",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": 1.0,
+      "metadata": {
+        "hard_veto": true
+      }
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "3044022021e924d50b7032f8c2c19df7063edf270557666afd098a8b30dee3960ef606b502204d11d5762241fc9c7b3421954d8f2d0d965adcf9b12fc1865daad5425917c3b1",
+  "assessment_digest": "bc06e803daf0b176359e71f293ba8c00a8a607f7549965d8cd84594ba9c29834",
+  "created_at": "2026-09-21T07:20:16.012236Z"
+}

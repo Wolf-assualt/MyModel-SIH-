@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_141b3256e08d",
+  "subject_id": "model_exec_a7a",
+  "subject_type": "REDTEAM_SANDBOX_ASSET",
+  "reason": "Defensive Red-Team Detection: Single Parameter Segment Weight Mutation. HARD VETO: Model identity hash mismatch: unauthorized model substitution or weight modification detected. | CORRELATED F",
+  "evidence_ids": [
+    "ev_weight_c57695df"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T16:32:27.088198Z",
+  "created_at": "2026-09-21T16:32:27.088198Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

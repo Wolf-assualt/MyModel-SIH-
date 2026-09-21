@@ -1,0 +1,75 @@
+{
+  "assessment_id": "fused_613b98f78b98",
+  "target_entity_id": "7a64369b-8668-416c-b43c-33b44c587fe5",
+  "overall_status": "ACCEPTED",
+  "verdict": "ACCEPTED",
+  "risk_level": "LOW",
+  "risk_score": 0.0525,
+  "confidence": 0.28,
+  "confidence_score": 0.28,
+  "action": "ALLOW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY"
+    ],
+    "coverage_ratio": 0.4,
+    "missing_sources": [
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "ALLOW asset promotion to operational pipeline."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 40%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 2 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_data_integ_01",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "04bbd70a-7937-4775-bd38-50f4ef35791b",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": 0.98,
+      "evidence_type": "INTEGRITY_CHECK",
+      "metadata": {}
+    },
+    {
+      "evidence_id": "ev_model_weights_01",
+      "source": "MODEL_IDENTITY",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "7a64369b-8668-416c-b43c-33b44c587fe5",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": 1.0,
+      "evidence_type": "WEIGHT_VERIFICATION",
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "30460221009e8c6c55d58c048b442e58063d7c7ad571e10d5d640374213aa10fce975fb8ba022100e41e74c299c485f7c9d08077c20e0e29fc3f55584f65805fae70590b384315be",
+  "assessment_digest": "7d67f2dfc82e880b5e35e0985c24eb29bab40a78beef9e1dfba1a6546f7ad448",
+  "created_at": "2026-09-21T16:31:44.372214Z"
+}

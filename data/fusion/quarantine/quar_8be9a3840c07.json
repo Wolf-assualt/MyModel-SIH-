@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_8be9a3840c07",
+  "subject_id": "ds_exec_906",
+  "subject_type": "ASSET",
+  "reason": "Critical training data tampering or backdoor trigger pattern detected.",
+  "evidence_ids": [
+    "ev_m_data_1e942429"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T16:32:27.212666Z",
+  "created_at": "2026-09-21T16:32:27.212666Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

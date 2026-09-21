@@ -1,0 +1,65 @@
+{
+  "assessment_id": "fused_8dbadde0b633",
+  "target_entity_id": "model_exec_7f9",
+  "overall_status": "UNDER_REVIEW",
+  "verdict": "UNDER_REVIEW",
+  "risk_level": "MEDIUM",
+  "risk_score": 0.35,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "REVIEW",
+  "coverage": {
+    "sources_checked": [
+      "DISTRIBUTION_SHIFT"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA"
+    ]
+  },
+  "findings": [
+    "Benign Operational Environmental Drift (Sensor/Lighting): Optical and illumination variance detected without underlying model tampering, backdoor triggers, or telemetry manipulation."
+  ],
+  "correlated_findings": [
+    "Benign Operational Environmental Drift (Sensor/Lighting): Optical and illumination variance detected without underlying model tampering, backdoor triggers, or telemetry manipulation."
+  ],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "FLAG for security officer and ML engineer secondary review.",
+    "Inspect field operating environment, lighting, and sensor telemetry for operational shift."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA."
+  ],
+  "explanation": "CORRELATED FINDINGS: Benign Operational Environmental Drift (Sensor/Lighting): Optical and illumination variance detected without underlying model tampering, backdoor triggers, or telemetry manipulation.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_drift_benign_b9d37c6c",
+      "source": "DISTRIBUTION_SHIFT",
+      "domain": null,
+      "severity": "MEDIUM",
+      "metric_value": 0.38,
+      "description": "Observable environmental distribution shift (brightness/contrast daylight shift).",
+      "subject_id": "drift_candidate_batch",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "3046022100bb8cb77849b6f044a8a4d007baefa224d0bd5c595cd9d9d66666dec89e65a47d022100b80460204a56f956954b4420d7267e4f448748c69b7e43b9149cbcb82065d126",
+  "assessment_digest": "96064f0ee440dd01e37aca52dbf06ac47456fcf50b8dc5c31a0771d237dfa845",
+  "created_at": "2026-09-21T16:32:27.154279Z"
+}

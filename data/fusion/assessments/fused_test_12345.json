@@ -43,6 +43,7 @@
       "related_dataset_id": null,
       "evidence_digest": null,
       "confidence": null,
+      "evidence_type": null,
       "metadata": {}
     },
     {
@@ -57,6 +58,7 @@
       "related_dataset_id": null,
       "evidence_digest": null,
       "confidence": null,
+      "evidence_type": null,
       "metadata": {}
     },
     {
@@ -71,6 +73,7 @@
       "related_dataset_id": null,
       "evidence_digest": null,
       "confidence": null,
+      "evidence_type": null,
       "metadata": {}
     }
   ],
@@ -79,5 +82,5 @@
   "veto_reasons": [],
   "signature": null,
   "assessment_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "created_at": "2026-09-21T07:21:06.270534Z"
+  "created_at": "2026-09-21T16:32:34.190137Z"
 }

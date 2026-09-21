@@ -10,5 +10,6 @@
   "related_dataset_id": null,
   "evidence_digest": "95e87cd2f0cf66374299f72709e3143afffb85ee3e919535b831083b6dcbdf95",
   "confidence": 1.0,
+  "evidence_type": null,
   "metadata": {}
 }

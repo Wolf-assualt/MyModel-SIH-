@@ -1,0 +1,79 @@
+{
+  "assessment_id": "fused_6fea806683e9",
+  "target_entity_id": "model_exec_faf",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.85,
+  "confidence": 0.28,
+  "confidence_score": 0.28,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "BEHAVIOURAL_FINGERPRINT",
+      "DISTRIBUTION_SHIFT"
+    ],
+    "coverage_ratio": 0.4,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "INFERENCE_DNA"
+    ]
+  },
+  "findings": [
+    "Coordinated Evasion / Adversarial Perturbation Attack detected: Severe distribution anomaly correlates with model output divergence across perturbation batteries."
+  ],
+  "correlated_findings": [
+    "Coordinated Evasion / Adversarial Perturbation Attack detected: Severe distribution anomaly correlates with model output divergence across perturbation batteries."
+  ],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 40%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, INFERENCE_DNA."
+  ],
+  "explanation": "CORRELATED FINDINGS: Coordinated Evasion / Adversarial Perturbation Attack detected: Severe distribution anomaly correlates with model output divergence across perturbation batteries.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_corr_drift_4a6bb98b",
+      "source": "DISTRIBUTION_SHIFT",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.85,
+      "description": "Severe input distribution shift across all color channels.",
+      "subject_id": "drift_and_probe_battery",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    },
+    {
+      "evidence_id": "ev_corr_probe_1762c432",
+      "source": "BEHAVIOURAL_FINGERPRINT",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.75,
+      "description": "Perturbation probe activation divergence under adversarial transformations.",
+      "subject_id": "drift_and_probe_battery",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "304402203340aed8d726953057b0471815102957f66e358ab731bfbfb1734fe0bbd8a6ce022074750cc5a77d5eed116efae50c87909f1680a9a0c0bc2e9ae7b8a993abb98922",
+  "assessment_digest": "47ea3a16a074babf0bbdf14076734e624bc80db4f5dfbb4f0fd1fd7987f34616",
+  "created_at": "2026-09-21T16:32:27.558891Z"
+}

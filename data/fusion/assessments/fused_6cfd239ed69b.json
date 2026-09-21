@@ -1,0 +1,60 @@
+{
+  "assessment_id": "fused_6cfd239ed69b",
+  "target_entity_id": "m1",
+  "overall_status": "ACCEPTED",
+  "verdict": "ACCEPTED",
+  "risk_level": "LOW",
+  "risk_score": 0.0225,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "ALLOW",
+  "coverage": {
+    "sources_checked": [
+      "BEHAVIOURAL_FINGERPRINT"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "ALLOW asset promotion to operational pipeline."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 1 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "e1",
+      "source": "BEHAVIOURAL_FINGERPRINT",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.1,
+      "description": "Fingerprint stable",
+      "subject_id": "m1",
+      "related_model_id": "m1",
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "3045022100b4922d2332b99e405e0ec40a482c5ea1d5058ca5c77e855692b949a7941d0fec022018bf38d102a95690e2ad7eee64c0fa4527cda1861ea419f6bff8ff4f6fb9aa44",
+  "assessment_digest": "8530f419e294f19052c334fec25c6b141b2d7a3b9e1666cf67244bec5b20a66d",
+  "created_at": "2026-09-21T16:32:32.940418Z"
+}

@@ -1,0 +1,16 @@
+{
+  "quarantine_id": "quar_52ef5adc1b47",
+  "subject_id": "model_exec_483",
+  "subject_type": "REDTEAM_SANDBOX_ASSET",
+  "reason": "Defensive Red-Team Detection: Corroborating Drift and Behavioral Divergence. CORRELATED FINDINGS: Coordinated Evasion / Adversarial Perturbation Attack detected: Severe distribution anomaly correla",
+  "evidence_ids": [
+    "ev_corr_drift_69402b1d",
+    "ev_corr_probe_86625a7d"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T16:32:27.205230Z",
+  "created_at": "2026-09-21T16:32:27.205230Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

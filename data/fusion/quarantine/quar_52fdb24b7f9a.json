@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_52fdb24b7f9a",
+  "subject_id": "model_exec_1ca",
+  "subject_type": "ASSET",
+  "reason": "Invalid or forged cryptographic signature detected.",
+  "evidence_ids": [
+    "ev_sig_9bfd9160"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T16:32:27.101428Z",
+  "created_at": "2026-09-21T16:32:27.101428Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

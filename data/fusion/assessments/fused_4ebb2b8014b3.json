@@ -1,0 +1,90 @@
+{
+  "assessment_id": "fused_4ebb2b8014b3",
+  "target_entity_id": "0d770ab2-c10c-418c-87f0-844db8dcbbee",
+  "overall_status": "ACCEPTED",
+  "verdict": "ACCEPTED",
+  "risk_level": "LOW",
+  "risk_score": 0.06,
+  "confidence": 0.48,
+  "confidence_score": 0.48,
+  "action": "ALLOW",
+  "coverage": {
+    "sources_checked": [
+      "BEHAVIOURAL_FINGERPRINT",
+      "DATA_INTEGRITY",
+      "DISTRIBUTION_SHIFT"
+    ],
+    "coverage_ratio": 0.6,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "INFERENCE_DNA"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "ALLOW asset promotion to operational pipeline."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 60%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, INFERENCE_DNA."
+  ],
+  "explanation": "All 3 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_integrity_01",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.05,
+      "description": "Clean dataset batch verified.",
+      "subject_id": null,
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    },
+    {
+      "evidence_id": "ev_fp_02",
+      "source": "BEHAVIOURAL_FINGERPRINT",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.02,
+      "description": "Model behavior matches baseline.",
+      "subject_id": null,
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    },
+    {
+      "evidence_id": "ev_drift_03",
+      "source": "DISTRIBUTION_SHIFT",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.01,
+      "description": "Zero distribution shift detected.",
+      "subject_id": null,
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "3045022057c7d6f0abcafd6414027bd0ecc415bef0855c9afc61fbd71619ceb5b1aa114d022100b7bf0e66e8e693d12ea8d4b01da3fbdb570da5902660765a2d27a65283d05e16",
+  "assessment_digest": "82fcb7ec9b055352f916941c2ebb53109bc959433e8cc2b3ecd7009f3f245713",
+  "created_at": "2026-09-21T16:31:39.224236Z"
+}

@@ -1,0 +1,90 @@
+{
+  "assessment_id": "fused_e61f7e041e54",
+  "target_entity_id": "36528026-3adf-40d2-a3d8-69379d01f44f",
+  "overall_status": "UNDER_REVIEW",
+  "verdict": "UNDER_REVIEW",
+  "risk_level": "HIGH",
+  "risk_score": 0.5,
+  "confidence": 0.28,
+  "confidence_score": 0.28,
+  "action": "REVIEW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY",
+      "DISTRIBUTION_SHIFT"
+    ],
+    "coverage_ratio": 0.4,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "FLAG for security officer and ML engineer secondary review."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 40%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA."
+  ],
+  "explanation": "All 2 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "integrity_bf518704-49e8-4773-8ffa-9cdca8b12874",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Zero-variance flat image detected (variance: 0.0000). Image appears to be solid color or sensor blackout.",
+      "subject_id": "36528026-3adf-40d2-a3d8-69379d01f44f",
+      "related_model_id": null,
+      "related_dataset_id": "36528026-3adf-40d2-a3d8-69379d01f44f",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "candidate.png"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "drift_shift_fa2333a2dcd1",
+      "source": "DISTRIBUTION_SHIFT",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 0.832,
+      "description": "Distribution shift: ADVERSARIAL_ANOMALY",
+      "subject_id": "36528026-3adf-40d2-a3d8-69379d01f44f",
+      "related_model_id": null,
+      "related_dataset_id": "36528026-3adf-40d2-a3d8-69379d01f44f",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "drift_type": "ADVERSARIAL_ANOMALY",
+        "affected_features": [
+          "brightness",
+          "channel_entropy",
+          "color_temperature",
+          "contrast",
+          "sharpness"
+        ]
+      }
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "30450220423b7fa17b1e74c5f983d323965d7112cadf638336500cc43ed66bc0549a071b0221008d1e9826a160ac7518a68603b1ae030a4a437fca94c69005db7cae715ea737ac",
+  "assessment_digest": "a4dec58d2db123c3af770e002450dc48d45c854d84b58bb3f21fb9b8e3a0ddd1",
+  "created_at": "2026-09-21T16:32:17.600741Z"
+}

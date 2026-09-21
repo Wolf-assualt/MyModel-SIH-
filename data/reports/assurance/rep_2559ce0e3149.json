@@ -1,0 +1,73 @@
+{
+  "report_id": "rep_2559ce0e3149",
+  "target_asset_id": "19d1a922-e3e3-420e-a8da-b4fac4044ee8",
+  "target_asset_type": "DATASET",
+  "assessment_id": "fused_ec4365e691a1",
+  "overall_verdict": "QUARANTINED",
+  "risk_score": 0.9,
+  "confidence_score": 0.28,
+  "coverage_ratio": 0.4,
+  "findings_summary": {
+    "CRITICAL": 1,
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 1
+  },
+  "threat_narratives": [],
+  "limitations_and_disclaimers": [
+    "Uninspected assurance layers: [MODEL_IDENTITY, INFERENCE_DNA, DISTRIBUTION_SHIFT]. Risk scores represent partial assurance.",
+    "Integrity and drift metrics are bounded by operational camera sensor dynamics and calibration.",
+    "Zero-trust provenance assurance assumes asymmetric root signing key confidentiality.",
+    "Assurance coverage is limited to evidence sources registered in the current fusion session; uninspected layers may conceal latent threats."
+  ],
+  "report_digest": "976b1619bae9670240921f4918bea0b1a50f724a1d346a7252a716d3e2d4b4a5",
+  "signature": "304502205b7a1f9bc79c78ca7db74188982fc8d998c80fc8a999c8f6ffc6fdfecbc69b71022100f185a08052a0d66cf155954abda396c965c53e4951f12d108fb87299e0488f64",
+  "signer_public_key_pem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1vkz0fgMaLkifteWo7dpEKp9KOeF\n17oQoiKES4OB0uU6oZOpuc8lMJRnpPjTcrN2bTc2hbMe1nA3zKr80xPCJg==\n-----END PUBLIC KEY-----\n",
+  "created_at": "2026-09-21T16:31:46.801184Z",
+  "gatekeeper_action": "BLOCK",
+  "risk_level": "CRITICAL",
+  "hard_veto_triggered": true,
+  "section_overviews": [
+    {
+      "layer_name": "Behavioral Fingerprint & Probes",
+      "status": "ACCEPTED",
+      "risk_contribution": 0.9
+    },
+    {
+      "layer_name": "Dataset & Training Data Integrity",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    }
+  ],
+  "upstream_lineage": [],
+  "downstream_blast_radius": {},
+  "dataset_findings": [
+    {
+      "evidence_id": "ev_tamper_alert_01",
+      "description": "",
+      "severity": "CRITICAL",
+      "metric_value": 0.0
+    }
+  ],
+  "model_findings": [],
+  "behavioral_findings": [
+    {
+      "evidence_id": "ev_benign_sensor_01",
+      "description": "",
+      "severity": "LOW",
+      "metric_value": 0.0
+    }
+  ],
+  "inference_findings": [],
+  "drift_findings": [],
+  "quarantine_records": [
+    {
+      "subject_id": "19d1a922-e3e3-420e-a8da-b4fac4044ee8",
+      "reason": "Critical layer weight discrepancy and runtime replay detection."
+    }
+  ],
+  "cryptographic_proofs": {
+    "canonical_report_digest": "976b1619bae9670240921f4918bea0b1a50f724a1d346a7252a716d3e2d4b4a5",
+    "ecdsa_signature": "304502205b7a1f9bc79c78ca7db74188982fc8d998c80fc8a999c8f6ffc6fdfecbc69b71022100f185a08052a0d66cf155954abda396c965c53e4951f12d108fb87299e0488f64"
+  }
+}

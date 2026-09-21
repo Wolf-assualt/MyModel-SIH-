@@ -1,0 +1,48 @@
+{
+  "report_id": "shift_38480e0d0500",
+  "baseline_id": "base_ff4a7d12-1c5c-4652-80af-56bcbd782953",
+  "target_batch_id": "7f22426e-2511-46b4-a2e1-7928811a195b",
+  "sample_count": 20,
+  "overall_drift_score": 0.0,
+  "detected_drift_type": "NO_DRIFT",
+  "severity": "NO_DRIFT",
+  "feature_metrics": [
+    {
+      "feature_name": "brightness",
+      "baseline_mean": 0.5,
+      "target_mean": 0.5,
+      "drift_score": 0.0,
+      "ks_distance": 0.0,
+      "ks_statistic": 0.0,
+      "ks_p_value": 1.0,
+      "psi": 0.0,
+      "psi_score": 0.0,
+      "wasserstein": 0.0,
+      "wasserstein_distance": 0.0,
+      "energy_distance": 0.0,
+      "is_drifted": false,
+      "explanation": "brightness: KS=0.0000 (p=1.0000), PSI=0.0000, Wasserstein=0.0000, Energy=0.0000"
+    },
+    {
+      "feature_name": "contrast",
+      "baseline_mean": 0.4,
+      "target_mean": 0.4,
+      "drift_score": 0.0,
+      "ks_distance": 0.0,
+      "ks_statistic": 0.0,
+      "ks_p_value": 1.0,
+      "psi": 0.0,
+      "psi_score": 0.0,
+      "wasserstein": 0.0,
+      "wasserstein_distance": 0.0,
+      "energy_distance": 0.0,
+      "is_drifted": false,
+      "explanation": "contrast: KS=0.0000 (p=1.0000), PSI=0.0000, Wasserstein=0.0000, Energy=0.0000"
+    }
+  ],
+  "affected_features": [],
+  "evidence_records": [],
+  "status": "ACCEPTED",
+  "report_digest": "04adb02c26f964e86d9e67c5178588da770adb92348de85f65793054efb79a74",
+  "created_at": "2026-09-21T16:30:39.803552Z"
+}

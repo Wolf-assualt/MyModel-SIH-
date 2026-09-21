@@ -1,0 +1,85 @@
+{
+  "report_id": "rep_f5f5b617f475",
+  "target_asset_id": "ff4a7d12-1c5c-4652-80af-56bcbd782953",
+  "target_asset_type": "MODEL",
+  "assessment_id": "fused_9fa12ef93fc6",
+  "overall_verdict": "ACCEPTED",
+  "risk_score": 0.06,
+  "confidence_score": 0.48,
+  "coverage_ratio": 0.6,
+  "findings_summary": {
+    "CRITICAL": 0,
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 3
+  },
+  "threat_narratives": [],
+  "limitations_and_disclaimers": [
+    "Uninspected assurance layers: [MODEL_IDENTITY, INFERENCE_DNA]. Risk scores represent partial assurance.",
+    "Integrity and drift metrics are bounded by operational camera sensor dynamics and calibration.",
+    "Zero-trust provenance assurance assumes asymmetric root signing key confidentiality.",
+    "Assurance coverage is limited to evidence sources registered in the current fusion session; uninspected layers may conceal latent threats."
+  ],
+  "report_digest": "013d76ac7fa54befe7b03bb8491c6f95acb7689a46d306eb86c786986ba23256",
+  "signature": "3045022060ed8b5e59bf17473aa7ea6254485b321b99b22a73224b4c1e6dfce1b7d1b377022100b326bddd7742545ccf14e16a8568ccd2c2d8e344347f3b2c1e70a2371e3927d1",
+  "signer_public_key_pem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEGoeb9yceBd0ruJT5ThQkJr0L/gy1\n/uEYlt41Gfle3I7pX5W/tvmy1AvaonzJoSokgF+A8wNJBDbtXh3L68K31Q==\n-----END PUBLIC KEY-----\n",
+  "created_at": "2026-09-21T16:30:39.988647Z",
+  "gatekeeper_action": "ALLOW",
+  "risk_level": "LOW",
+  "hard_veto_triggered": false,
+  "section_overviews": [
+    {
+      "layer_name": "Behavioral Fingerprint & Probes",
+      "status": "ACCEPTED",
+      "risk_contribution": 0.06
+    },
+    {
+      "layer_name": "Dataset & Training Data Integrity",
+      "status": "ACCEPTED",
+      "risk_contribution": 0.06
+    },
+    {
+      "layer_name": "Distribution Shift & Drift Analysis",
+      "status": "ACCEPTED",
+      "risk_contribution": 0.06
+    }
+  ],
+  "upstream_lineage": [],
+  "downstream_blast_radius": {},
+  "dataset_findings": [
+    {
+      "evidence_id": "ev_integrity_01",
+      "description": "Clean dataset batch verified.",
+      "severity": "LOW",
+      "metric_value": 0.05
+    }
+  ],
+  "model_findings": [],
+  "behavioral_findings": [
+    {
+      "evidence_id": "ev_fp_02",
+      "description": "Model behavior matches baseline.",
+      "severity": "LOW",
+      "metric_value": 0.02
+    }
+  ],
+  "inference_findings": [],
+  "drift_findings": [
+    {
+      "evidence_id": "ev_drift_03",
+      "description": "Zero distribution shift detected.",
+      "severity": "LOW",
+      "metric_value": 0.01
+    }
+  ],
+  "quarantine_records": [
+    {
+      "subject_id": "ff4a7d12-1c5c-4652-80af-56bcbd782953",
+      "reason": "Critical layer weight discrepancy and runtime replay detection."
+    }
+  ],
+  "cryptographic_proofs": {
+    "canonical_report_digest": "013d76ac7fa54befe7b03bb8491c6f95acb7689a46d306eb86c786986ba23256",
+    "ecdsa_signature": "3045022060ed8b5e59bf17473aa7ea6254485b321b99b22a73224b4c1e6dfce1b7d1b377022100b326bddd7742545ccf14e16a8568ccd2c2d8e344347f3b2c1e70a2371e3927d1"
+  }
+}

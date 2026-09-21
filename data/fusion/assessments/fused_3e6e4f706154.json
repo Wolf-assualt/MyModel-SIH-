@@ -1,0 +1,69 @@
+{
+  "assessment_id": "fused_3e6e4f706154",
+  "target_entity_id": "ds_exec_8f8",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [
+    "Data Poisoning Indicator: Backdoor trigger patterns detected in training partition."
+  ],
+  "correlated_findings": [
+    "Data Poisoning Indicator: Backdoor trigger patterns detected in training partition."
+  ],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+    "Investigate Critical training data tampering or backdoor trigger pattern detected."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "HARD VETO: Critical training data tampering or backdoor trigger pattern detected. | CORRELATED FINDINGS: Data Poisoning Indicator: Backdoor trigger patterns detected in training partition.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_trig_eb36f5f6",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 0.99,
+      "description": "TRIGGER_BACKDOOR: High-contrast 16x16 corner checkerboard backdoor pattern detected.",
+      "subject_id": "synthetic_dataset_batch",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [
+    "ev_trig_eb36f5f6"
+  ],
+  "hard_veto_triggered": true,
+  "veto_reasons": [
+    "Critical training data tampering or backdoor trigger pattern detected."
+  ],
+  "signature": "3045022100f35cb3194d6da6e64ba93b942008fa1000c8feb43556e346b3cb5402cac6eb6802204a4aaff8e12fab48c74dc5c503a21dd1b36f4cd9baf4c6a3be47e45fd7a3d384",
+  "assessment_digest": "76816e6ce0eb5675362b9a6786617be3d6e252ba06d5017dbb49aba3c02b9325",
+  "created_at": "2026-09-21T16:32:27.478855Z"
+}

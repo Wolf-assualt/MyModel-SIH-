@@ -1,0 +1,69 @@
+{
+  "assessment_id": "fused_5fd013199d10",
+  "target_entity_id": "model_exec_96f",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "MODEL_IDENTITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [
+    "Model Identity Compromise: Active model weights mismatch reference baseline manifest."
+  ],
+  "correlated_findings": [
+    "Model Identity Compromise: Active model weights mismatch reference baseline manifest."
+  ],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+    "Investigate Model identity hash mismatch: unauthorized model substitution or weight modification detected."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "HARD VETO: Model identity hash mismatch: unauthorized model substitution or weight modification detected. | CORRELATED FINDINGS: Model Identity Compromise: Active model weights mismatch reference baseline manifest.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_sub_6ba43752",
+      "source": "MODEL_IDENTITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "Architecture hash mismatch: Unauthorized foreign model substitution.",
+      "subject_id": "approved_reference_model",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [
+    "ev_sub_6ba43752"
+  ],
+  "hard_veto_triggered": true,
+  "veto_reasons": [
+    "Model identity hash mismatch: unauthorized model substitution or weight modification detected."
+  ],
+  "signature": "3045022100e5f08518ad9fd67bb4fb5ae81030d5c3fbfe5b4120a00c05dbe28bb73e62094502205539630794659e6dcf59c1a8313ce8d2b837ec037293cf6961521f1c462e5a1b",
+  "assessment_digest": "9f7e8a04483a8afb5ca740f00566cfa841631ebde0eff113d461b61e23e90b15",
+  "created_at": "2026-09-21T16:32:27.489824Z"
+}

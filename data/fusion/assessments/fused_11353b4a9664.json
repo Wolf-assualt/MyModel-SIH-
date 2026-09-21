@@ -1,0 +1,60 @@
+{
+  "assessment_id": "fused_11353b4a9664",
+  "target_entity_id": "ds_exec_e54",
+  "overall_status": "UNDER_REVIEW",
+  "verdict": "UNDER_REVIEW",
+  "risk_level": "MEDIUM",
+  "risk_score": 0.35,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "REVIEW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "FLAG for security officer and ML engineer secondary review."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 1 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_dup_9f262496",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "MEDIUM",
+      "metric_value": 0.4,
+      "description": "Near-duplicate anomaly: 4 pairs of highly redundant frames detected.",
+      "subject_id": "synthetic_dataset_batch",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "3045022023741bd88714c11e9f283d8ea40af3f28aa9ba6c5fead2dbfdfa5b74af59f7bd022100b848852c92e37a42a0f7578ff1be4cbd53b9702ec38f0e9fc947a2dc85127cf4",
+  "assessment_digest": "ed5a6649e7d2eefeb3462da7ff10f7ca843c0f60b36eaf1b8f9caeb91d55af81",
+  "created_at": "2026-09-21T16:32:27.471774Z"
+}

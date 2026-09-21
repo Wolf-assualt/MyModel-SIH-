@@ -56,11 +56,7 @@ def mock_engines(temp_dirs):
     km = KeyManager()
     fusion_engine = EvidenceFusionEngine(storage_dir=fusion_path, key_manager=km)
     graph_engine = EvidenceGraphEngine(storage_dir=graph_path)
-    report_engine = AssuranceReportEngine(
-        storage_dir=storage_path,
-        fusion_engine=fusion_engine,
-        graph_engine=graph_engine,
-    )
+    report_engine = AssuranceReportEngine(storage_dir=storage_path)
     return report_engine, fusion_engine, graph_engine, km
 
 
@@ -159,7 +155,7 @@ def comprehensive_fused_setup(mock_engines):
         subject_type="MODEL",
     )
 
-    return report_engine, assessment, km, "mod_yolo_tactical"
+    return report_engine, assessment, km, graph_engine, "mod_yolo_tactical"
 
 
 # ===========================================================================
@@ -169,7 +165,7 @@ def comprehensive_fused_setup(mock_engines):
 
 def test_report_generation_from_fused_assessment(comprehensive_fused_setup):
     """Test full cross-domain forensic report synthesis from fused assessment."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
 
     report = report_engine.generate_report(
         target_asset_id=target_id,
@@ -202,10 +198,11 @@ def test_report_generation_from_fused_assessment(comprehensive_fused_setup):
 
 def test_section_overviews_status_assignment(comprehensive_fused_setup):
     """Verify each section overview correctly derives status and risk contribution."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
 
     report = report_engine.generate_report(
         target_asset_id=target_id,
+        target_asset_type="MODEL",
         assessment=assessment,
         key_manager=km,
     )
@@ -220,14 +217,16 @@ def test_section_overviews_status_assignment(comprehensive_fused_setup):
 
 def test_upstream_lineage_and_blast_radius_attachment(comprehensive_fused_setup):
     """Verify upstream provenance lineage and downstream blast radius are computed and attached."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
 
     report = report_engine.generate_report(
         target_asset_id=target_id,
+        target_asset_type="MODEL",
         assessment=assessment,
         key_manager=km,
         include_lineage=True,
         include_blast_radius=True,
+        graph_engine=graph_engine,
     )
 
     assert len(report.upstream_lineage) >= 1
@@ -246,16 +245,16 @@ def test_upstream_lineage_and_blast_radius_attachment(comprehensive_fused_setup)
 
 def test_canonical_digest_sealing_integrity(comprehensive_fused_setup):
     """Verify canonical digest calculation is strictly reproducible and tamper-evident."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
 
     report = report_engine.generate_report(
         target_asset_id=target_id,
+        target_asset_type="MODEL",
         assessment=assessment,
         key_manager=km,
     )
 
     expected_payload = {
-        "report_id": report.report_id,
         "target_asset_id": report.target_asset_id,
         "target_asset_type": report.target_asset_type,
         "assessment_id": report.assessment_id,
@@ -274,10 +273,11 @@ def test_canonical_digest_sealing_integrity(comprehensive_fused_setup):
 
 def test_ecdsa_signature_verification_success(comprehensive_fused_setup):
     """Verify valid report passes full cryptographic verification."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
 
     report = report_engine.generate_report(
         target_asset_id=target_id,
+        target_asset_type="MODEL",
         assessment=assessment,
         key_manager=km,
     )
@@ -291,9 +291,9 @@ def test_ecdsa_signature_verification_success(comprehensive_fused_setup):
 
 def test_tamper_detection_altered_verdict(comprehensive_fused_setup):
     """Tampering with verdict must invalidate digest and trigger verification failure."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
 
-    report = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    report = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
     tampered_data = report.model_dump(mode="json")
     tampered_data["overall_verdict"] = "ACCEPTED"
     tampered_report = AssuranceReport.model_validate(tampered_data)
@@ -306,9 +306,9 @@ def test_tamper_detection_altered_verdict(comprehensive_fused_setup):
 
 def test_tamper_detection_altered_risk_score(comprehensive_fused_setup):
     """Tampering with composite risk score must be detected."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
 
-    report = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    report = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
     tampered_data = report.model_dump(mode="json")
     tampered_data["risk_score"] = 0.01
     tampered_report = AssuranceReport.model_validate(tampered_data)
@@ -320,9 +320,9 @@ def test_tamper_detection_altered_risk_score(comprehensive_fused_setup):
 
 def test_tamper_detection_altered_hard_veto_flag(comprehensive_fused_setup):
     """Tampering with hard veto flag must be detected."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
 
-    report = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    report = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
     tampered_data = report.model_dump(mode="json")
     tampered_data["hard_veto_triggered"] = False
     tampered_report = AssuranceReport.model_validate(tampered_data)
@@ -334,9 +334,9 @@ def test_tamper_detection_altered_hard_veto_flag(comprehensive_fused_setup):
 
 def test_tamper_detection_altered_findings_summary(comprehensive_fused_setup):
     """Tampering with findings summary count must be detected."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
 
-    report = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    report = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
     tampered_data = report.model_dump(mode="json")
     tampered_data["findings_summary"]["CRITICAL"] = 0
     tampered_report = AssuranceReport.model_validate(tampered_data)
@@ -348,9 +348,9 @@ def test_tamper_detection_altered_findings_summary(comprehensive_fused_setup):
 
 def test_forged_signature_rejection(comprehensive_fused_setup):
     """Forged signature hex must fail ECDSA cryptographic verification."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
 
-    report = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    report = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
     tampered_data = report.model_dump(mode="json")
     tampered_data["signature"] = "deadbeef" * 16
     tampered_report = AssuranceReport.model_validate(tampered_data)
@@ -363,9 +363,9 @@ def test_forged_signature_rejection(comprehensive_fused_setup):
 
 def test_wrong_signer_public_key_rejection(comprehensive_fused_setup):
     """Replacing signer public key with another key pair must fail verification."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
 
-    report = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    report = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
     other_km = KeyManager()
     other_pem = other_km.export_public_key_pem().decode("utf-8")
 
@@ -385,8 +385,8 @@ def test_wrong_signer_public_key_rejection(comprehensive_fused_setup):
 
 def test_format_markdown_rendering(comprehensive_fused_setup):
     """Verify Markdown rendering produces all defense-grade sections and headers."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
-    report = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
+    report = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
 
     md = ReportFormatter.format_markdown(report)
     assert "[RESTRICTED // TRUST-CV SECURITY ASSURANCE REPORT]" in md
@@ -402,8 +402,8 @@ def test_format_markdown_rendering(comprehensive_fused_setup):
 
 def test_format_executive_summary_rendering(comprehensive_fused_setup):
     """Verify Executive Situation Brief plain-text formatting."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
-    report = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
+    report = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
 
     summary = ReportFormatter.format_executive_summary(report)
     assert "TRUST-CV EXECUTIVE SECURITY SITUATION BRIEF" in summary
@@ -415,8 +415,8 @@ def test_format_executive_summary_rendering(comprehensive_fused_setup):
 
 def test_format_html_rendering(comprehensive_fused_setup):
     """Verify standalone air-gapped HTML forensic report formatting."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
-    report = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
+    report = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
 
     html = ReportFormatter.format_html(report)
     assert "<!DOCTYPE html>" in html
@@ -430,10 +430,10 @@ def test_format_html_rendering(comprehensive_fused_setup):
 
 def test_export_to_file_all_formats(comprehensive_fused_setup, temp_dirs):
     """Verify exporting report to file across all supported formats."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
     storage_path, _, _ = temp_dirs
 
-    report = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    report = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
 
     for fmt in [ReportFormat.JSON_MANIFEST, ReportFormat.MARKDOWN, ReportFormat.EXECUTIVE_SUMMARY, ReportFormat.HTML]:
         res = report_engine.export_report_to_file(report_id=report.report_id, export_format=fmt)
@@ -451,10 +451,10 @@ def test_export_to_file_all_formats(comprehensive_fused_setup, temp_dirs):
 
 def test_report_persistence_and_list_indexing(comprehensive_fused_setup):
     """Verify multiple reports can be persisted, retrieved by ID, and listed."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
 
-    rep1 = report_engine.generate_report(target_asset_id="asset_alpha", assessment=assessment, key_manager=km)
-    rep2 = report_engine.generate_report(target_asset_id="asset_beta", assessment=assessment, key_manager=km)
+    rep1 = report_engine.generate_report(target_asset_id="asset_alpha",  target_asset_type="MODEL", assessment=assessment, key_manager=km)
+    rep2 = report_engine.generate_report(target_asset_id="asset_beta",  target_asset_type="MODEL", assessment=assessment, key_manager=km)
 
     retrieved_1 = report_engine.get_report(rep1.report_id)
     assert retrieved_1 is not None
@@ -497,13 +497,13 @@ def test_cli_list_and_show_report(capsys, comprehensive_fused_setup, temp_dirs):
     """Test CLI list-reports and show-report commands."""
     from app.reports.engine import default_report_engine
 
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
     storage_path, _, _ = temp_dirs
-    rep = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    rep = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
     rep_file = storage_path / f"{rep.report_id}.json"
 
     # 1. list-reports via default storage
-    default_report = default_report_engine.generate_report(target_asset_id="cli_list_target", assessment=assessment)
+    default_report = default_report_engine.generate_report(target_asset_id="cli_list_target",  target_asset_type="MODEL", assessment=assessment)
     code_list = cli_main(["list-reports"])
     assert code_list == 0
     out_list = capsys.readouterr().out
@@ -518,9 +518,9 @@ def test_cli_list_and_show_report(capsys, comprehensive_fused_setup, temp_dirs):
 
 def test_cli_verify_report_valid_and_tampered(comprehensive_fused_setup, capsys, temp_dirs):
     """Test CLI verify-report command on valid and tampered reports."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
     storage_path, _, _ = temp_dirs
-    rep = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    rep = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
     rep_file = storage_path / f"{rep.report_id}.json"
 
     # 1. Valid report verification
@@ -546,9 +546,9 @@ def test_cli_export_report(capsys, comprehensive_fused_setup, temp_dirs):
     """Test CLI export-report command."""
     from app.reports.engine import default_report_engine
 
-    _, assessment, _, _ = comprehensive_fused_setup
+    _, assessment, _, graph_engine, _ = comprehensive_fused_setup
     storage_path, _, _ = temp_dirs
-    rep = default_report_engine.generate_report(target_asset_id="cli_export_target", assessment=assessment)
+    rep = default_report_engine.generate_report(target_asset_id="cli_export_target",  target_asset_type="MODEL", assessment=assessment)
 
     out_file = storage_path / "custom_export.html"
     code_exp = cli_main(["export-report", "--report-id", rep.report_id, "--format", "HTML", "--out", str(out_file)])
@@ -629,8 +629,8 @@ def test_api_generate_and_get_report():
 
 def test_tamper_detection_altered_confidence_score(comprehensive_fused_setup):
     """Tampering with confidence score must fail verification."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
-    report = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
+    report = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
     data = report.model_dump(mode="json")
     data["confidence_score"] = 0.50
     tampered = AssuranceReport.model_validate(data)
@@ -641,8 +641,8 @@ def test_tamper_detection_altered_confidence_score(comprehensive_fused_setup):
 
 def test_tamper_detection_altered_coverage_ratio(comprehensive_fused_setup):
     """Tampering with coverage ratio must fail verification."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
-    report = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
+    report = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
     data = report.model_dump(mode="json")
     data["coverage_ratio"] = 0.50
     tampered = AssuranceReport.model_validate(data)
@@ -653,8 +653,8 @@ def test_tamper_detection_altered_coverage_ratio(comprehensive_fused_setup):
 
 def test_tamper_detection_altered_target_asset_id(comprehensive_fused_setup):
     """Tampering with target asset ID must fail verification."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
-    report = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
+    report = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
     data = report.model_dump(mode="json")
     data["target_asset_id"] = "fraudulent_model_target"
     tampered = AssuranceReport.model_validate(data)
@@ -665,8 +665,8 @@ def test_tamper_detection_altered_target_asset_id(comprehensive_fused_setup):
 
 def test_tamper_detection_altered_assessment_id(comprehensive_fused_setup):
     """Tampering with assessment ID must fail verification."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
-    report = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
+    report = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
     data = report.model_dump(mode="json")
     data["assessment_id"] = "fused_fake_assessment"
     tampered = AssuranceReport.model_validate(data)
@@ -677,8 +677,8 @@ def test_tamper_detection_altered_assessment_id(comprehensive_fused_setup):
 
 def test_tamper_detection_altered_gatekeeper_action(comprehensive_fused_setup):
     """Tampering with gatekeeper action must fail verification."""
-    report_engine, assessment, km, target_id = comprehensive_fused_setup
-    report = report_engine.generate_report(target_asset_id=target_id, assessment=assessment, key_manager=km)
+    report_engine, assessment, km, graph_engine, target_id = comprehensive_fused_setup
+    report = report_engine.generate_report(target_asset_id=target_id,  target_asset_type="MODEL", assessment=assessment, key_manager=km)
     data = report.model_dump(mode="json")
     data["gatekeeper_action"] = "ALLOW"
     tampered = AssuranceReport.model_validate(data)

@@ -95,7 +95,7 @@ class FusedAssessment(BaseModel):
     verdict: Optional[AssetStatus] = None
     risk_level: AssuranceRiskLevel = AssuranceRiskLevel.LOW
     risk_score: float = Field(..., ge=0.0, le=1.0)
-    confidence: float = Field(..., ge=0.0, le=1.0)
+    confidence: float = Field(0.0, ge=0.0, le=1.0)
     confidence_score: Optional[float] = None
     action: AssuranceAction = AssuranceAction.ALLOW
     coverage: EvidenceCoverage

@@ -1,10 +1,12 @@
 """Pydantic schemas for Defense-Grade Security Assurance Reports."""
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Dict, List
+from typing import Any, Dict, List
+# pyrefly: ignore [missing-import]
 from pydantic import BaseModel, Field
 
 from app.schemas.base import AssetStatus
+from app.schemas.fusion import AssuranceAction, AssuranceRiskLevel
 
 
 class ReportFormat(str, Enum):
@@ -12,6 +14,13 @@ class ReportFormat(str, Enum):
     JSON_MANIFEST = "JSON_MANIFEST"
     MARKDOWN = "MARKDOWN"
     EXECUTIVE_SUMMARY = "EXECUTIVE_SUMMARY"
+    HTML = "HTML"
+
+
+class CryptographicProofs(BaseModel):
+    """Cryptographic proof references attached to an assurance report."""
+    canonical_report_digest: str
+    ecdsa_signature: str
 
 
 class AssuranceReport(BaseModel):
@@ -31,6 +40,20 @@ class AssuranceReport(BaseModel):
     signature: str
     signer_public_key_pem: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    # Extended forensic fields
+    gatekeeper_action: AssuranceAction = Field(default_factory=lambda: AssuranceAction.ALLOW)
+    risk_level: AssuranceRiskLevel = Field(default_factory=lambda: AssuranceRiskLevel.LOW)
+    hard_veto_triggered: bool = False
+    section_overviews: List[Any] = Field(default_factory=list)
+    upstream_lineage: List[Any] = Field(default_factory=list)
+    downstream_blast_radius: Any = Field(default_factory=dict)
+    dataset_findings: List[Dict[str, Any]] = Field(default_factory=list)
+    model_findings: List[Dict[str, Any]] = Field(default_factory=list)
+    behavioral_findings: List[Dict[str, Any]] = Field(default_factory=list)
+    inference_findings: List[Dict[str, Any]] = Field(default_factory=list)
+    drift_findings: List[Dict[str, Any]] = Field(default_factory=list)
+    quarantine_records: List[Dict[str, Any]] = Field(default_factory=list)
+    cryptographic_proofs: CryptographicProofs = Field(default_factory=lambda: CryptographicProofs(canonical_report_digest="", ecdsa_signature=""))
 
 
 class GenerateReportRequest(BaseModel):
@@ -52,3 +75,12 @@ class VerifyReportResponse(BaseModel):
     digest_match: bool
     signature_valid: bool
     discrepancies: List[str] = Field(default_factory=list)
+
+
+class ExportResult(BaseModel):
+    """Result of exporting an assurance report to a file."""
+    report_id: str
+    format: ReportFormat
+    export_path: str
+    file_size_bytes: int
+    export_digest: str

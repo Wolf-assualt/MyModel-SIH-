@@ -224,7 +224,9 @@ async def _run_scan_pipeline(scan_id: str, batch_id: str):
                 
                 # Extract features from current batch
                 from app.drift.extractor import ImageDistributionExtractor
+                # pyrefly: ignore [missing-import]
                 from PIL import Image
+                # pyrefly: ignore [missing-import]
                 import numpy as np
                 
                 batch_images = []

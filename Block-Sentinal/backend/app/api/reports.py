@@ -1,5 +1,6 @@
 """Defense-Grade Security Assurance Reports API Endpoints."""
-from typing import Any
+from typing import Any, List
+# pyrefly: ignore [missing-import]
 from fastapi import APIRouter, HTTPException, Query
 
 from app.fusion.engine import default_fusion_engine
@@ -62,8 +63,42 @@ def get_assurance_report(
         return ResponseEnvelope(
             data={"report_id": report_id, "format": "EXECUTIVE_SUMMARY", "content": rendered}
         )
+    elif format == ReportFormat.HTML:
+        rendered = ReportFormatter.format_html(report)
+        return ResponseEnvelope(
+            data={"report_id": report_id, "format": "HTML", "content": rendered}
+        )
 
     return ResponseEnvelope(data=report)
+
+
+@router.get("/", response_model=ResponseEnvelope[List[AssuranceReport]])
+def list_assurance_reports() -> ResponseEnvelope[List[AssuranceReport]]:
+    """List all stored forensic assurance reports."""
+    reports = default_report_engine.list_reports()
+    return ResponseEnvelope(data=reports)
+
+
+@router.post("/{report_id}/export", response_model=ResponseEnvelope[Any])
+def export_assurance_report(
+    report_id: str,
+    format: ReportFormat = Query(ReportFormat.JSON_MANIFEST, description="Desired export format"),
+) -> ResponseEnvelope[Any]:
+    """Export a stored assurance report to disk in the specified format."""
+    try:
+        result = default_report_engine.export_report_to_file(
+            report_id=report_id,
+            export_format=format,
+        )
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return ResponseEnvelope(data={
+        "report_id": result.report_id,
+        "format": result.format.value,
+        "export_path": result.export_path,
+        "file_size_bytes": result.file_size_bytes,
+        "export_digest": result.export_digest,
+    })
 
 
 @router.post("/verify", response_model=ResponseEnvelope[VerifyReportResponse])

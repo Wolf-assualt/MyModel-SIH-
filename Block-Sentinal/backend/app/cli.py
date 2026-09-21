@@ -1250,16 +1250,23 @@ def cmd_redteam_scorecard(args: argparse.Namespace) -> int:
 
 def cmd_generate_report(args: argparse.Namespace) -> int:
     """Generate, cryptographically seal, and persist an assurance report."""
+    from app.fusion.engine import default_fusion_engine
     from app.reports.engine import default_report_engine
     from app.reports.formatter import ReportFormatter
     from app.schemas.report import AssuranceReport, ReportFormat
 
     print(f"[*] Generating forensic assurance report for target '{args.target_id}'...")
     try:
+        assessment = None
+        if args.assessment_id:
+            assessment = default_fusion_engine.get_assessment(args.assessment_id)
+            if not assessment:
+                print(f"[!] Fused assessment not found: {args.assessment_id}")
+                return 1
         report = default_report_engine.generate_report(
             target_asset_id=args.target_id,
             target_asset_type=args.target_type,
-            assessment_id=args.assessment_id,
+            assessment=assessment,
             include_limitations=not args.no_limitations,
         )
     except Exception as exc:

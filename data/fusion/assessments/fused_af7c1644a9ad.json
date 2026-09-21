@@ -1,0 +1,65 @@
+{
+  "assessment_id": "fused_af7c1644a9ad",
+  "target_entity_id": "model_exec_8cf",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "CRYPTO_VERIFICATION"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+    "Investigate Invalid or forged cryptographic signature detected."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "HARD VETO: Invalid or forged cryptographic signature detected.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_sig_2cfb77a9",
+      "source": "CRYPTO_VERIFICATION",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "ECDSA signature verification failure: Model manifest signature is forged or invalid.",
+      "subject_id": "approved_reference_model",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [
+    "ev_sig_2cfb77a9"
+  ],
+  "hard_veto_triggered": true,
+  "veto_reasons": [
+    "Invalid or forged cryptographic signature detected."
+  ],
+  "signature": "3045022100f5bf4d76083f66c55559922b3a23c6dece21b2c38c9ff0614647818f253c4f580220528ed3d69b841a1314dc67f4639930e2a87a401f9019f297422762199e46d84f",
+  "assessment_digest": "a90353680460a4b4ac9efaa1bff188e90ca7ffd557c5b62ebb53358ab7203ce5",
+  "created_at": "2026-09-21T06:56:48.367682Z"
+}

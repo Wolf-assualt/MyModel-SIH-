@@ -1,0 +1,74 @@
+{
+  "report_id": "shift_eac78968f932",
+  "baseline_id": "eo_summer_baseline_demo",
+  "target_batch_id": "eo_batch_candidate",
+  "sample_count": 4,
+  "overall_drift_score": 0.375,
+  "detected_drift_type": "DATASET_DRIFT",
+  "severity": "SIGNIFICANT_DRIFT",
+  "feature_metrics": [
+    {
+      "feature_name": "ndvi",
+      "baseline_mean": 0.6675,
+      "target_mean": 0.65,
+      "drift_score": 0.5,
+      "ks_distance": 0.5,
+      "ks_statistic": 0.5,
+      "ks_p_value": 0.5344,
+      "psi": 18.4163,
+      "psi_score": 18.4163,
+      "wasserstein": 0.0184,
+      "wasserstein_distance": 0.0184,
+      "energy_distance": 0.0113,
+      "is_drifted": true,
+      "explanation": "ndvi: KS=0.5000 (p=0.5344), PSI=18.4163, Wasserstein=0.0184, Energy=0.0113"
+    },
+    {
+      "feature_name": "visible_brightness",
+      "baseline_mean": 93.75,
+      "target_mean": 94.75,
+      "drift_score": 0.25,
+      "ks_distance": 0.25,
+      "ks_statistic": 0.25,
+      "ks_p_value": 0.9969,
+      "psi": 13.8122,
+      "psi_score": 13.8122,
+      "wasserstein": 1.3317,
+      "wasserstein_distance": 1.3317,
+      "energy_distance": 0.75,
+      "is_drifted": true,
+      "explanation": "visible_brightness: KS=0.2500 (p=0.9969), PSI=13.8122, Wasserstein=1.3317, Energy=0.7500"
+    }
+  ],
+  "affected_features": [
+    "ndvi",
+    "visible_brightness"
+  ],
+  "evidence_records": [
+    {
+      "evidence_id": "ev_drift_54c85e323407",
+      "source": "DRIFT_ENGINE",
+      "baseline_id": "eo_summer_baseline_demo",
+      "baseline_digest": "6c8f94f6a3bee756660c4bbb0e095a45557a89debba90466ee4169c1b80f5fd0",
+      "feature_name": "ndvi",
+      "severity": "CRITICAL",
+      "ks_distance": 0.5,
+      "psi": 18.4163,
+      "description": "Distribution drift detected in 'ndvi': ndvi: KS=0.5000 (p=0.5344), PSI=18.4163, Wasserstein=0.0184, Energy=0.0113"
+    },
+    {
+      "evidence_id": "ev_drift_f5065ede5afc",
+      "source": "DRIFT_ENGINE",
+      "baseline_id": "eo_summer_baseline_demo",
+      "baseline_digest": "6c8f94f6a3bee756660c4bbb0e095a45557a89debba90466ee4169c1b80f5fd0",
+      "feature_name": "visible_brightness",
+      "severity": "CRITICAL",
+      "ks_distance": 0.25,
+      "psi": 13.8122,
+      "description": "Distribution drift detected in 'visible_brightness': visible_brightness: KS=0.2500 (p=0.9969), PSI=13.8122, Wasserstein=1.3317, Energy=0.7500"
+    }
+  ],
+  "status": "UNDER_REVIEW",
+  "report_digest": "c8b654ab6a94dc4a9177a6de8f24b841cff36d3bae1342975da6270c637882f6",
+  "created_at": "2026-09-21T06:56:05.542198Z"
+}

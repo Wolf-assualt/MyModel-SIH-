@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_7dd393c6510a",
+  "subject_id": "model_exec_ed6",
+  "subject_type": "REDTEAM_SANDBOX_ASSET",
+  "reason": "Defensive Red-Team Detection: Inference DNA Nonce Reuse Replay Attack. HARD VETO: Inference provenance chain broken or replay attack detected.",
+  "evidence_ids": [
+    "ev_nonce_05b3b317"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T06:56:49.085810Z",
+  "created_at": "2026-09-21T06:56:49.085810Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

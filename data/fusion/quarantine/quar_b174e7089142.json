@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_b174e7089142",
+  "subject_id": "model_exec_229",
+  "subject_type": "REDTEAM_SANDBOX_ASSET",
+  "reason": "Defensive Red-Team Detection: Previous DNA Hash Sequence Break. HARD VETO: Inference provenance chain broken or replay attack detected.",
+  "evidence_ids": [
+    "ev_chain_2c5e9db2"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T06:56:48.413181Z",
+  "created_at": "2026-09-21T06:56:48.413181Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

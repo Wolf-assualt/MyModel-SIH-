@@ -1,6 +1,8 @@
 """Unit and integration tests for Phase 13: Red-Team & Adversarial Attack Lab."""
 from pathlib import Path
+# pyrefly: ignore [missing-import]
 import pytest
+# pyrefly: ignore [missing-import]
 from fastapi.testclient import TestClient
 
 from app.crypto.chain import HashChain

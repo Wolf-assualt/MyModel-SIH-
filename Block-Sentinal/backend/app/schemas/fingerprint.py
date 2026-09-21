@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
+# pyrefly: ignore [missing-import]
 from pydantic import BaseModel, Field
 
 from app.schemas.base import AssetStatus
@@ -12,7 +13,9 @@ class PerturbationType(str, Enum):
     GAUSSIAN_NOISE = "GAUSSIAN_NOISE"
     GAUSSIAN_BLUR = "GAUSSIAN_BLUR"
     CONTRAST_SHIFT = "CONTRAST_SHIFT"
+    BRIGHTNESS_SHIFT = "BRIGHTNESS_SHIFT"
     ROTATION = "ROTATION"
+    OCCLUSION_PATCH = "OCCLUSION_PATCH"
 
 
 class ProbeRecord(BaseModel):
@@ -28,6 +31,7 @@ class PerturbationResult(BaseModel):
     output_digest: str = Field(..., min_length=64, max_length=64)
     mean_confidence: float = Field(..., ge=0.0, le=1.0)
     top_class_id: int = Field(..., ge=0)
+    output_l2_norm: float = 0.0
 
 
 class ModelFingerprint(BaseModel):
@@ -38,6 +42,7 @@ class ModelFingerprint(BaseModel):
     battery_size: int
     probe_records: List[ProbeRecord] = Field(default_factory=list)
     results: List[PerturbationResult]
+    activation_stats: Dict[str, Dict[str, float]] = Field(default_factory=dict)
     aggregate_digest: str = Field(..., min_length=64, max_length=64)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -54,6 +59,9 @@ class FingerprintComparisonResponse(BaseModel):
     reference_model_id: str
     cosine_similarity: float = Field(..., ge=0.0, le=1.0)
     mean_squared_error: float = Field(..., ge=0.0)
+    max_absolute_error: float = 0.0
     is_divergent: bool
     status: AssetStatus
+    divergent_probes: List[str] = Field(default_factory=list)
+    evidence_records: List[Dict[str, Any]] = Field(default_factory=list)
     details: List[Dict[str, Any]] = Field(default_factory=list)

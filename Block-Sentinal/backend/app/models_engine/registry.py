@@ -2,10 +2,11 @@
 import json
 import uuid
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from app.core.config import settings
-from app.crypto.canonical import canonical_json_dumps, canonical_json_hash, hash_file
+from app.crypto.canonical import canonical_json_dumps, canonical_json_hash, hash_bytes, hash_file
+from app.crypto.signer import KeyManager
 from app.models_engine.adapters.factory import ModelAdapterFactory
 from app.models_engine.trigger_detector import TriggerDetector
 from app.schemas.base import AssetStatus
@@ -14,6 +15,7 @@ from app.schemas.model import (
     ModelAssuranceFinding,
     ModelFormat,
     ModelIdentityManifest,
+    ModelLayerInfo,
     ModelVerifyResponse,
     TriggerStatus,
     VerificationStatus,
@@ -34,6 +36,9 @@ class ModelRegistry:
 
         self.manifests_dir.mkdir(parents=True, exist_ok=True)
         self.baselines_dir.mkdir(parents=True, exist_ok=True)
+
+        # ECDSA keypair for signing model identity manifests
+        self.key_manager = KeyManager()
 
     def register_model(
         self,
@@ -59,6 +64,44 @@ class ModelRegistry:
         out_schema = adapter.output_schema()
         resolved_access_mode = access_mode or adapter.access_mode
 
+        # --- Compute per-layer hashes (PyTorch state_dict) ---
+        layers: List[ModelLayerInfo] = []
+        weights_hash: Optional[str] = None
+        architecture_hash: Optional[str] = None
+
+        try:
+            # pyrefly: ignore [missing-import]
+            import torch
+            data = torch.load(str(path), map_location="cpu", weights_only=True)
+            if isinstance(data, dict):
+                state_dict = data.get("state_dict") or data.get("model") or data
+                if isinstance(state_dict, dict):
+                    # Per-layer hashing
+                    arch_entries = []  # name + shape only (structure)
+                    weight_entries = []  # name + shape + hash (content)
+                    for tensor_name in sorted(state_dict.keys()):
+                        tensor = state_dict[tensor_name]
+                        if hasattr(tensor, "detach"):
+                            t_np = tensor.detach().cpu().numpy()
+                            t_bytes = t_np.tobytes()
+                            t_hash = hash_bytes(t_bytes)
+                            t_shape = list(tensor.shape)
+                            t_count = int(tensor.numel())
+                            layers.append(ModelLayerInfo(
+                                name=tensor_name,
+                                shape=t_shape,
+                                sha256_hash=t_hash,
+                                param_count=t_count,
+                            ))
+                            arch_entries.append({"name": tensor_name, "shape": t_shape})
+                            weight_entries.append({"name": tensor_name, "hash": t_hash})
+
+                    architecture_hash = canonical_json_hash({"layers": arch_entries})
+                    weights_hash = canonical_json_hash({"weights": weight_entries})
+        except Exception:
+            # Non-PyTorch format — hashes remain None (set from identity_digest below)
+            pass
+
         identity_payload = {
             "name": name,
             "version": version,
@@ -70,6 +113,15 @@ class ModelRegistry:
             "outputs": [out.model_dump() for out in out_schema],
         }
         identity_digest = canonical_json_hash(identity_payload)
+
+        # For non-PyTorch formats derive architecture_hash / weights_hash from the identity digest
+        if architecture_hash is None:
+            architecture_hash = canonical_json_hash({"format": format.value, "identity": identity_digest})
+        if weights_hash is None:
+            weights_hash = artifact_hash  # fall back to full file hash
+
+        # Sign the identity digest
+        signature = self.key_manager.sign_hash(identity_digest)
 
         model_id = str(uuid.uuid4())
         manifest_meta = dict(meta)
@@ -83,10 +135,14 @@ class ModelRegistry:
             artifact_hash=artifact_hash,
             binary_sha256=artifact_hash,
             access_mode=resolved_access_mode,
+            architecture_hash=architecture_hash,
+            weights_hash=weights_hash,
+            signature=signature,
+            layers=layers,
             architecture_info=meta,
             parameter_count=meta.get("parameter_count", 0),
             node_count=meta.get("node_count", 0),
-            layer_count=meta.get("layer_count", 0),
+            layer_count=len(layers) if layers else meta.get("layer_count", 0),
             inputs=in_schema,
             outputs=out_schema,
             metadata=manifest_meta,
@@ -178,25 +234,42 @@ class ModelRegistry:
                 f"Binary SHA-256 mismatch: candidate={current_cand_hash[:16]}... vs baseline={baseline.artifact_hash[:16]}..."
             )
 
+        # 2b. Weights-level hash comparison (per-layer)
+        weights_match = True
+        if candidate.weights_hash and baseline.weights_hash:
+            weights_match = (candidate.weights_hash == baseline.weights_hash)
+            if not weights_match:
+                # Identify specific differing layers
+                cand_layer_map = {l.name: l.sha256_hash for l in candidate.layers}
+                base_layer_map = {l.name: l.sha256_hash for l in baseline.layers}
+                for lname, lhash in cand_layer_map.items():
+                    if lname in base_layer_map and base_layer_map[lname] != lhash:
+                        discrepancies.append(
+                            f"Weight tamper detected in layer '{lname}': hash changed from baseline"
+                        )
+
         # 3. Structural Identity
         if candidate.access_mode == AccessMode.BLACK_BOX or baseline.access_mode == AccessMode.BLACK_BOX:
             structural_identity = VerificationStatus.UNAVAILABLE
             structural_match = False
             discrepancies.append("Structural verification unavailable: Model has BLACK_BOX access mode.")
         else:
-            structural_match = (candidate.identity_digest == baseline.identity_digest)
+            # Use architecture_hash if available; fall back to identity_digest
+            cand_arch = candidate.architecture_hash or candidate.identity_digest
+            base_arch = baseline.architecture_hash or baseline.identity_digest
+            structural_match = (cand_arch == base_arch)
             structural_identity = VerificationStatus.MATCH if structural_match else VerificationStatus.MISMATCH
             if not structural_match:
                 discrepancies.append(
-                    f"Structural identity mismatch: candidate={candidate.identity_digest[:16]}... vs baseline={baseline.identity_digest[:16]}..."
-                )
-            if candidate.parameter_count != baseline.parameter_count:
-                discrepancies.append(
-                    f"Parameter count mismatch: candidate={candidate.parameter_count} vs baseline={baseline.parameter_count}"
+                    f"Architecture hash mismatch: candidate={cand_arch[:16]}... vs baseline={base_arch[:16]}..."
                 )
             if candidate.layer_count != baseline.layer_count:
                 discrepancies.append(
                     f"Layer count mismatch: candidate={candidate.layer_count} vs baseline={baseline.layer_count}"
+                )
+            if candidate.parameter_count != baseline.parameter_count:
+                discrepancies.append(
+                    f"Parameter count mismatch: candidate={candidate.parameter_count} vs baseline={baseline.parameter_count}"
                 )
             if candidate.inputs != baseline.inputs:
                 discrepancies.append("Input tensor specifications do not match baseline")
@@ -236,6 +309,7 @@ class ModelRegistry:
 
         is_valid = (
             binary_match
+            and weights_match
             and (structural_identity in (VerificationStatus.MATCH, VerificationStatus.UNAVAILABLE))
             and (behavioural_identity in (VerificationStatus.MATCH, VerificationStatus.UNAVAILABLE))
             and (trigger_status != TriggerStatus.SUSPICIOUS_TRIGGER_SENSITIVITY)
@@ -247,6 +321,7 @@ class ModelRegistry:
             is_valid=is_valid,
             binary_match=binary_match,
             structural_match=structural_match,
+            weights_match=weights_match,
             binary_identity=binary_identity,
             structural_identity=structural_identity,
             behavioural_identity=behavioural_identity,

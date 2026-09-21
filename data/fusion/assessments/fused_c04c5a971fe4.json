@@ -1,0 +1,68 @@
+{
+  "assessment_id": "fused_c04c5a971fe4",
+  "target_entity_id": "model_exec_19a",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "INFERENCE_DNA"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [
+    "Cryptographic Provenance Failure: Inference DNA tampering or replay detected."
+  ],
+  "correlated_findings": [
+    "Cryptographic Provenance Failure: Inference DNA tampering or replay detected."
+  ],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+    "Investigate Inference provenance chain broken or replay attack detected."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "HARD VETO: Inference provenance chain broken or replay attack detected. | CORRELATED FINDINGS: Cryptographic Provenance Failure: Inference DNA tampering or replay detected.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_inf_tamper_1a58af58",
+      "source": "INFERENCE_DNA",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "Inference DNA hash mismatch: Raw output digest was altered post-execution.",
+      "subject_id": "inference_dna_record",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [
+    "ev_inf_tamper_1a58af58"
+  ],
+  "hard_veto_triggered": true,
+  "veto_reasons": [
+    "Inference provenance chain broken or replay attack detected."
+  ],
+  "signature": "30450221009d9d0cfe80fe485f3a74ea97ec10a498ba71215f3bf684bf5912ddd6077b49d0022001331cd220679aa6bfa698b659b7ea84051a7e333fbe29a941a9ca06d7b09822",
+  "assessment_digest": "dfc5450337695bb9ad7ee8e823e3ccd985d0a0675a92217a270a3d0442d80367",
+  "created_at": "2026-09-21T06:56:48.425052Z"
+}

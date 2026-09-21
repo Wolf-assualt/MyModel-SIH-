@@ -1,6 +1,8 @@
 """Deterministic probe battery generation and standard CV perturbations."""
 from typing import List, Tuple
+# pyrefly: ignore [missing-import]
 import numpy as np
+# pyrefly: ignore [missing-import]
 from PIL import Image, ImageFilter
 
 from app.schemas.fingerprint import PerturbationType
@@ -52,5 +54,18 @@ class TestBatteryGenerator:
         elif p_type == PerturbationType.ROTATION:
             # 90-degree rotation preserving dimensions if square
             return np.rot90(image, k=1).copy()
+
+        elif p_type == PerturbationType.BRIGHTNESS_SHIFT:
+            # Uniform brightness increase, clipped to [0, 255]
+            shifted = np.clip(image.astype(np.int32) + 40, 0, 255).astype(np.uint8)
+            return shifted
+
+        elif p_type == PerturbationType.OCCLUSION_PATCH:
+            # Black square patch in the top-left quadrant
+            result = image.copy()
+            h, w = result.shape[:2]
+            ph, pw = max(1, h // 4), max(1, w // 4)
+            result[:ph, :pw] = 0
+            return result
 
         return image.copy()

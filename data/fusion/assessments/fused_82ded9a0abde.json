@@ -1,0 +1,64 @@
+{
+  "assessment_id": "fused_82ded9a0abde",
+  "target_entity_id": "pipeline_run_api_01",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "INFERENCE_DNA"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+    "Investigate Inference provenance chain broken or replay attack detected."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "HARD VETO: Inference provenance chain broken or replay attack detected.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_api_dna_fail",
+      "source": "INFERENCE_DNA",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "Cryptographic hash chain broken at sequence 8.",
+      "subject_id": null,
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": "5a51862af67daa907143038695a0bd185eb49dd20c8a2a096ae19405109f3e69",
+      "confidence": 1.0,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [
+    "ev_api_dna_fail"
+  ],
+  "hard_veto_triggered": true,
+  "veto_reasons": [
+    "Inference provenance chain broken or replay attack detected."
+  ],
+  "signature": "3045022100f71ec66e88f7693935404c64735ead78909603678c1607dfb4fc1a2bbd911c6702201d99c6cb9ee462479266f548c3534e6a8f67ca1277b8b4d4cd37623eb44be2f7",
+  "assessment_digest": "bac2cefd3130ba97f84e7db8d5270d6e11ea8732c7e15b7c081f4a0a91327ebf",
+  "created_at": "2026-09-21T06:56:27.772451Z"
+}

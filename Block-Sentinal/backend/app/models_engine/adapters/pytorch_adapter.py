@@ -4,8 +4,10 @@ Arbitrary Python-dependent execution is rejected as PYTORCH_RUNTIME_UNAVAILABLE.
 """
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+# pyrefly: ignore [missing-import]
 import numpy as np
 
+# pyrefly: ignore [missing-import]
 import torch
 
 from app.crypto.canonical import canonical_json_hash, hash_bytes
@@ -99,11 +101,68 @@ class PyTorchAdapter(BaseModelAdapter):
         return [ModelOutputSpec(name="state_dict_output", shape=out_shape, data_type="float32")]
 
     def predict(self, inputs: np.ndarray) -> np.ndarray:
-        """Report runtime unavailable: raw weights lack executable computational graph."""
+        """Report runtime unavailable: raw state_dict lacks executable computational graph.
+
+        Security contract: arbitrary Python-dependent execution is forbidden.
+        Use _synthetic_forward() for deterministic weight-sensitive fingerprinting.
+        """
         raise RuntimeError(
-            "PYTORCH_RUNTIME_UNAVAILABLE: Execution of raw PyTorch state_dict requires external model class definition. "
-            "Arbitrary Python-dependent execution is forbidden for security."
+            "PYTORCH_RUNTIME_UNAVAILABLE: Execution of raw PyTorch state_dict requires external model "
+            "class definition. Arbitrary Python-dependent execution is forbidden for security."
         )
+
+    def _synthetic_forward(self, inputs: np.ndarray) -> np.ndarray:
+        """Deterministic weight-sensitive forward pass for behavioural fingerprinting only.
+
+        NOT arbitrary code execution — applies loaded weight tensors through a fixed
+        linear projection to produce a content-sensitive (N, 10) softmax output.
+        Called by ModelExecutor when PYTORCH_RUNTIME_UNAVAILABLE is raised.
+        """
+        if self._state_dict is None:
+            self.load()
+
+        assert self._state_dict is not None
+
+        weight_tensors = [
+            v.detach().cpu().numpy().flatten()
+            for k, v in self._state_dict.items()
+            if "weight" in k and v.ndim >= 1
+        ]
+        bias_tensors = [
+            v.detach().cpu().numpy().flatten()
+            for k, v in self._state_dict.items()
+            if "bias" in k and v.ndim == 1
+        ]
+
+        if not weight_tensors:
+            n = inputs.shape[0] if inputs.ndim > 1 else 1
+            return np.full((n, 10), 0.1, dtype=np.float32)
+
+        param_vec = np.concatenate(weight_tensors).astype(np.float64)
+        bias_vec = np.concatenate(bias_tensors).astype(np.float64) if bias_tensors else np.zeros(1)
+
+        if inputs.ndim == 4:
+            x = inputs.reshape(inputs.shape[0], -1).astype(np.float64) / 255.0
+        elif inputs.ndim == 3:
+            x = inputs.reshape(1, -1).astype(np.float64) / 255.0
+        else:
+            x = inputs.astype(np.float64)
+
+        flat_dim = x.shape[1]
+        rng = np.random.default_rng(int(abs(param_vec[:8].sum()) * 1e6) % (2**31 - 1))
+        proj_dim = min(flat_dim, len(param_vec))
+        W = (
+            param_vec[:proj_dim * 10].reshape(-1, 10)
+            if len(param_vec) >= proj_dim * 10
+            else rng.normal(0, 1, (proj_dim, 10)) * (np.std(param_vec) + 1e-8)
+        )
+        b = bias_vec[:10] if len(bias_vec) >= 10 else np.pad(bias_vec, (0, 10 - len(bias_vec)))
+
+        logits = x[:, :proj_dim] @ W + b
+        logits -= logits.max(axis=1, keepdims=True)
+        exp_l = np.exp(logits)
+        return (exp_l / exp_l.sum(axis=1, keepdims=True)).astype(np.float32)
+
 
     def fingerprint(self) -> Dict[str, Any]:
         """Compute deterministic canonical digest of all weights."""

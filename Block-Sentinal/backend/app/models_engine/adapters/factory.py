@@ -6,6 +6,7 @@ import numpy as np
 
 from app.models_engine.adapters.base import BaseModelAdapter
 from app.models_engine.adapters.blackbox_adapter import BlackBoxAdapter
+from app.models_engine.adapters.generic_binary_adapter import GenericBinaryAdapter
 from app.models_engine.adapters.onnx_adapter import ONNXAdapter
 from app.models_engine.adapters.pytorch_adapter import PyTorchAdapter
 from app.models_engine.adapters.torchscript_adapter import TorchScriptAdapter
@@ -66,7 +67,7 @@ class ModelAdapterFactory:
         elif fmt == ModelFormat.PYTORCH_WEIGHTS:
             return PyTorchAdapter(path)
         elif fmt == ModelFormat.GENERIC_BINARY:
-            # Check if it's actually an ONNX or TorchScript binary despite the name
+            # Check if it's actually an ONNX, TorchScript, or PyTorch binary despite the name
             try:
                 adapter = ONNXAdapter(path)
                 adapter.load()
@@ -85,6 +86,7 @@ class ModelAdapterFactory:
                 return adapter
             except Exception:
                 pass
-            raise ValueError(f"UNSUPPORTED_FORMAT: File {path.name} cannot be safely parsed as a known model format.")
+            # Safely fall back to GenericBinaryAdapter for static integrity assurance
+            return GenericBinaryAdapter(path)
         else:
             raise ValueError(f"UNSUPPORTED_FORMAT: Model format {fmt} is not safely supported locally.")

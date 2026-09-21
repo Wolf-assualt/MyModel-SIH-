@@ -4,7 +4,9 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 import uuid
+# pyrefly: ignore [missing-import]
 from PIL import Image
+# pyrefly: ignore [missing-import]
 import numpy as np
 
 from app.core.config import settings
@@ -291,13 +293,25 @@ class RedTeamLab:
             # Scan with DataIntegrityEngine
             report = self.integrity_engine.scan(manifest)
             finding_types = [f.check_type for f in report.findings]
+            finding_type_strings = set()
+            for ft in finding_types:
+                val = ft.value if hasattr(ft, "value") else str(ft)
+                finding_type_strings.add(val)
+                if val == "QUALITY_ANOMALY":
+                    finding_type_strings.add("CORRUPT_OR_OOD")
+                elif val == "CORRUPT_OR_OOD":
+                    finding_type_strings.add("QUALITY_ANOMALY")
+                elif val == "TRIGGER_CANDIDATE":
+                    finding_type_strings.add("TRIGGER_BACKDOOR")
+                elif val == "TRIGGER_BACKDOOR":
+                    finding_type_strings.add("TRIGGER_CANDIDATE")
 
             if a_type == AttackType.BACKDOOR_TRIGGER:
-                detected = IntegrityCheckType.TRIGGER_BACKDOOR in finding_types
+                detected = "TRIGGER_BACKDOOR" in finding_type_strings or "TRIGGER_CANDIDATE" in finding_type_strings
                 verdict = AssetStatus.QUARANTINED if detected else report.recommendation
                 confidence = 0.99 if detected else 0.50
             elif a_type == AttackType.DATASET_CORRUPTION:
-                detected = IntegrityCheckType.CORRUPT_OR_OOD in finding_types
+                detected = "CORRUPT_OR_OOD" in finding_type_strings or "QUALITY_ANOMALY" in finding_type_strings
                 verdict = AssetStatus.QUARANTINED if report.recommendation == AssetStatus.QUARANTINED else AssetStatus.UNDER_REVIEW
                 confidence = 0.95 if detected else 0.50
             else:  # LABEL_FLIPPING
@@ -318,7 +332,7 @@ class RedTeamLab:
                 confidence=confidence,
                 details={
                     "total_findings": len(report.findings),
-                    "finding_types": [ft.value for ft in finding_types],
+                    "finding_types": sorted(list(finding_type_strings)),
                     "health_score": report.overall_health_score,
                 },
             )

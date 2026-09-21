@@ -1,0 +1,16 @@
+{
+  "quarantine_id": "quar_29160b3999ee",
+  "subject_id": "model_exec_16e",
+  "subject_type": "ASSET",
+  "reason": "Risk score 0.8500 exceeded threshold 0.70",
+  "evidence_ids": [
+    "ev_corr_drift_93f069bf",
+    "ev_corr_probe_b1a484cb"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T06:55:07.572867Z",
+  "created_at": "2026-09-21T06:55:07.572867Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

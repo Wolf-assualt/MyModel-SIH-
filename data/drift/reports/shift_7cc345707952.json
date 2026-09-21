@@ -1,0 +1,102 @@
+{
+  "report_id": "shift_7cc345707952",
+  "baseline_id": "eo_summer_baseline",
+  "target_batch_id": "eo_autumn_batch",
+  "sample_count": 5,
+  "overall_drift_score": 1.0,
+  "detected_drift_type": "ADVERSARIAL_ANOMALY",
+  "severity": "CRITICAL_SHIFT",
+  "feature_metrics": [
+    {
+      "feature_name": "ndvi",
+      "baseline_mean": 0.1434,
+      "target_mean": 0.2235,
+      "drift_score": 1.0,
+      "ks_distance": 1.0,
+      "ks_statistic": 1.0,
+      "ks_p_value": 0.0038,
+      "psi": 21.6353,
+      "psi_score": 21.6353,
+      "wasserstein": 0.0802,
+      "wasserstein_distance": 0.0802,
+      "energy_distance": 0.1597,
+      "is_drifted": true,
+      "explanation": "ndvi: KS=1.0000 (p=0.0038), PSI=21.6353, Wasserstein=0.0802, Energy=0.1597"
+    },
+    {
+      "feature_name": "nir_mean",
+      "baseline_mean": 159.5238,
+      "target_mean": 109.5232,
+      "drift_score": 1.0,
+      "ks_distance": 1.0,
+      "ks_statistic": 1.0,
+      "ks_p_value": 0.0038,
+      "psi": 21.6353,
+      "psi_score": 21.6353,
+      "wasserstein": 49.9982,
+      "wasserstein_distance": 49.9982,
+      "energy_distance": 99.949,
+      "is_drifted": true,
+      "explanation": "nir_mean: KS=1.0000 (p=0.0038), PSI=21.6353, Wasserstein=49.9982, Energy=99.9490"
+    },
+    {
+      "feature_name": "visible_brightness",
+      "baseline_mean": 109.5096,
+      "target_mean": 59.5068,
+      "drift_score": 1.0,
+      "ks_distance": 1.0,
+      "ks_statistic": 1.0,
+      "ks_p_value": 0.0038,
+      "psi": 21.6353,
+      "psi_score": 21.6353,
+      "wasserstein": 50.0016,
+      "wasserstein_distance": 50.0016,
+      "energy_distance": 99.9785,
+      "is_drifted": true,
+      "explanation": "visible_brightness: KS=1.0000 (p=0.0038), PSI=21.6353, Wasserstein=50.0016, Energy=99.9785"
+    }
+  ],
+  "affected_features": [
+    "ndvi",
+    "nir_mean",
+    "visible_brightness"
+  ],
+  "evidence_records": [
+    {
+      "evidence_id": "ev_drift_fb5ba52580f3",
+      "source": "DRIFT_ENGINE",
+      "baseline_id": "eo_summer_baseline",
+      "baseline_digest": "2e744fcd7386c574efe1ac9aa7bba9b1054fa3fb7c0c14b767b6c66d76bed20e",
+      "feature_name": "ndvi",
+      "severity": "CRITICAL",
+      "ks_distance": 1.0,
+      "psi": 21.6353,
+      "description": "Distribution drift detected in 'ndvi': ndvi: KS=1.0000 (p=0.0038), PSI=21.6353, Wasserstein=0.0802, Energy=0.1597"
+    },
+    {
+      "evidence_id": "ev_drift_5eefeb90989a",
+      "source": "DRIFT_ENGINE",
+      "baseline_id": "eo_summer_baseline",
+      "baseline_digest": "2e744fcd7386c574efe1ac9aa7bba9b1054fa3fb7c0c14b767b6c66d76bed20e",
+      "feature_name": "nir_mean",
+      "severity": "CRITICAL",
+      "ks_distance": 1.0,
+      "psi": 21.6353,
+      "description": "Distribution drift detected in 'nir_mean': nir_mean: KS=1.0000 (p=0.0038), PSI=21.6353, Wasserstein=49.9982, Energy=99.9490"
+    },
+    {
+      "evidence_id": "ev_drift_40ed22bac686",
+      "source": "DRIFT_ENGINE",
+      "baseline_id": "eo_summer_baseline",
+      "baseline_digest": "2e744fcd7386c574efe1ac9aa7bba9b1054fa3fb7c0c14b767b6c66d76bed20e",
+      "feature_name": "visible_brightness",
+      "severity": "CRITICAL",
+      "ks_distance": 1.0,
+      "psi": 21.6353,
+      "description": "Distribution drift detected in 'visible_brightness': visible_brightness: KS=1.0000 (p=0.0038), PSI=21.6353, Wasserstein=50.0016, Energy=99.9785"
+    }
+  ],
+  "status": "QUARANTINED",
+  "report_digest": "2374208d92a98f1ad272d59c0a3fc1f944b9fd83bdc351d05ec5fbbc68a968ab",
+  "created_at": "2026-09-21T06:55:46.736162Z"
+}

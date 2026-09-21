@@ -1,0 +1,76 @@
+{
+  "assessment_id": "fused_ab8bdcda2cce",
+  "target_entity_id": "28371f55-c92c-4e5a-b586-28a75feac08a",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.28,
+  "confidence_score": 0.28,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "BEHAVIOURAL_FINGERPRINT",
+      "DATA_INTEGRITY"
+    ],
+    "coverage_ratio": 0.4,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 40%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 2 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_tamper_alert_01",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "28371f55-c92c-4e5a-b586-28a75feac08a",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": 1.0,
+      "metadata": {
+        "hard_veto": true,
+        "tampered_sample": "S2A_Patch_Alpha"
+      }
+    },
+    {
+      "evidence_id": "ev_benign_sensor_01",
+      "source": "BEHAVIOURAL_FINGERPRINT",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "28371f55-c92c-4e5a-b586-28a75feac08a",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": 0.95,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "3045022036b4912c251d847c2ca3407dfae790cb819aee32d6b9147c76d04ef9b3cff79e0221009590449ffcadc64dfb18a88947d566486d77873c281aa4932bce9492c4d1d0d4",
+  "assessment_digest": "74e9fe6f4c89b22b8713841c2824b3595667abf8f8eb913a1f164d15c0cdeeb1",
+  "created_at": "2026-09-21T06:56:08.780086Z"
+}

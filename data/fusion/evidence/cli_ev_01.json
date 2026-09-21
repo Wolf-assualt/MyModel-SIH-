@@ -1,0 +1,14 @@
+{
+  "evidence_id": "cli_ev_01",
+  "source": "MODEL_IDENTITY",
+  "domain": null,
+  "severity": "LOW",
+  "metric_value": 0.0,
+  "description": "Model weights authenticated against reference baseline.",
+  "subject_id": null,
+  "related_model_id": null,
+  "related_dataset_id": null,
+  "evidence_digest": "95e87cd2f0cf66374299f72709e3143afffb85ee3e919535b831083b6dcbdf95",
+  "confidence": 1.0,
+  "metadata": {}
+}

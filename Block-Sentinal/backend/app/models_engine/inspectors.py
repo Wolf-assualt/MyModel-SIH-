@@ -50,9 +50,12 @@ class PyTorchInspector(BaseModelInspector):
 
         from app.models_engine.adapters.pytorch_adapter import PyTorchAdapter
 
-        adapter = PyTorchAdapter(path)
-        adapter.load()
-        meta = adapter.metadata()
+        try:
+            adapter = PyTorchAdapter(path)
+            adapter.load()
+            meta = adapter.metadata()
+        except Exception as exc:
+            raise ValueError(f"Secure PyTorch deserialization failed: {exc}")
 
         return {
             "parameter_count": meta.get("parameter_count", 0),

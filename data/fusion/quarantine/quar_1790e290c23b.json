@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_1790e290c23b",
+  "subject_id": "pipeline_run_99",
+  "subject_type": "ASSET",
+  "reason": "Invalid or forged cryptographic signature detected.",
+  "evidence_ids": [
+    "ev_api_02"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T06:56:27.569697Z",
+  "created_at": "2026-09-21T06:56:27.569697Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

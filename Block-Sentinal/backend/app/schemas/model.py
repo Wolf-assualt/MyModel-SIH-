@@ -47,6 +47,13 @@ class ModelOutputSpec(BaseModel):
     data_type: str = "float32"
 
 
+class ModelLayerInfo(BaseModel):
+    name: str
+    shape: List[Optional[int]] = Field(default_factory=list)
+    sha256_hash: str = Field(..., min_length=64, max_length=64)
+    param_count: int = Field(default=0, ge=0)
+
+
 class ModelIdentityManifest(BaseModel):
     model_id: str
     name: str
@@ -55,6 +62,10 @@ class ModelIdentityManifest(BaseModel):
     artifact_hash: str = Field(..., min_length=64, max_length=64)
     binary_sha256: str = Field(..., min_length=64, max_length=64)
     access_mode: AccessMode = AccessMode.WHITE_BOX
+    architecture_hash: Optional[str] = None
+    weights_hash: Optional[str] = None
+    signature: Optional[str] = None
+    layers: List[ModelLayerInfo] = Field(default_factory=list)
     architecture_info: Dict[str, Any] = Field(default_factory=dict)
     parameter_count: int = Field(default=0, ge=0)
     node_count: int = Field(default=0, ge=0)
@@ -82,6 +93,8 @@ class ModelVerifyResponse(BaseModel):
     is_valid: bool
     binary_match: bool
     structural_match: bool
+    weights_match: bool = True
+    signature_valid: bool = True
     binary_identity: VerificationStatus = VerificationStatus.UNAVAILABLE
     structural_identity: VerificationStatus = VerificationStatus.UNAVAILABLE
     behavioural_identity: VerificationStatus = VerificationStatus.UNAVAILABLE

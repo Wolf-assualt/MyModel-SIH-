@@ -1,0 +1,17 @@
+{
+  "quarantine_id": "quar_ef340bb57e53",
+  "subject_id": "ds_exec_78f",
+  "subject_type": "REDTEAM_SANDBOX_ASSET",
+  "reason": "Defensive Red-Team Detection: End-to-End Poisoned Pipeline Attack Chain. CORRELATED FINDINGS: Correlated Targeted Backdoor Poisoning Campaign detected: Training data contains synthetic trigger ",
+  "evidence_ids": [
+    "ev_m_data_1af9094b",
+    "ev_m_model_a3d4d363",
+    "ev_m_drift_632ed1e7"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T04:41:11.095503Z",
+  "created_at": "2026-09-21T04:41:11.095503Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

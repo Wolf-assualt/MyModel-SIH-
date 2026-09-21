@@ -1,0 +1,46 @@
+{
+  "report_id": "shift_cebd209700a0",
+  "baseline_id": "eo_base_drift_test",
+  "target_batch_id": "eval_batch",
+  "sample_count": 4,
+  "overall_drift_score": 1.0,
+  "detected_drift_type": "ADVERSARIAL_ANOMALY",
+  "severity": "CRITICAL_SHIFT",
+  "feature_metrics": [
+    {
+      "feature_name": "ndvi",
+      "baseline_mean": 0.715,
+      "target_mean": 0.635,
+      "drift_score": 1.0,
+      "ks_distance": 1.0,
+      "ks_statistic": 1.0,
+      "ks_p_value": 0.0111,
+      "psi": 19.1092,
+      "psi_score": 19.1092,
+      "wasserstein": 0.08,
+      "wasserstein_distance": 0.08,
+      "energy_distance": 0.135,
+      "is_drifted": true,
+      "explanation": "ndvi: KS=1.0000 (p=0.0111), PSI=19.1092, Wasserstein=0.0800, Energy=0.1350"
+    }
+  ],
+  "affected_features": [
+    "ndvi"
+  ],
+  "evidence_records": [
+    {
+      "evidence_id": "ev_drift_138b4446d26e",
+      "source": "DRIFT_ENGINE",
+      "baseline_id": "eo_base_drift_test",
+      "baseline_digest": "8ef13e2095176556a9210f2fc8aee0edca882189fc75608a326723ee9a78a2f6",
+      "feature_name": "ndvi",
+      "severity": "CRITICAL",
+      "ks_distance": 1.0,
+      "psi": 19.1092,
+      "description": "Distribution drift detected in 'ndvi': ndvi: KS=1.0000 (p=0.0111), PSI=19.1092, Wasserstein=0.0800, Energy=0.1350"
+    }
+  ],
+  "status": "QUARANTINED",
+  "report_digest": "69eee8f70724ccd43f4d17b51813d42ab31ccd60a0aa960477e3f4a13736aea3",
+  "created_at": "2026-09-21T04:40:24.579196Z"
+}

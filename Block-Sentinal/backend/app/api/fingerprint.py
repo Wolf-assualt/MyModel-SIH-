@@ -1,4 +1,5 @@
 """Model Behavioural Fingerprinting and Comparative Audit API Endpoints."""
+# pyrefly: ignore [missing-import]
 from fastapi import APIRouter, HTTPException, Query
 
 from app.fingerprint.runner import default_fingerprinter
@@ -29,6 +30,21 @@ def generate_model_fingerprint(
         raise HTTPException(status_code=400, detail=f"Fingerprint generation failed: {str(exc)}")
 
     return ResponseEnvelope(data=fingerprint)
+
+
+@router.get("/{model_id}", response_model=ResponseEnvelope[ModelFingerprint])
+def get_model_fingerprint(
+    model_id: str,
+    seed: int = Query(42, description="Battery randomization seed"),
+) -> ResponseEnvelope[ModelFingerprint]:
+    """Retrieve an existing model behavioural fingerprint by model ID."""
+    fp = default_fingerprinter.load_fingerprint(model_id, seed=seed)
+    if not fp:
+        try:
+            fp = default_fingerprinter.fingerprint_model(model_id=model_id, seed=seed)
+        except Exception:
+            raise HTTPException(status_code=404, detail=f"Fingerprint for model '{model_id}' (seed: {seed}) not found.")
+    return ResponseEnvelope(data=fp)
 
 
 @router.post("/compare", response_model=ResponseEnvelope[FingerprintComparisonResponse])

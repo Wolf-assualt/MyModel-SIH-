@@ -247,16 +247,23 @@ class EvidenceFusionEngine:
 
             # Rule B: Broken inference provenance / replay attack
             if e.source == EvidenceSource.INFERENCE_DNA and e.severity == IntegritySeverity.CRITICAL:
-                if any(k in desc_lower for k in ["replay", "tamper", "broken", "mismatch"]):
+                if any(k in desc_lower for k in ["replay", "tamper", "broken", "mismatch", "reuse", "break"]):
                     hard_veto_triggered = True
                     veto_reasons.append("Inference provenance chain broken or replay attack detected.")
                     decisive_evidence.append(e.evidence_id)
 
             # Rule C: Model identity hash mismatch / unauthorized substitution
             if e.source == EvidenceSource.MODEL_IDENTITY and e.severity == IntegritySeverity.CRITICAL:
-                if any(k in desc_lower for k in ["mismatch", "substitution", "tamper", "unauthorized"]):
+                if any(k in desc_lower for k in ["mismatch", "substitution", "tamper", "unauthorized", "discrepancy", "modified", "mutation"]):
                     hard_veto_triggered = True
-                    veto_reasons.append("Model identity hash mismatch: unauthorized model substitution detected.")
+                    veto_reasons.append("Model identity hash mismatch: unauthorized model substitution or weight modification detected.")
+                    decisive_evidence.append(e.evidence_id)
+
+            # Rule D: Dataset tampering / poisoning trigger (critical severity)
+            if e.source == EvidenceSource.DATA_INTEGRITY and e.severity == IntegritySeverity.CRITICAL:
+                if any(k in desc_lower for k in ["tamper", "mismatch", "backdoor", "trigger", "poison"]):
+                    hard_veto_triggered = True
+                    veto_reasons.append("Critical training data tampering or backdoor trigger pattern detected.")
                     decisive_evidence.append(e.evidence_id)
 
         # 3. Weighted risk computation
@@ -286,6 +293,16 @@ class EvidenceFusionEngine:
         only_drift = evidence and all(e.source == EvidenceSource.DISTRIBUTION_SHIFT for e in evidence)
         if only_drift and not hard_veto_triggered:
             raw_weighted_risk = min(raw_weighted_risk, 0.65)
+
+        # Corroborated drift attack (drift + behavioral divergence / weight tampering) elevated to quarantine
+        has_drift = any(e.source == EvidenceSource.DISTRIBUTION_SHIFT for e in evidence)
+        has_behavior_or_weight = any(
+            e.source in (EvidenceSource.BEHAVIOURAL_FINGERPRINT, EvidenceSource.MODEL_IDENTITY)
+            and e.severity in (IntegritySeverity.HIGH, IntegritySeverity.CRITICAL)
+            for e in evidence
+        )
+        if has_drift and has_behavior_or_weight:
+            raw_weighted_risk = max(raw_weighted_risk, 0.85)
 
         risk_score = round(float(max(0.0, min(1.0, raw_weighted_risk))), 4)
 
@@ -392,7 +409,7 @@ class EvidenceFusionEngine:
         # Sign digest
         signature = None
         try:
-            signature = self.key_manager.sign_data(assessment_digest.encode("utf-8"))
+            signature = self.key_manager.sign_hash(assessment_digest)
         except Exception:
             pass
 

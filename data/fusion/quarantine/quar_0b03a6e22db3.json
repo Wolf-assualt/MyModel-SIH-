@@ -1,0 +1,17 @@
+{
+  "quarantine_id": "quar_0b03a6e22db3",
+  "subject_id": "ds_exec_05d",
+  "subject_type": "REDTEAM_SANDBOX_ASSET",
+  "reason": "Defensive Red-Team Detection: End-to-End Poisoned Pipeline Attack Chain. HARD VETO: Critical training data tampering or backdoor trigger pattern detected. | CORRELATED FINDINGS: Correlated Targ",
+  "evidence_ids": [
+    "ev_m_data_0be2078e",
+    "ev_m_model_e4df4a4b",
+    "ev_m_drift_fff18c06"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T06:56:48.727169Z",
+  "created_at": "2026-09-21T06:56:48.727169Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

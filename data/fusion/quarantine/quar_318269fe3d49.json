@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_318269fe3d49",
+  "subject_id": "model_exec_bc0",
+  "subject_type": "REDTEAM_SANDBOX_ASSET",
+  "reason": "Defensive Red-Team Detection: Unauthorized Model Architecture Substitution. HARD VETO: Model identity hash mismatch: unauthorized model substitution detected. | CORRELATED FINDINGS: Model Identity",
+  "evidence_ids": [
+    "ev_sub_106a23a2"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T04:41:09.167255Z",
+  "created_at": "2026-09-21T04:41:09.167255Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

@@ -1,0 +1,248 @@
+{
+  "execution_id": "exec_e38db5c17cd7",
+  "scenario_id": "DATASET_BYTE_TAMPER",
+  "scenario_name": "Single Image Byte Tampering",
+  "category": "DATASET",
+  "attack_id": "",
+  "is_detected": true,
+  "execution_success": true,
+  "detected": true,
+  "detecting_subsystems": [
+    "DATA_INTEGRITY"
+  ],
+  "evidence_generated": [
+    {
+      "evidence_id": "ev_byte_5066f711",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "Per-sample SHA-256 mismatch: Image payload bytes tampered post-ingestion.",
+      "subject_id": "synthetic_dataset_batch",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "fused_assessment": {
+    "assessment_id": "fused_d43bd25c1b2f",
+    "target_entity_id": "ds_exec_e38",
+    "overall_status": "QUARANTINED",
+    "verdict": "QUARANTINED",
+    "risk_level": "CRITICAL",
+    "risk_score": 0.9,
+    "confidence": 0.12,
+    "confidence_score": 0.12,
+    "action": "BLOCK",
+    "coverage": {
+      "sources_checked": [
+        "DATA_INTEGRITY"
+      ],
+      "coverage_ratio": 0.2,
+      "missing_sources": [
+        "MODEL_IDENTITY",
+        "BEHAVIOURAL_FINGERPRINT",
+        "INFERENCE_DNA",
+        "DISTRIBUTION_SHIFT"
+      ]
+    },
+    "findings": [],
+    "correlated_findings": [],
+    "contributors": [
+      "UNKNOWN"
+    ],
+    "recommended_actions": [
+      "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+      "Investigate Critical training data tampering or backdoor trigger pattern detected."
+    ],
+    "limitations": [
+      "Audit coverage ratio: 20%.",
+      "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+      "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+    ],
+    "explanation": "HARD VETO: Critical training data tampering or backdoor trigger pattern detected.",
+    "raw_evidence": [
+      {
+        "evidence_id": "ev_byte_5066f711",
+        "source": "DATA_INTEGRITY",
+        "domain": null,
+        "severity": "CRITICAL",
+        "metric_value": 1.0,
+        "description": "Per-sample SHA-256 mismatch: Image payload bytes tampered post-ingestion.",
+        "subject_id": "synthetic_dataset_batch",
+        "related_model_id": null,
+        "related_dataset_id": null,
+        "evidence_digest": null,
+        "confidence": null,
+        "metadata": {}
+      }
+    ],
+    "decisive_evidence": [
+      "ev_byte_5066f711"
+    ],
+    "hard_veto_triggered": true,
+    "veto_reasons": [
+      "Critical training data tampering or backdoor trigger pattern detected."
+    ],
+    "signature": "3045022100b8f2b8c09626269e6be061315aeacd806b2bc962f52a5a0fd8aecfb252c0f48a02203e5515f97f2e6bd3bc222a006341342f85898494c447c63991b4463d8eaf915d",
+    "assessment_digest": "27f86d2b66aa5be0f54ecdf1d2889f92c0ac4fd662cb42373591073159b71448",
+    "created_at": "2026-09-21T06:55:08.193645Z"
+  },
+  "hard_veto_triggered": true,
+  "quarantine_record": {
+    "quarantine_id": "quar_cc9509ce6d0d",
+    "subject_id": "ds_exec_e38",
+    "subject_type": "REDTEAM_SANDBOX_ASSET",
+    "reason": "Defensive Red-Team Detection: Single Image Byte Tampering. HARD VETO: Critical training data tampering or backdoor trigger pattern detected.",
+    "evidence_ids": [
+      "ev_byte_5066f711"
+    ],
+    "is_active": true,
+    "quarantined_at": "2026-09-21T06:55:08.202968Z",
+    "created_at": "2026-09-21T06:55:08.202968Z",
+    "resolved_at": null,
+    "resolved_by": null,
+    "resolution_notes": null
+  },
+  "graph_lineage_nodes": [
+    {
+      "id": "model_exec_e38",
+      "node_type": "MODEL",
+      "label": "Model model_exec_e38",
+      "digest": null,
+      "canonical_identity": null,
+      "properties": {},
+      "created_at": "2026-09-21T06:55:08.207877Z"
+    },
+    {
+      "id": "infer_exec_e38",
+      "node_type": "INFERENCE",
+      "label": "Inference infer_exec_e38",
+      "digest": null,
+      "canonical_identity": null,
+      "properties": {},
+      "created_at": "2026-09-21T06:55:08.207897Z"
+    },
+    {
+      "id": "out_exec_e38",
+      "node_type": "OUTPUT",
+      "label": "Output out_exec_e38",
+      "digest": null,
+      "canonical_identity": null,
+      "properties": {},
+      "created_at": "2026-09-21T06:55:08.207912Z"
+    },
+    {
+      "id": "fused_d43bd25c1b2f",
+      "node_type": "FUSION_ASSESSMENT",
+      "label": "Fusion Assessment fused_d43bd25c1b2f",
+      "digest": null,
+      "canonical_identity": null,
+      "properties": {},
+      "created_at": "2026-09-21T06:55:08.207927Z"
+    },
+    {
+      "id": "quar_cc9509ce6d0d",
+      "node_type": "QUARANTINE_RECORD",
+      "label": "Quarantine quar_cc9509ce6d0d",
+      "digest": null,
+      "canonical_identity": null,
+      "properties": {},
+      "created_at": "2026-09-21T06:55:08.207941Z"
+    },
+    {
+      "id": "ev_byte_5066f711",
+      "node_type": "EVIDENCE",
+      "label": "Per-sample SHA-256 mismatch: Image payload bytes tampered post-ingestion.",
+      "digest": null,
+      "canonical_identity": null,
+      "properties": {
+        "severity": "IntegritySeverity.CRITICAL",
+        "metric_value": 1.0,
+        "source_domain": "EvidenceSource.DATA_INTEGRITY",
+        "subject_id": "model_exec_e38"
+      },
+      "created_at": "2026-09-21T06:55:08.208426Z"
+    }
+  ],
+  "graph_lineage_edges": [
+    {
+      "source_id": "out_exec_e38",
+      "target_id": "infer_exec_e38",
+      "edge_type": "GENERATED_BY",
+      "evidence_id": "out_out_exec_e38_infer_exec_e38",
+      "metadata": {},
+      "created_at": "2026-09-21T06:55:08.207918Z"
+    },
+    {
+      "source_id": "fused_d43bd25c1b2f",
+      "target_id": "model_exec_e38",
+      "edge_type": "DECIDES_ON",
+      "evidence_id": "fa_fused_d43bd25c1b2f_model_exec_e38",
+      "metadata": {},
+      "created_at": "2026-09-21T06:55:08.207934Z"
+    },
+    {
+      "source_id": "quar_cc9509ce6d0d",
+      "target_id": "model_exec_e38",
+      "edge_type": "QUARANTINES",
+      "evidence_id": "quar_quar_cc9509ce6d0d_model_exec_e38",
+      "metadata": {},
+      "created_at": "2026-09-21T06:55:08.208015Z"
+    },
+    {
+      "source_id": "quar_cc9509ce6d0d",
+      "target_id": "fused_d43bd25c1b2f",
+      "edge_type": "RESULTED_FROM",
+      "evidence_id": "quar_fa_quar_cc9509ce6d0d_fused_d43bd25c1b2f",
+      "metadata": {},
+      "created_at": "2026-09-21T06:55:08.208241Z"
+    },
+    {
+      "source_id": "model_exec_e38",
+      "target_id": "ev_byte_5066f711",
+      "edge_type": "FLAGGED_WITH",
+      "evidence_id": "edge_flag_ev_byte_5066f711",
+      "metadata": {},
+      "created_at": "2026-09-21T06:55:08.208497Z"
+    },
+    {
+      "source_id": "ev_byte_5066f711",
+      "target_id": "model_exec_e38",
+      "edge_type": "ABOUT",
+      "evidence_id": "edge_about_ev_byte_5066f711",
+      "metadata": {},
+      "created_at": "2026-09-21T06:55:08.208610Z"
+    }
+  ],
+  "blast_radius_report": {
+    "root_cause_id": "ds_exec_e38",
+    "root_cause_type": "DATASET",
+    "status": "QUARANTINED",
+    "directly_affected_count": 2,
+    "total_downstream_count": 3,
+    "affected_training_runs": [],
+    "affected_models": [
+      "model_exec_e38"
+    ],
+    "affected_inferences": [
+      "infer_exec_e38"
+    ],
+    "affected_evidence_ids": [
+      "ev_byte_5066f711"
+    ],
+    "affected_quarantines": [
+      "quar_cc9509ce6d0d"
+    ],
+    "total_affected_entities": 2,
+    "explanation": "Downstream dependencies of 'ds_exec_e38' (DATASET) include 0 training runs, 1 models, and 1 deployed inference sequences."
+  },
+  "execution_time_ms": 18.2,
+  "execution_time_seconds": 0.0,
+  "forensic_summary": "Scenario 'Single Image Byte Tampering' [DATASET_BYTE_TAMPER] executed in 18.2ms. Outcome: SUCCESSFULLY DETECTED by DATA_INTEGRITY. Gatekeeper Action: BLOCK (Risk: 0.9000, Hard Veto: True). Downstream blast radius affected 3 assets.",
+  "assigned_verdict": "QUARANTINED",
+  "details": {},
+  "executed_at": "2026-09-21T06:55:08.209204Z"
+}

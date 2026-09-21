@@ -1,0 +1,17 @@
+{
+  "quarantine_id": "quar_efa01505c51c",
+  "subject_id": "ds_exec_002",
+  "subject_type": "ASSET",
+  "reason": "Risk score 0.9000 exceeded threshold 0.70",
+  "evidence_ids": [
+    "ev_m_data_38ebb271",
+    "ev_m_model_9a6f1c8b",
+    "ev_m_drift_729a16a0"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-21T04:41:10.892037Z",
+  "created_at": "2026-09-21T04:41:10.892037Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

@@ -1,0 +1,285 @@
+{
+  "assessment_id": "fused_ff2ad536d240",
+  "target_entity_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+  "overall_status": "UNDER_REVIEW",
+  "verdict": "UNDER_REVIEW",
+  "risk_level": "HIGH",
+  "risk_score": 0.5,
+  "confidence": 0.2,
+  "confidence_score": 0.2,
+  "action": "REVIEW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "FLAG for security officer and ML engineer secondary review."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 12 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "integrity_17f5bf98-8bf9-4f4f-b405-003c48203c69",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file 'C:\\\\Users\\\\sce24\\\\Desktop\\\\sih-project\\\\data\\\\uploads\\\\1d9b69a6-ae66-438d-b27f-ec9df9660cb7\\\\samples\\\\patch_sample_B01.tif'",
+      "subject_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "related_model_id": null,
+      "related_dataset_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B01.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_7d0c74c9-2cc4-4d99-93c1-44bf4564f791",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file 'C:\\\\Users\\\\sce24\\\\Desktop\\\\sih-project\\\\data\\\\uploads\\\\1d9b69a6-ae66-438d-b27f-ec9df9660cb7\\\\samples\\\\patch_sample_B02.tif'",
+      "subject_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "related_model_id": null,
+      "related_dataset_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B02.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_51dcea60-7475-48ce-817d-732c0f19725a",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file 'C:\\\\Users\\\\sce24\\\\Desktop\\\\sih-project\\\\data\\\\uploads\\\\1d9b69a6-ae66-438d-b27f-ec9df9660cb7\\\\samples\\\\patch_sample_B03.tif'",
+      "subject_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "related_model_id": null,
+      "related_dataset_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B03.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_3bbd9ee1-456d-4a21-80cd-5bf1c8c91e47",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file 'C:\\\\Users\\\\sce24\\\\Desktop\\\\sih-project\\\\data\\\\uploads\\\\1d9b69a6-ae66-438d-b27f-ec9df9660cb7\\\\samples\\\\patch_sample_B04.tif'",
+      "subject_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "related_model_id": null,
+      "related_dataset_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B04.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_b0244860-6926-4470-b4a7-6a1d7792dc1b",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file 'C:\\\\Users\\\\sce24\\\\Desktop\\\\sih-project\\\\data\\\\uploads\\\\1d9b69a6-ae66-438d-b27f-ec9df9660cb7\\\\samples\\\\patch_sample_B05.tif'",
+      "subject_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "related_model_id": null,
+      "related_dataset_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B05.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_3c77fbb1-9857-4aa5-91d0-53b96f2e5f01",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file 'C:\\\\Users\\\\sce24\\\\Desktop\\\\sih-project\\\\data\\\\uploads\\\\1d9b69a6-ae66-438d-b27f-ec9df9660cb7\\\\samples\\\\patch_sample_B06.tif'",
+      "subject_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "related_model_id": null,
+      "related_dataset_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B06.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_3b20c738-239a-4318-b1fa-d49d18a83936",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file 'C:\\\\Users\\\\sce24\\\\Desktop\\\\sih-project\\\\data\\\\uploads\\\\1d9b69a6-ae66-438d-b27f-ec9df9660cb7\\\\samples\\\\patch_sample_B07.tif'",
+      "subject_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "related_model_id": null,
+      "related_dataset_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B07.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_0fb2eaf8-c0bd-4e89-a5fe-2571c95b4a6b",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file 'C:\\\\Users\\\\sce24\\\\Desktop\\\\sih-project\\\\data\\\\uploads\\\\1d9b69a6-ae66-438d-b27f-ec9df9660cb7\\\\samples\\\\patch_sample_B08.tif'",
+      "subject_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "related_model_id": null,
+      "related_dataset_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B08.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_9a3c313b-e1f2-47b7-a3a9-53e54de9392e",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file 'C:\\\\Users\\\\sce24\\\\Desktop\\\\sih-project\\\\data\\\\uploads\\\\1d9b69a6-ae66-438d-b27f-ec9df9660cb7\\\\samples\\\\patch_sample_B09.tif'",
+      "subject_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "related_model_id": null,
+      "related_dataset_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B09.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_988fbaf9-db97-420b-b9f5-6b08a98293ee",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file 'C:\\\\Users\\\\sce24\\\\Desktop\\\\sih-project\\\\data\\\\uploads\\\\1d9b69a6-ae66-438d-b27f-ec9df9660cb7\\\\samples\\\\patch_sample_B11.tif'",
+      "subject_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "related_model_id": null,
+      "related_dataset_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B11.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_7a6e03b7-df2c-46b9-ae8b-b45dd2fd9934",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file 'C:\\\\Users\\\\sce24\\\\Desktop\\\\sih-project\\\\data\\\\uploads\\\\1d9b69a6-ae66-438d-b27f-ec9df9660cb7\\\\samples\\\\patch_sample_B12.tif'",
+      "subject_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "related_model_id": null,
+      "related_dataset_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B12.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_64a70f6a-37fa-47e2-bd1b-1d6f82fc818a",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file 'C:\\\\Users\\\\sce24\\\\Desktop\\\\sih-project\\\\data\\\\uploads\\\\1d9b69a6-ae66-438d-b27f-ec9df9660cb7\\\\samples\\\\patch_sample_B8A.tif'",
+      "subject_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "related_model_id": null,
+      "related_dataset_id": "3c8e7a58-1776-4754-bde8-b4ac1b2dd186",
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B8A.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": null,
+  "assessment_digest": "ccef3b265e1c2a7c0ca37cf954c1723867f1c4b6e2c494b9282972ccb6342006",
+  "created_at": "2026-09-21T04:41:26.444601Z"
+}

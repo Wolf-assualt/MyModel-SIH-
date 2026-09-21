@@ -24,6 +24,14 @@ class ModelVerifyRequest(BaseModel):
     baseline_id: Optional[str] = None
 
 
+@router.get("", response_model=ResponseEnvelope[list[ModelIdentityManifest]])
+@router.get("/", response_model=ResponseEnvelope[list[ModelIdentityManifest]], include_in_schema=False)
+def list_models() -> ResponseEnvelope[list[ModelIdentityManifest]]:
+    """List all registered model identity manifests."""
+    models = default_model_registry.list_models()
+    return ResponseEnvelope(data=models)
+
+
 @router.post("/ingest", response_model=ResponseEnvelope[ModelIdentityManifest])
 @router.post("/register", response_model=ResponseEnvelope[ModelIdentityManifest])
 def register_model(payload: ModelIngestRequest) -> ResponseEnvelope[ModelIdentityManifest]:

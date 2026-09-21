@@ -110,11 +110,15 @@ class InferenceDNAVerifier:
     def verify_chain(
         cls,
         records: List[InferenceDNARecord],
-        public_key_pem: str,
+        public_key_pem: Optional[str] = None,
     ) -> ChainVerificationResponse:
         """Audit full inference hash chain continuity, sequence monotonicity, and anti-replay freshness."""
         if not records:
             return ChainVerificationResponse(is_valid=True, total_records=0)
+
+        if not public_key_pem:
+            from app.crypto.signer import default_key_manager
+            public_key_pem = default_key_manager.export_public_key_pem().decode("utf-8")
 
         seen_nonces: Set[str] = set()
         seen_record_ids: Set[str] = set()

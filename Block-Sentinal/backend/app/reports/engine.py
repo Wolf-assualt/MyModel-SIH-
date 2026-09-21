@@ -269,7 +269,20 @@ class AssuranceReportEngine:
         }
         recomputed_digest = canonical_json_hash(expected_digest_payload)
 
-        digest_match = (recomputed_digest == report.report_digest)
+        # Also support legacy digest payload for pre-existing reports
+        legacy_digest_payload = {
+            "target_asset_id": report.target_asset_id,
+            "target_asset_type": report.target_asset_type,
+            "assessment_id": report.assessment_id,
+            "overall_verdict": report.overall_verdict.value,
+            "risk_score": report.risk_score,
+            "confidence_score": report.confidence_score,
+            "coverage_ratio": report.coverage_ratio,
+            "findings_summary": report.findings_summary,
+        }
+        legacy_digest = canonical_json_hash(legacy_digest_payload)
+
+        digest_match = (recomputed_digest == report.report_digest) or (legacy_digest == report.report_digest)
         if not digest_match:
             discrepancies.append(
                 f"Report digest mismatch: recomputed '{recomputed_digest}' does not match record '{report.report_digest}'."

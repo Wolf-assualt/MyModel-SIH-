@@ -81,7 +81,7 @@ class ModelExecutor:
         try:
             probs = adapter.predict(batch_arr)
         except RuntimeError as exc:
-            if "PYTORCH_RUNTIME_UNAVAILABLE" in str(exc) and hasattr(adapter, "_synthetic_forward"):
+            if ("PYTORCH_RUNTIME_UNAVAILABLE" in str(exc) or "GENERIC_BINARY_RUNTIME_UNAVAILABLE" in str(exc)) and hasattr(adapter, "_synthetic_forward"):
                 probs = adapter._synthetic_forward(batch_arr)
             else:
                 raise
@@ -161,7 +161,11 @@ class BehaviouralFingerprinter:
                 try:
                     outputs = adapter.predict(np.array(perturbed))
                 except RuntimeError as exc:
-                    if "PYTORCH_RUNTIME_UNAVAILABLE" in str(exc) and hasattr(adapter, "_synthetic_forward"):
+                    exc_str = str(exc)
+                    if (
+                        ("PYTORCH_RUNTIME_UNAVAILABLE" in exc_str or "GENERIC_BINARY_RUNTIME_UNAVAILABLE" in exc_str)
+                        and hasattr(adapter, "_synthetic_forward")
+                    ):
                         outputs = adapter._synthetic_forward(np.array(perturbed))
                     else:
                         raise

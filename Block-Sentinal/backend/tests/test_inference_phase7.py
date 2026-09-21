@@ -13,20 +13,29 @@ Validates the full offline inference assurance subsystem according to Phase 7 sp
 - Concurrent thread-safety and sequence monotonicity
 - Absolute isolation of private keys
 """
+import base64
 import copy
+import io
 import json
 from pathlib import Path
 import threading
 from typing import List
+# pyrefly: ignore [missing-import]
+import numpy as np
+# pyrefly: ignore [missing-import]
+from PIL import Image
+# pyrefly: ignore [missing-import]
 import pytest
+# pyrefly: ignore [missing-import]
 from fastapi.testclient import TestClient
 
-from app.cli import build_parser, main
+from app.cli import main
 from app.crypto.canonical import canonical_json_hash, hash_bytes
 from app.crypto.signer import KeyManager
 from app.inference.dna import InferenceDNAGenerator
 from app.inference.verifier import InferenceDNAVerifier
 from app.main import app
+from app.models_engine.fixtures import generate_real_onnx_model
 from app.schemas.inference import (
     BoundingBox,
     ChainVerificationResponse,
@@ -44,6 +53,32 @@ def clean_generator(tmp_path: Path):
     km = KeyManager()
     storage_dir = tmp_path / "inference_dna_test"
     return InferenceDNAGenerator(key_manager=km, storage_dir=storage_dir)
+
+
+@pytest.fixture
+def api_model_env(tmp_path: Path):
+    """Create a real ONNX model artifact and real image bytes for REST API inference tests.
+
+    Reason: /api/v1/inference/execute requires a real model artifact on disk and actual
+    image bytes. Arbitrary model IDs and hash-only inputs are rejected by the architecture
+    (no fabrication contract). This fixture mirrors the pattern in test_api_inference_execute_endpoint_success.
+    """
+    models_dir = tmp_path / "api_test_models"
+    models_dir.mkdir(parents=True, exist_ok=True)
+    model_path = models_dir / "api_test_model.onnx"
+    generate_real_onnx_model(model_path, num_classes=10)
+
+    img_arr = np.zeros((32, 32, 3), dtype=np.uint8)
+    img_arr[:16, :] = 100
+    pil_img = Image.fromarray(img_arr)
+    buf = io.BytesIO()
+    pil_img.save(buf, format="PNG")
+    img_b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+
+    return {
+        "model_path": model_path,
+        "img_b64": img_b64,
+    }
 
 
 @pytest.fixture
@@ -456,11 +491,19 @@ def test_private_key_isolation_in_all_outputs(clean_generator, mock_output):
 # 8. REST API Endpoints End-to-End
 # ==============================================================================
 
-def test_rest_api_chain_verification_endpoint(client: TestClient):
-    """Verify POST /api/v1/inference/verify-chain with genuine vs corrupted chain."""
-    # 1. Create two inferences via API
-    resp1 = client.post("/api/v1/inference/execute", json={"model_id": "api_mod_1"})
-    resp2 = client.post("/api/v1/inference/execute", json={"model_id": "api_mod_1"})
+def test_rest_api_chain_verification_endpoint(client: TestClient, api_model_env):
+    """Verify POST /api/v1/inference/verify-chain with genuine vs corrupted chain.
+
+    Architecture note: /inference/execute requires a real model path on disk and actual
+    image bytes. Arbitrary model IDs (e.g. 'api_mod_1') without a registered artifact
+    are correctly rejected (UNAVAILABLE). This test uses a real ONNX model fixture.
+    """
+    model_path = str(api_model_env["model_path"])
+    img_b64 = api_model_env["img_b64"]
+
+    # 1. Create two inferences via API using a real model and real image bytes
+    resp1 = client.post("/api/v1/inference/execute", json={"model_id": model_path, "image_bytes_b64": img_b64})
+    resp2 = client.post("/api/v1/inference/execute", json={"model_id": model_path, "image_bytes_b64": img_b64})
     assert resp1.status_code == 200
     assert resp2.status_code == 200
 
@@ -490,9 +533,17 @@ def test_rest_api_chain_verification_endpoint(client: TestClient):
     assert len(replayed_data["evidence_records"]) > 0
 
 
-def test_rest_api_get_record_by_id(client: TestClient):
-    """Verify GET /api/v1/inference/record/{record_id}."""
-    exec_resp = client.post("/api/v1/inference/execute", json={"model_id": "api_mod_fetch"})
+def test_rest_api_get_record_by_id(client: TestClient, api_model_env):
+    """Verify GET /api/v1/inference/record/{record_id}.
+
+    Architecture note: /inference/execute requires a real model artifact on disk and
+    actual image bytes. 'api_mod_fetch' was an arbitrary placeholder — the current
+    architecture enforces real model resolution (no fabrication). Uses real ONNX fixture.
+    """
+    model_path = str(api_model_env["model_path"])
+    img_b64 = api_model_env["img_b64"]
+
+    exec_resp = client.post("/api/v1/inference/execute", json={"model_id": model_path, "image_bytes_b64": img_b64})
     assert exec_resp.status_code == 200
     rec_id = exec_resp.json()["data"]["dna_record"]["record_id"]
 

@@ -22,9 +22,12 @@ router = APIRouter(prefix="/graph", tags=["Evidence & Lineage Graph"])
 
 
 @router.get("/export", response_model=ResponseEnvelope[GraphExport])
-def export_evidence_graph() -> ResponseEnvelope[GraphExport]:
+def export_evidence_graph(sign: bool = Query(False)) -> ResponseEnvelope[GraphExport]:
     """Export the complete directed property graph sealed with a canonical SHA-256 digest."""
     export_data = default_graph_engine.export_graph()
+    if sign:
+        from app.crypto.signer import default_signer
+        export_data.signature = default_signer.sign_hash(export_data.graph_digest)
     return ResponseEnvelope(data=export_data)
 
 
@@ -61,6 +64,8 @@ def get_node_upstream(
     max_depth: int = Query(10, ge=1, le=50),
 ) -> ResponseEnvelope[List[GraphNode]]:
     """Trace upstream dependencies for an entity."""
+    if node_id not in default_graph_engine.nodes:
+        raise HTTPException(status_code=404, detail=f"Node '{node_id}' not found.")
     upstream = default_graph_engine.trace_upstream(node_id, max_depth=max_depth)
     return ResponseEnvelope(data=upstream)
 
@@ -71,6 +76,8 @@ def get_node_downstream(
     max_depth: int = Query(10, ge=1, le=50),
 ) -> ResponseEnvelope[List[GraphNode]]:
     """Trace downstream consumers for an entity."""
+    if node_id not in default_graph_engine.nodes:
+        raise HTTPException(status_code=404, detail=f"Node '{node_id}' not found.")
     downstream = default_graph_engine.trace_downstream(node_id, max_depth=max_depth)
     return ResponseEnvelope(data=downstream)
 

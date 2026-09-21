@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 import uuid
+# pyrefly: ignore [missing-import]
 import numpy as np
 
 from app.core.config import settings
@@ -60,6 +61,7 @@ class DistributionShiftEngine:
             img_paths = sorted([f for f in p.glob("*") if f.suffix.lower() in (".png", ".jpg", ".jpeg")])
             if not img_paths:
                 raise ValueError(f"No images found in image_dir: {image_dir}")
+            # pyrefly: ignore [missing-import]
             from PIL import Image
             imgs = [np.array(Image.open(f)) for f in img_paths]
             batch_feats = ImageDistributionExtractor.extract_batch_distributions(imgs)
@@ -194,6 +196,7 @@ class DistributionShiftEngine:
             img_paths = sorted([f for f in p.glob("*") if f.suffix.lower() in (".png", ".jpg", ".jpeg")])
             if not img_paths:
                 raise ValueError(f"No images found in candidate_dir: {candidate_dir}")
+            # pyrefly: ignore [missing-import]
             from PIL import Image
             imgs = [np.array(Image.open(f)) for f in img_paths]
             batch_feats = ImageDistributionExtractor.extract_batch_distributions(imgs)

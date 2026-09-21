@@ -58,6 +58,16 @@ class GenericBinaryAdapter(BaseModelAdapter):
             "GENERIC_BINARY_RUNTIME_UNAVAILABLE: Raw binary files cannot be executed without a runtime interpreter."
         )
 
+    def _synthetic_forward(self, inputs: np.ndarray) -> np.ndarray:
+        """Deterministic byte-sensitive pseudo-forward pass for fingerprinting generic binaries."""
+        n = inputs.shape[0] if inputs.ndim > 1 else 1
+        # Seed deterministic RNG with hash of binary
+        seed = int(self.artifact_hash[:8], 16) % (2**31 - 1)
+        rng = np.random.default_rng(seed)
+        weights = rng.normal(0, 1, (10,))
+        probs = np.tile(np.exp(weights) / np.sum(np.exp(weights)), (n, 1))
+        return probs.astype(np.float32)
+
     def fingerprint(self) -> Dict[str, Any]:
         """Compute deterministic canonical digest of the binary payload."""
         digest = canonical_json_hash({

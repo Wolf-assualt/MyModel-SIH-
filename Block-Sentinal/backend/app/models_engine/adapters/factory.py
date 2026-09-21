@@ -58,13 +58,26 @@ class ModelAdapterFactory:
         if format_hint == ModelFormat.BLACK_BOX or predict_fn is not None:
             return BlackBoxAdapter(path, predict_fn=predict_fn)
 
+        if isinstance(format_hint, str):
+            fh_upper = format_hint.upper()
+            if fh_upper in ("PYTORCH", "PYTORCH_WEIGHTS", "TORCH"):
+                format_hint = ModelFormat.PYTORCH_WEIGHTS
+            elif fh_upper == "TORCHSCRIPT":
+                format_hint = ModelFormat.TORCHSCRIPT
+            elif fh_upper == "ONNX":
+                format_hint = ModelFormat.ONNX
+            elif fh_upper == "GENERIC_BINARY":
+                format_hint = ModelFormat.GENERIC_BINARY
+            elif fh_upper == "BLACK_BOX":
+                format_hint = ModelFormat.BLACK_BOX
+
         fmt = format_hint if format_hint and format_hint != ModelFormat.UNSUPPORTED else cls.detect_format(path)
 
         if fmt == ModelFormat.ONNX:
             return ONNXAdapter(path)
         elif fmt == ModelFormat.TORCHSCRIPT:
             return TorchScriptAdapter(path)
-        elif fmt == ModelFormat.PYTORCH_WEIGHTS:
+        elif fmt in (ModelFormat.PYTORCH_WEIGHTS, "PYTORCH"):
             return PyTorchAdapter(path)
         elif fmt == ModelFormat.GENERIC_BINARY:
             # Check if it's actually an ONNX, TorchScript, or PyTorch binary despite the name

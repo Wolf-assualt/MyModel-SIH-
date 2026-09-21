@@ -3,8 +3,10 @@
   "dataset_name": "Synthetic_RedTeam_Set",
   "format": "IMAGE_FOLDER",
   "contributor_id": "redteam_operator",
+  "contributor_source": "UNKNOWN",
   "sample_count": 4,
   "merkle_root": "0000000000000000000000000000000000000000000000000000000000000000",
+  "dataset_sha256": "",
   "samples": [
     {
       "sample_id": "samp_api_batch_recon_01_0",
@@ -73,5 +75,7 @@
       }
     }
   ],
-  "created_at": "2026-09-11T06:33:32.919359Z"
+  "signature": null,
+  "public_key_pem": null,
+  "created_at": "2026-09-21T14:29:42.369136Z"
 }

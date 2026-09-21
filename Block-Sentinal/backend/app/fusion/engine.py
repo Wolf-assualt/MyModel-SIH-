@@ -237,7 +237,22 @@ class EvidenceFusionEngine:
         decisive_evidence: List[str] = []
 
         for e in evidence:
-            desc_lower = e.description.lower()
+            desc_lower = (e.description or "").lower()
+            ev_type_upper = (e.evidence_type or "").upper()
+
+            # Direct hard-veto metadata trigger
+            if e.metadata and (e.metadata.get("hard_veto") is True or e.metadata.get("hard_veto") == "true"):
+                hard_veto_triggered = True
+                veto_reasons.append(e.description or "Hard veto triggered via evidence policy.")
+                decisive_evidence.append(e.evidence_id)
+                continue
+
+            # Weight tampering / backdoor poisoning / crypto tampering triggers
+            if ev_type_upper in ("WEIGHT_TAMPERING", "CRYPTO_TAMPERING", "BACKDOOR_POISONING") and e.severity == IntegritySeverity.CRITICAL:
+                hard_veto_triggered = True
+                veto_reasons.append(e.description or f"Critical security violation ({ev_type_upper}).")
+                decisive_evidence.append(e.evidence_id)
+                continue
 
             # Rule A: Cryptographic signature failure / forgery
             if (e.source == EvidenceSource.CRYPTO_VERIFICATION or "signature" in desc_lower or "forger" in desc_lower) and e.severity == IntegritySeverity.CRITICAL:
@@ -454,6 +469,19 @@ class EvidenceFusionEngine:
             data = json.load(f)
         return FusedAssessment.model_validate(data)
 
+    def list_assessments(self) -> List[FusedAssessment]:
+        """List all stored fused assessments."""
+        assessments: List[FusedAssessment] = []
+        if self.assessments_dir.exists():
+            for p in sorted(self.assessments_dir.glob("*.json"), reverse=True):
+                try:
+                    with open(p, "r", encoding="utf-8") as f:
+                        assessments.append(FusedAssessment.model_validate(json.load(f)))
+                except Exception:
+                    continue
+        return assessments
+
 
 # Default singleton instance
 default_fusion_engine = EvidenceFusionEngine()
+

@@ -39,6 +39,7 @@ class EdgeType(str, Enum):
     PRODUCED = "PRODUCED"
     AUTHORED_BY = "AUTHORED_BY"
     CONTAINS_SAMPLE = "CONTAINS_SAMPLE"
+    CONTAINS = "CONTAINS_SAMPLE"
     TRAINED_ON = "TRAINED_ON"
     USED_PREPROCESSING = "USED_PREPROCESSING"
     GENERATED_BY = "GENERATED_BY"
@@ -96,6 +97,7 @@ class GraphExport(BaseModel):
     node_count: int = 0
     edge_count: int = 0
     graph_digest: str = Field(..., min_length=64, max_length=64)
+    signature: Optional[str] = None
 
     def model_post_init(self, __context: Any) -> None:
         if self.node_count == 0 and self.nodes:
@@ -128,6 +130,7 @@ class BlastRadiusReport(BaseModel):
     affected_inferences: List[str] = Field(default_factory=list)
     affected_evidence_ids: List[str] = Field(default_factory=list)
     affected_quarantines: List[str] = Field(default_factory=list)
+    affected_nodes: List[str] = Field(default_factory=list)
     total_affected_entities: int = 0
     explanation: str = ""
 

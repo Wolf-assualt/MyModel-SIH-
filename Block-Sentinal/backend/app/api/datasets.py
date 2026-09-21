@@ -75,6 +75,16 @@ async def upload_and_scan_dataset(
     if not uploads:
         raise HTTPException(status_code=400, detail="No files provided for upload.")
 
+    # Enforce hard limit before accepting any data
+    if len(uploads) > settings.MAX_UPLOAD_FILES:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Too many files selected. Maximum allowed is {settings.MAX_UPLOAD_FILES}, "
+                f"received {len(uploads)}."
+            ),
+        )
+
     try:
         if len(uploads) == 1 and Path(uploads[0].filename or "").suffix.lower() == ".zip":
             zip_file = uploads[0]
@@ -218,12 +228,32 @@ def ingest_dataset(payload: IngestDirectoryRequest) -> ResponseEnvelope[IngestRe
     ))
 
 
+@router.get("", response_model=ResponseEnvelope[List[BatchManifest]])
+@router.get("/", response_model=ResponseEnvelope[List[BatchManifest]], include_in_schema=False)
+def list_datasets() -> ResponseEnvelope[List[BatchManifest]]:
+    """List all registered dataset batch manifests."""
+    manifests = default_ingestion_engine.list_manifests()
+    return ResponseEnvelope(data=manifests)
+
+
+@router.post("/bigearthnet/inspect", response_model=ResponseEnvelope[dict])
+def inspect_bigearthnet_dataset(payload: IngestDirectoryRequest) -> ResponseEnvelope[dict]:
+    """Perform read-only structural inspection of a BigEarthNet-S2 patch directory."""
+    from app.datasets.bigearthnet import BigEarthNetS2Adapter
+    source_dir = Path(payload.source_path)
+    if not source_dir.is_dir():
+        raise HTTPException(status_code=400, detail=f"Source path is not a directory: {payload.source_path}")
+    report = BigEarthNetS2Adapter.inspect(source_dir)
+    return ResponseEnvelope(data=report)
+
+
 @router.get("/manifest/{batch_id}", response_model=ResponseEnvelope[BatchManifest])
+@router.get("/{batch_id}", response_model=ResponseEnvelope[BatchManifest])
 def get_batch_manifest(batch_id: str) -> ResponseEnvelope[BatchManifest]:
     """Retrieve the cryptographic batch manifest for an ingested dataset."""
     manifest = default_ingestion_engine.load_manifest(batch_id)
     if not manifest:
-        raise HTTPException(status_code=404, detail=f"Batch manifest {batch_id} not found.")
+        raise HTTPException(status_code=404, detail=f"Batch manifest '{batch_id}' not found.")
     return ResponseEnvelope(data=manifest)
 
 
@@ -235,3 +265,4 @@ def verify_batch_manifest(batch_id: str) -> ResponseEnvelope[BatchVerificationRe
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail=f"Batch manifest {batch_id} not found.")
     return ResponseEnvelope(data=result)
+

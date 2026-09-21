@@ -6,17 +6,24 @@ Validates:
 3. Hash chain tamper stress testing with broken block localization.
 4. Offline air-gapped operations and telemetry benchmarking.
 """
+import base64
+import io
 import json
 from pathlib import Path
+# pyrefly: ignore [missing-import]
 import numpy as np
+# pyrefly: ignore [missing-import]
 from PIL import Image
+# pyrefly: ignore [missing-import]
 import pytest
+# pyrefly: ignore [missing-import]
 from fastapi.testclient import TestClient
 
 from app.core.hardening import SystemIntegrityAuditor
 from app.crypto.chain import HashChain
 from app.graph.engine import default_graph_engine
 from app.main import app
+from app.models_engine.fixtures import generate_real_onnx_model
 from app.schemas.base import AssetStatus
 from app.schemas.fusion import EvidenceItem, EvidenceSource
 from app.schemas.graph import GraphEdge, GraphNode, NodeType, EdgeType
@@ -73,17 +80,22 @@ def test_full_lifecycle_clean_asset_acceptance(tmp_path: Path, client: TestClien
 
     # -------------------------------------------------------------
     # Step 3: Model Ingestion and Identity Baseline Registration
+    # Architecture note: GENERIC_BINARY models cannot be executed by the inference
+    # runtime (no interpreter available), so we register a real ONNX model for the
+    # inference execution steps. The GENERIC_BINARY fingerprint path uses the
+    # deterministic _synthetic_forward contract in GenericBinaryAdapter.
     # -------------------------------------------------------------
     model_dir = tmp_path / "models"
     model_dir.mkdir(parents=True, exist_ok=True)
-    model_bin = model_dir / "recon_detector_v1.bin"
-    model_bin.write_bytes(b"MILITARY_GRADE_DETECTOR_WEIGHTS_TENSOR_GRAPH_1234567890" * 16)
+    # Generate a real, executable ONNX model for inference
+    onnx_model_path = model_dir / "recon_detector_v1.onnx"
+    generate_real_onnx_model(onnx_model_path, num_classes=10)
 
     model_reg_payload = {
         "name": "recon_detector_v1",
         "version": "1.0.0",
-        "model_path": str(model_bin),
-        "format": "GENERIC_BINARY",
+        "model_path": str(onnx_model_path),
+        "format": "ONNX",
         "is_reference": True,
     }
     res_mod = client.post("/api/v1/models/register", json=model_reg_payload)
@@ -103,12 +115,20 @@ def test_full_lifecycle_clean_asset_acceptance(tmp_path: Path, client: TestClien
 
     # -------------------------------------------------------------
     # Step 5: Provenance-Sealed Inference Execution
+    # Real image bytes are required — the runtime rejects hash-only input.
     # -------------------------------------------------------------
+    img_arr = np.zeros((32, 32, 3), dtype=np.uint8)
+    img_arr[:16, :] = 120
+    pil_img = Image.fromarray(img_arr)
+    buf = io.BytesIO()
+    pil_img.save(buf, format="PNG")
+    img_b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+
     inf_req = {
-        "model_id": model_id,
-        "image_sha256": "f" * 64,
+        "model_id": str(onnx_model_path),
+        "image_bytes_b64": img_b64,
         "preprocessing": {
-            "target_size": [640, 640],
+            "target_size": [32, 32],
             "normalization_mean": [0.485, 0.456, 0.406],
             "normalization_std": [0.229, 0.224, 0.225],
             "color_space": "RGB",

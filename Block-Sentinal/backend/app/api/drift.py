@@ -1,7 +1,7 @@
 """Distribution-Shift and Out-of-Distribution (OOD) Analysis API Endpoints."""
 from typing import Any, Dict, List
 # pyrefly: ignore [missing-import]
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from app.drift.engine import default_drift_engine
 from app.schemas.base import ResponseEnvelope
@@ -87,6 +87,22 @@ def evaluate_distribution_shift(
     return ResponseEnvelope(data=report)
 
 
+@router.get("/reports", response_model=ResponseEnvelope[List[DistributionShiftReport]])
+def list_distribution_shift_reports(
+    limit: int = Query(50, ge=1, le=1000, description="Maximum number of reports to return"),
+) -> ResponseEnvelope[List[DistributionShiftReport]]:
+    """List stored distribution shift reports up to limit."""
+    reports: List[DistributionShiftReport] = []
+    if default_drift_engine.reports_dir.exists():
+        for rf in sorted(default_drift_engine.reports_dir.glob("*.json"), reverse=True):
+            rep = default_drift_engine.get_report(rf.stem)
+            if rep:
+                reports.append(rep)
+            if len(reports) >= limit:
+                break
+    return ResponseEnvelope(data=reports)
+
+
 @router.get("/reports/{report_id}", response_model=ResponseEnvelope[DistributionShiftReport])
 def get_distribution_shift_report(
     report_id: str,
@@ -96,3 +112,4 @@ def get_distribution_shift_report(
     if not report:
         raise HTTPException(status_code=404, detail=f"Report '{report_id}' not found.")
     return ResponseEnvelope(data=report)
+

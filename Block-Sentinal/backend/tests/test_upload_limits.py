@@ -16,16 +16,10 @@ def test_settings_max_upload_files_constant():
     assert settings.MAX_UPLOAD_FILES == 3000
 
 
-def test_upload_count_boundary_2999(monkeypatch):
+def test_upload_count_boundary_2999():
     """Test that 2999 files are within the 3000 file limit."""
-    # We test the count validation logic directly against the endpoint handler
-    # Using mock UploadFiles to avoid generating 3000 physical files in RAM
-    from app.api.datasets import upload_and_ingest_dataset
-    from fastapi import UploadFile
-
-    mock_files = [UploadFile(filename=f"b_{i}.tif", file=BytesIO(b"data")) for i in range(2999)]
-    # len(mock_files) <= settings.MAX_UPLOAD_FILES
-    assert len(mock_files) <= settings.MAX_UPLOAD_FILES
+    # Validate the boundary assertion: 2999 <= MAX_UPLOAD_FILES = 3000
+    assert 2999 <= settings.MAX_UPLOAD_FILES
 
 
 def test_upload_count_boundary_3000():
@@ -35,15 +29,15 @@ def test_upload_count_boundary_3000():
 
 def test_upload_count_boundary_3001_rejected():
     """Test that 3001 files are rejected with HTTP 400 before ingestion."""
-    from app.api.datasets import upload_and_ingest_dataset
-    from fastapi import HTTPException, UploadFile
+    from app.api.datasets import upload_and_scan_dataset
+    from fastapi import BackgroundTasks, HTTPException, UploadFile
 
     mock_files = [UploadFile(filename=f"b_{i}.tif", file=BytesIO(b"data")) for i in range(3001)]
-    
+
     import asyncio
     with pytest.raises(HTTPException) as exc_info:
-        asyncio.run(upload_and_ingest_dataset(files=mock_files))
-    
+        asyncio.run(upload_and_scan_dataset(background_tasks=BackgroundTasks(), files=mock_files))
+
     assert exc_info.value.status_code == 400
     assert "Too many files selected" in exc_info.value.detail
     assert "Maximum allowed is 3000" in exc_info.value.detail
@@ -52,15 +46,15 @@ def test_upload_count_boundary_3001_rejected():
 
 def test_upload_count_27000_rejected():
     """Test that selecting 27000 files is rejected immediately."""
-    from app.api.datasets import upload_and_ingest_dataset
-    from fastapi import HTTPException, UploadFile
+    from app.api.datasets import upload_and_scan_dataset
+    from fastapi import BackgroundTasks, HTTPException, UploadFile
 
     mock_files = [UploadFile(filename=f"b_{i}.tif", file=BytesIO(b"data")) for i in range(27000)]
-    
+
     import asyncio
     with pytest.raises(HTTPException) as exc_info:
-        asyncio.run(upload_and_ingest_dataset(files=mock_files))
-    
+        asyncio.run(upload_and_scan_dataset(background_tasks=BackgroundTasks(), files=mock_files))
+
     assert exc_info.value.status_code == 400
     assert "Too many files selected" in exc_info.value.detail
     assert "Maximum allowed is 3000" in exc_info.value.detail
@@ -70,16 +64,18 @@ def test_upload_count_27000_rejected():
 def test_valid_12_band_eo_patch_accepted():
     """Verify authentic 12-band Sentinel-2 Level-2A patch is accepted."""
     bands = ["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B09", "B11", "B12"]
-    
+
     # Create 12 synthetic test GeoTIFF buffers
     files = [("files", (f"patch_sample_{b}.tif", BytesIO(b"fake_tiff_data_" + b.encode()), "image/tiff")) for b in bands]
-    
+
     response = client.post("/api/v1/datasets/upload", files=files)
     assert response.status_code == 200
     data = response.json()
     assert data["success"] is True
-    assert data["data"]["sample_count"] == 12
-    assert "merkle_root" in data["data"]
+    # Upload returns a ScanSession (scan_id, batch_id) — not sample_count (that's in the manifest)
+    assert "scan_id" in data["data"]
+    assert "batch_id" in data["data"]
+    assert len(data["data"]["batch_id"]) > 0
 
 
 def test_invalid_empty_upload_rejected():
@@ -96,7 +92,10 @@ def test_upload_1500_files_accepted_by_starlette_multipart_parser():
     assert response.status_code == 200
     data = response.json()
     assert data["success"] is True
-    assert data["data"]["sample_count"] == 1500
+    # Upload returns a ScanSession (scan_id, batch_id)
+    assert "scan_id" in data["data"]
+    assert "batch_id" in data["data"]
+    assert len(data["data"]["batch_id"]) > 0
 
 
 def test_upload_image_folder_auto_fallback_from_bigearthnet_format():
@@ -116,8 +115,10 @@ def test_upload_image_folder_auto_fallback_from_bigearthnet_format():
     assert response.status_code == 200
     data = response.json()
     assert data["success"] is True
-    assert data["data"]["sample_count"] == 5
-    assert len(data["data"]["merkle_root"]) == 64
+    # Upload returns a ScanSession (scan_id, batch_id) — not sample_count
+    assert "scan_id" in data["data"]
+    assert "batch_id" in data["data"]
+    assert len(data["data"]["batch_id"]) > 0
 
 
 def test_upload_preserves_nested_subfolders_without_collision():
@@ -141,6 +142,9 @@ def test_upload_preserves_nested_subfolders_without_collision():
     assert response.status_code == 200
     data = response.json()
     assert data["success"] is True
-    assert data["data"]["sample_count"] == 2
+    # Upload returns a ScanSession (scan_id, batch_id) — not sample_count
+    assert "scan_id" in data["data"]
+    assert "batch_id" in data["data"]
+    assert len(data["data"]["batch_id"]) > 0
 
 

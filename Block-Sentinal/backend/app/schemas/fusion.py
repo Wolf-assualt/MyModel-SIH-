@@ -59,6 +59,7 @@ class EvidenceItem(BaseModel):
     related_dataset_id: Optional[str] = None
     evidence_digest: Optional[str] = None
     confidence: Optional[float] = None
+    evidence_type: Optional[str] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 

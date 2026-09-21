@@ -26,6 +26,13 @@ def submit_evidence(item: EvidenceItem) -> ResponseEnvelope[EvidenceItem]:
         raise HTTPException(status_code=400, detail=f"Evidence registration failed: {str(exc)}")
 
 
+@router.get("/evidence", response_model=ResponseEnvelope[List[EvidenceItem]])
+def list_evidence() -> ResponseEnvelope[List[EvidenceItem]]:
+    """List all registered evidence items."""
+    items = default_fusion_engine.list_evidence()
+    return ResponseEnvelope(data=items)
+
+
 @router.get("/evidence/{evidence_id}", response_model=ResponseEnvelope[EvidenceItem])
 def get_evidence(evidence_id: str) -> ResponseEnvelope[EvidenceItem]:
     """Retrieve an evidence item by its evidence ID."""
@@ -62,6 +69,13 @@ def evaluate_evidence_fusion(
         raise HTTPException(status_code=400, detail=f"Evidence fusion failed: {str(exc)}")
 
 
+@router.get("/assessments", response_model=ResponseEnvelope[List[FusedAssessment]])
+def list_fused_assessments() -> ResponseEnvelope[List[FusedAssessment]]:
+    """List all persisted fused assurance assessments."""
+    assessments = default_fusion_engine.list_assessments()
+    return ResponseEnvelope(data=assessments)
+
+
 @router.get("/assessment/{assessment_id}", response_model=ResponseEnvelope[FusedAssessment])
 def get_fused_assessment(
     assessment_id: str,
@@ -71,6 +85,7 @@ def get_fused_assessment(
     if not assessment:
         raise HTTPException(status_code=404, detail=f"Assessment '{assessment_id}' not found.")
     return ResponseEnvelope(data=assessment)
+
 
 
 @router.get("/quarantine", response_model=ResponseEnvelope[List[QuarantineRecord]])

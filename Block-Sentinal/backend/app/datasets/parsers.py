@@ -206,6 +206,54 @@ class BigEarthNetS2Parser(BaseParser):
         if not source_dir.is_dir():
             raise FileNotFoundError(f"Source directory does not exist: {source_dir}")
 
+        from app.datasets.bigearthnet import BigEarthNetS2Adapter
+        patches = BigEarthNetS2Adapter.discover(source_dir)
+        if patches:
+            records: List[SampleRecord] = []
+            for patch_dir in patches:
+                rel_path = patch_dir.relative_to(source_dir)
+                hash_info = BigEarthNetS2Adapter.hash_sample(patch_dir)
+                metadata = BigEarthNetS2Adapter.read_metadata(patch_dir)
+
+                labels_raw = metadata.get("labels", [])
+                formatted_labels = [{"class": lbl} for lbl in labels_raw]
+
+                band_files = BigEarthNetS2Adapter.find_band_files(patch_dir)
+                width, height = 120, 120
+                if "B02" in band_files:
+                    try:
+                        with Image.open(band_files["B02"]) as img:
+                            width, height = img.size[0], img.size[1]
+                    except Exception:
+                        pass
+
+                spectral_features = BigEarthNetS2Adapter.extract_spectral_features(patch_dir)
+
+                record_metadata = {
+                    "format": "BIGEARTHNET_S2",
+                    "relative_path": rel_path.as_posix(),
+                    "patch_id": patch_dir.name,
+                    "band_hashes": hash_info["band_hashes"],
+                    "band_count": hash_info["band_count"],
+                    "metadata_digest": hash_info["metadata_digest"],
+                    "raw_metadata": metadata,
+                    "spectral_features": spectral_features,
+                }
+
+                record = SampleRecord(
+                    sample_id=patch_dir.name,
+                    file_path=str(patch_dir.resolve()),
+                    sha256_hash=hash_info["compound_sha256"],
+                    width=width,
+                    height=height,
+                    labels=formatted_labels,
+                    metadata=record_metadata,
+                )
+                records.append(record)
+
+            records.sort(key=lambda r: r.sample_id)
+            return records
+
         tif_files = [
             f for f in source_dir.rglob("*")
             if f.is_file() and f.suffix.lower() in {".tif", ".tiff"}
@@ -214,12 +262,11 @@ class BigEarthNetS2Parser(BaseParser):
         if not tif_files:
             raise ValueError(f"No Sentinel-2 GeoTIFF band files found in {source_dir}")
 
-        records: List[SampleRecord] = []
+        records = []
         for file_path in sorted(tif_files, key=lambda p: p.name):
             sha256_hash = hash_file(str(file_path))
             width, height = get_image_dimensions(file_path)
 
-            # Extract band label from file stem
             detected_band = "UNKNOWN"
             stem_upper = file_path.stem.upper()
             for band in SENTINEL2_BANDS:

@@ -57,6 +57,21 @@ class ModelRegistry:
         # Always calculate SHA-256 directly from the current model artifact on disk
         artifact_hash = hash_file(str(path))
 
+        if isinstance(format, str):
+            f_upper = format.upper()
+            if f_upper in ("PYTORCH", "PYTORCH_WEIGHTS", "TORCH"):
+                format = ModelFormat.PYTORCH_WEIGHTS
+            elif f_upper == "TORCHSCRIPT":
+                format = ModelFormat.TORCHSCRIPT
+            elif f_upper == "ONNX":
+                format = ModelFormat.ONNX
+            elif f_upper == "GENERIC_BINARY":
+                format = ModelFormat.GENERIC_BINARY
+            elif f_upper == "BLACK_BOX":
+                format = ModelFormat.BLACK_BOX
+            else:
+                format = ModelFormat.UNSUPPORTED
+
         adapter = ModelAdapterFactory.get_adapter(path, format_hint=format)
         adapter.load()
         meta = adapter.metadata()
@@ -174,6 +189,19 @@ class ModelRegistry:
             data = json.load(f)
 
         return ModelIdentityManifest(**data)
+
+    def list_models(self) -> List[ModelIdentityManifest]:
+        """List all registered model identity manifests."""
+        models: List[ModelIdentityManifest] = []
+        if self.manifests_dir.exists():
+            for mf in self.manifests_dir.glob("*.json"):
+                try:
+                    with open(mf, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    models.append(ModelIdentityManifest(**data))
+                except Exception:
+                    continue
+        return models
 
     def get_baseline(self, name: str, version: str) -> Optional[ModelIdentityManifest]:
         """Load reference baseline manifest by model name and version."""

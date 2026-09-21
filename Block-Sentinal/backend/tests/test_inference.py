@@ -1,7 +1,15 @@
 """Unit and integration tests for Inference DNA, Cryptographic Provenance, and Replay Defense."""
+import base64
 import copy
+import io
 from pathlib import Path
+# pyrefly: ignore [missing-import]
+import numpy as np
+# pyrefly: ignore [missing-import]
+from PIL import Image
+# pyrefly: ignore [missing-import]
 import pytest
+# pyrefly: ignore [missing-import]
 from fastapi.testclient import TestClient
 
 from app.crypto.canonical import canonical_json_hash, hash_bytes
@@ -9,6 +17,7 @@ from app.crypto.signer import KeyManager
 from app.inference.dna import InferenceDNAGenerator
 from app.inference.verifier import InferenceDNAVerifier
 from app.main import app
+from app.models_engine.fixtures import generate_real_onnx_model
 from app.schemas.inference import (
     BoundingBox,
     InferenceOutput,
@@ -194,14 +203,36 @@ def test_replay_attack_nonce_rejection(temp_dna_generator, sample_output):
         )
 
 
-def test_api_inference_flow_execute_and_verify():
-    """Verify full end-to-end inference execution, receipt generation, and DNA verification API."""
+def test_api_inference_flow_execute_and_verify(tmp_path: Path):
+    """Verify full end-to-end inference execution, receipt generation, and DNA verification API.
+
+    Architecture contract:
+    - /inference/execute requires a real model artifact on disk and actual image bytes.
+    - image_sha256-only input (without image_bytes_b64) is rejected: hashes identify bytes,
+      they cannot reconstruct them. No fabricated bytes are generated from a hash.
+    - Predictions are always [] in the API response: no synthetic bounding boxes are produced.
+    - The DNA record, signature, and chain are cryptographically authentic.
+    """
     client = TestClient(app)
 
-    # 1. Execute inference
+    # Create real ONNX model artifact
+    models_dir = tmp_path / "infer_test_models"
+    models_dir.mkdir(parents=True, exist_ok=True)
+    model_path = models_dir / "drone_detector_v1.onnx"
+    generate_real_onnx_model(model_path, num_classes=10)
+
+    # Create real image bytes
+    img_arr = np.zeros((32, 32, 3), dtype=np.uint8)
+    img_arr[:16, :] = 128
+    pil_img = Image.fromarray(img_arr)
+    buf = io.BytesIO()
+    pil_img.save(buf, format="PNG")
+    img_b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+
+    # 1. Execute inference with real model path and real image bytes
     exec_resp = client.post(
         "/api/v1/inference/execute",
-        json={"model_id": "drone_detector_v1", "image_sha256": "3" * 64},
+        json={"model_id": str(model_path), "image_bytes_b64": img_b64},
     )
     assert exec_resp.status_code == 200
     exec_data = exec_resp.json()
@@ -211,10 +242,11 @@ def test_api_inference_flow_execute_and_verify():
     dna_record = receipt["dna_record"]
     pubkey_pem = receipt["public_key_pem"]
 
-    assert dna_record["model_id"] == "drone_detector_v1"
     assert dna_record["sequence_id"] >= 1
     assert len(dna_record["dna_hash"]) == 64
-    assert len(receipt["output"]["predictions"]) == 2
+    # No fabricated bounding boxes: predictions is always empty in the real inference contract
+    assert receipt["output"]["predictions"] == []
+    assert len(receipt["output"]["raw_output_digest"]) == 64
 
     # 2. Verify DNA receipt via API
     verify_resp = client.post(

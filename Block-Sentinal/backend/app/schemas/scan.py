@@ -37,6 +37,8 @@ class ComponentState(BaseModel):
 class ScanSession(BaseModel):
     scan_id: str
     batch_id: Optional[str] = None
+    sample_count: Optional[int] = None
+    merkle_root: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     status: ScanStatus = ScanStatus.PENDING
     stage: ScanStage = ScanStage.INGESTION

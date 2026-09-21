@@ -175,7 +175,7 @@ class ContributorRiskEngine:
             )
         else:
             explanation = (
-                f"Contributor risk scorecard computed from {total_datasets} datasets and {total_samples} samples. {quarantine_note}"
+                f"Empirical contributor risk scorecard computed from {total_datasets} datasets and {total_samples} samples. {quarantine_note}"
                 f"Observed {evidence_count} attached verification findings (CRITICAL: {severity_breakdown['CRITICAL']}, "
                 f"HIGH: {severity_breakdown['HIGH']}, MEDIUM: {severity_breakdown['MEDIUM']}, LOW: {severity_breakdown['LOW']}). "
                 f"This statistical evaluation reflects historical artifact verification and is not an assertion of malicious intent."

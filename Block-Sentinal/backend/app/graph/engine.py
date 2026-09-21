@@ -215,10 +215,11 @@ class EvidenceGraphEngine:
                     clean_contrib_prop = "UNKNOWN"
 
             if actual_dataset_id not in self.nodes:
+                n_type = NodeType.DATASET_BATCH if (batch_id and not dataset_id) else NodeType.DATASET
                 self.add_node(
                     GraphNode(
                         id=actual_dataset_id,
-                        node_type=NodeType.DATASET,
+                        node_type=n_type,
                         label=f"Dataset {actual_dataset_id}",
                         properties={"contributor_id": clean_contrib_prop, "sample_count": len(sample_ids) if sample_ids else 0},
                     )
@@ -595,31 +596,50 @@ class EvidenceGraphEngine:
 
             # Follow outgoing edges of dependency types:
             # e.g., OUTPUT -> INFERENCE -> MODEL -> TRAINING_RUN -> DATASET_VERSION -> DATASET -> CONTRIBUTOR
-            # or VERSION_OF, PRODUCED, TRAINED_ON, GENERATED_BY, PROVIDED, AUTHORED_BY
+            # or VERSION_OF, TRAINED_ON, GENERATED_BY, PROVIDED, AUTHORED_BY
+            # Note: in build_lineage(), model_id points to training_run_id via PRODUCED.
             for edge in self._out_edges.get(curr_id, []):
+                tgt = edge.target_id
+                if tgt in visited or tgt not in self.nodes:
+                    continue
                 if edge.edge_type in (
                     EdgeType.GENERATED_BY,
-                    EdgeType.PRODUCED,
                     EdgeType.TRAINED_ON,
                     EdgeType.AUTHORED_BY,
                     EdgeType.PROVIDED,
                     EdgeType.VERSION_OF,
                     EdgeType.USED_PREPROCESSING,
                 ):
-                    tgt = edge.target_id
-                    if tgt not in visited and tgt in self.nodes:
+                    visited.add(tgt)
+                    upstream_nodes.append(self.nodes[tgt])
+                    queue.append((tgt, depth + 1))
+                elif edge.edge_type == EdgeType.PRODUCED:
+                    # In build_lineage, model_id -> training_run_id is PRODUCED (model depends on training_run)
+                    tgt_node = self.nodes[tgt]
+                    if tgt_node.node_type == NodeType.TRAINING_RUN:
                         visited.add(tgt)
-                        upstream_nodes.append(self.nodes[tgt])
+                        upstream_nodes.append(tgt_node)
                         queue.append((tgt, depth + 1))
 
-            # Follow incoming edges that represent containment/provision:
+            # Follow incoming edges that represent containment/provision/production:
             # DATASET -> CONTAINS_SAMPLE -> SAMPLE (so sample points upstream to dataset)
+            # DATASET/PATCH -> PRODUCED -> TARGET (so target points upstream to producer)
+            # (CONTRIBUTOR -> PROVIDED -> DATASET)
             for edge in self._in_edges.get(curr_id, []):
+                src = edge.source_id
+                if src in visited or src not in self.nodes:
+                    continue
                 if edge.edge_type in (EdgeType.CONTAINS_SAMPLE, EdgeType.PROVIDED):
-                    src = edge.source_id
-                    if src not in visited and src in self.nodes:
+                    visited.add(src)
+                    upstream_nodes.append(self.nodes[src])
+                    queue.append((src, depth + 1))
+                elif edge.edge_type == EdgeType.PRODUCED:
+                    # Follow backwards from target to source, UNLESS it was a model->training_run edge
+                    src_node = self.nodes[src]
+                    curr_node = self.nodes[curr_id]
+                    if not (src_node.node_type == NodeType.MODEL and curr_node.node_type == NodeType.TRAINING_RUN):
                         visited.add(src)
-                        upstream_nodes.append(self.nodes[src])
+                        upstream_nodes.append(src_node)
                         queue.append((src, depth + 1))
 
         return upstream_nodes
@@ -640,29 +660,45 @@ class EvidenceGraphEngine:
 
             # Inbound dependency edges represent downstream consumers:
             # (e.g. INFERENCE -> GENERATED_BY -> MODEL: model has downstream inference)
+            # (e.g. MODEL -> PRODUCED -> TRAINING_RUN: training_run has downstream model)
             for edge in self._in_edges.get(curr_id, []):
+                src = edge.source_id
+                if src in visited or src not in self.nodes:
+                    continue
                 if edge.edge_type in (
                     EdgeType.GENERATED_BY,
-                    EdgeType.PRODUCED,
                     EdgeType.TRAINED_ON,
                     EdgeType.AUTHORED_BY,
                     EdgeType.VERSION_OF,
                     EdgeType.USED_PREPROCESSING,
                 ):
-                    src = edge.source_id
-                    if src not in visited and src in self.nodes:
+                    visited.add(src)
+                    downstream_nodes.append(self.nodes[src])
+                    queue.append((src, depth + 1))
+                elif edge.edge_type == EdgeType.PRODUCED:
+                    src_node = self.nodes[src]
+                    curr_node = self.nodes[curr_id]
+                    if src_node.node_type == NodeType.MODEL and curr_node.node_type == NodeType.TRAINING_RUN:
                         visited.add(src)
-                        downstream_nodes.append(self.nodes[src])
+                        downstream_nodes.append(src_node)
                         queue.append((src, depth + 1))
 
-            # Outbound provision / containment:
-            # (CONTRIBUTOR -> PROVIDED -> DATASET, DATASET -> CONTAINS_SAMPLE -> SAMPLE)
+            # Outbound provision / containment / production:
+            # (CONTRIBUTOR -> PROVIDED -> DATASET, DATASET -> CONTAINS_SAMPLE -> SAMPLE, PATCH -> PRODUCED -> MODEL)
             for edge in self._out_edges.get(curr_id, []):
+                tgt = edge.target_id
+                if tgt in visited or tgt not in self.nodes:
+                    continue
                 if edge.edge_type in (EdgeType.PROVIDED, EdgeType.CONTAINS_SAMPLE):
-                    tgt = edge.target_id
-                    if tgt not in visited and tgt in self.nodes:
+                    visited.add(tgt)
+                    downstream_nodes.append(self.nodes[tgt])
+                    queue.append((tgt, depth + 1))
+                elif edge.edge_type == EdgeType.PRODUCED:
+                    curr_node = self.nodes[curr_id]
+                    tgt_node = self.nodes[tgt]
+                    if not (curr_node.node_type == NodeType.MODEL and tgt_node.node_type == NodeType.TRAINING_RUN):
                         visited.add(tgt)
-                        downstream_nodes.append(self.nodes[tgt])
+                        downstream_nodes.append(tgt_node)
                         queue.append((tgt, depth + 1))
 
         return downstream_nodes
@@ -776,6 +812,7 @@ class EvidenceGraphEngine:
             affected_inferences=affected_inferences,
             affected_evidence_ids=affected_evidence_ids,
             affected_quarantines=affected_quarantines,
+            affected_nodes=[n.id for n in downstream],
             total_affected_entities=total_affected,
             explanation=explanation,
         )

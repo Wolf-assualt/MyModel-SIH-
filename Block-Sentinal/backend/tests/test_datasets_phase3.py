@@ -14,7 +14,9 @@ Validates:
 from pathlib import Path
 import json
 import time
+# pyrefly: ignore [missing-import]
 import pytest
+# pyrefly: ignore [missing-import]
 from PIL import Image
 
 from app.cli import main as cli_main

@@ -3,8 +3,11 @@ import base64
 import io
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, HTTPException
+# pyrefly: ignore [missing-import]
+from fastapi import APIRouter, HTTPException, Query
+# pyrefly: ignore [missing-import]
 import numpy as np
+# pyrefly: ignore [missing-import]
 from PIL import Image
 
 from app.core.config import settings
@@ -182,8 +185,27 @@ def get_inference_record_by_id(
     return ResponseEnvelope(data=record)
 
 
+@router.get("/records", response_model=ResponseEnvelope[List[InferenceDNARecord]])
+def list_inference_records(
+    limit: int = Query(50, ge=1, le=1000, description="Maximum number of records to return"),
+) -> ResponseEnvelope[List[InferenceDNARecord]]:
+    """Retrieve runtime inference DNA records up to limit."""
+    records: List[InferenceDNARecord] = []
+    if default_dna_generator.storage_dir.exists():
+        for rf in sorted(default_dna_generator.storage_dir.glob("*.json"), reverse=True):
+            if rf.name == "state.json":
+                continue
+            rec = default_dna_generator.load_record(rf.stem)
+            if rec:
+                records.append(rec)
+            if len(records) >= limit:
+                break
+    return ResponseEnvelope(data=records)
+
+
 @router.get("/chain", response_model=ResponseEnvelope[Dict[str, Any]])
 def get_inference_hash_chain() -> ResponseEnvelope[Dict[str, Any]]:
     """Retrieve the current audit hash chain tip and recorded sequence history."""
     state = default_dna_generator.get_chain_state()
     return ResponseEnvelope(data=state)
+

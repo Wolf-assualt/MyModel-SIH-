@@ -1,0 +1,87 @@
+{
+  "report_id": "rep_c666e52109ae",
+  "target_asset_id": "yolov8_tactical_v1",
+  "target_asset_type": "MODEL",
+  "assessment_id": "fused_test_12345",
+  "overall_verdict": "QUARANTINED",
+  "risk_score": 0.885,
+  "confidence_score": 0.54,
+  "coverage_ratio": 0.6,
+  "findings_summary": {
+    "CRITICAL": 1,
+    "HIGH": 1,
+    "MEDIUM": 1,
+    "LOW": 0
+  },
+  "threat_narratives": [
+    "Correlated Targeted Backdoor Poisoning Campaign detected: Training data contains synthetic triggers."
+  ],
+  "limitations_and_disclaimers": [
+    "Uninspected assurance layers: [MODEL_IDENTITY, INFERENCE_DNA]. Risk scores represent partial assurance.",
+    "Integrity and drift metrics are bounded by operational camera sensor dynamics and calibration.",
+    "Zero-trust provenance assurance assumes asymmetric root signing key confidentiality.",
+    "Assurance coverage is limited to evidence sources registered in the current fusion session; uninspected layers may conceal latent threats."
+  ],
+  "report_digest": "68c5cbdc7c6afa39bcc50ef2a21984c5556a9ccf48db4a1fc376252e20c1b15a",
+  "signature": "3046022100f19b49fef8609acdca811976b0023ff2ef440f0eade27c62f405f2024279c6b0022100db3f05fcd5fde3f0578fdf91a22bbf98ffc85cb7f759bd37e1b11eb4ec1e344f",
+  "signer_public_key_pem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE0+cfMbAkd7iDl6kCYEM+hA3wqoqI\n1dZlNGZywmmaQYpJspXZuMxLrBSr1FxHXY9LWmOS/Mz2u/ywbWvMq9a/1A==\n-----END PUBLIC KEY-----\n",
+  "created_at": "2026-09-21T02:51:53.885093Z",
+  "gatekeeper_action": "BLOCK",
+  "risk_level": "CRITICAL",
+  "hard_veto_triggered": true,
+  "section_overviews": [
+    {
+      "layer_name": "Dataset & Training Data Integrity",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.885
+    },
+    {
+      "layer_name": "Behavioral Fingerprint & Probes",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.885
+    },
+    {
+      "layer_name": "Distribution Shift & Drift Analysis",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.885
+    }
+  ],
+  "upstream_lineage": [],
+  "downstream_blast_radius": {},
+  "dataset_findings": [
+    {
+      "evidence_id": "ev_01",
+      "description": "Synthetic backdoor trigger pattern confirmed in training batch.",
+      "severity": "CRITICAL",
+      "metric_value": 0.95
+    }
+  ],
+  "model_findings": [],
+  "behavioral_findings": [
+    {
+      "evidence_id": "ev_02",
+      "description": "Model output divergence detected on perturbation battery.",
+      "severity": "HIGH",
+      "metric_value": 0.55
+    }
+  ],
+  "inference_findings": [],
+  "drift_findings": [
+    {
+      "evidence_id": "ev_03",
+      "description": "Operational environmental illumination shift observed.",
+      "severity": "MEDIUM",
+      "metric_value": 0.35
+    }
+  ],
+  "quarantine_records": [
+    {
+      "subject_id": "yolov8_tactical_v1",
+      "reason": "Critical layer weight discrepancy and runtime replay detection."
+    }
+  ],
+  "cryptographic_proofs": {
+    "canonical_report_digest": "68c5cbdc7c6afa39bcc50ef2a21984c5556a9ccf48db4a1fc376252e20c1b15a",
+    "ecdsa_signature": "3046022100f19b49fef8609acdca811976b0023ff2ef440f0eade27c62f405f2024279c6b0022100db3f05fcd5fde3f0578fdf91a22bbf98ffc85cb7f759bd37e1b11eb4ec1e344f"
+  }
+}

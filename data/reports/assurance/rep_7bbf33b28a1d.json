@@ -1,0 +1,60 @@
+{
+  "report_id": "rep_7bbf33b28a1d",
+  "target_asset_id": "cli_export_target",
+  "target_asset_type": "MODEL",
+  "assessment_id": "fused_334051db54f8",
+  "overall_verdict": "QUARANTINED",
+  "risk_score": 0.9,
+  "confidence_score": 1.0,
+  "coverage_ratio": 1.0,
+  "findings_summary": {
+    "CRITICAL": 2,
+    "HIGH": 2,
+    "MEDIUM": 1,
+    "LOW": 0
+  },
+  "threat_narratives": [
+    "Model Identity Compromise: Active model weights mismatch reference baseline manifest.",
+    "Data Poisoning Indicator: Backdoor trigger patterns detected in training partition."
+  ],
+  "limitations_and_disclaimers": [
+    "Integrity and drift metrics are bounded by operational camera sensor dynamics and calibration.",
+    "Zero-trust provenance assurance assumes asymmetric root signing key confidentiality."
+  ],
+  "report_digest": "798cc7d98a6d5f86a9c90e8f6f66b036c8b8c693afcaf632e6238ab0354f226e",
+  "signature": "3045022035793f6a9301c1d0ed2a8a627bf25d746ffc6dafff1bc582110b6063ecb333b502210096108f03ca7b8757de5df9030200fc3f99aa39a5e19e90958d3c56c3b61f4f31",
+  "signer_public_key_pem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEbCZNbLZWQphSiZoD3YAvrVB6UEZR\nE6nKq9VtdBH7h52Tz1DqCQ4E7SsO9Nxr5bCQZhQmOgu+YaWYU9v5NOkznA==\n-----END PUBLIC KEY-----\n",
+  "created_at": "2026-09-21T02:22:01.218972Z",
+  "gatekeeper_action": "BLOCK",
+  "risk_level": "CRITICAL",
+  "hard_veto_triggered": true,
+  "section_overviews": [
+    {
+      "layer_name": "Behavioural Fingerprint",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    },
+    {
+      "layer_name": "Data Integrity",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    },
+    {
+      "layer_name": "Distribution Shift",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    },
+    {
+      "layer_name": "Inference Dna",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    },
+    {
+      "layer_name": "Model Identity",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    }
+  ],
+  "upstream_lineage": [],
+  "downstream_blast_radius": {}
+}

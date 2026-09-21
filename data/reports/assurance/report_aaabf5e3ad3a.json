@@ -1,0 +1,60 @@
+{
+  "report_id": "report_aaabf5e3ad3a",
+  "target_asset_id": "cli_export_target",
+  "target_asset_type": "MODEL",
+  "assessment_id": "fused_3de44aedddc3",
+  "overall_verdict": "QUARANTINED",
+  "risk_score": 0.9,
+  "confidence_score": 1.0,
+  "coverage_ratio": 1.0,
+  "findings_summary": {
+    "CRITICAL": 2,
+    "HIGH": 2,
+    "MEDIUM": 1,
+    "LOW": 0
+  },
+  "threat_narratives": [
+    "Model Identity Compromise: Active model weights mismatch reference baseline manifest.",
+    "Data Poisoning Indicator: Backdoor trigger patterns detected in training partition."
+  ],
+  "limitations_and_disclaimers": [
+    "Integrity and drift metrics are bounded by operational camera sensor dynamics and calibration.",
+    "Zero-trust provenance assurance assumes asymmetric root signing key confidentiality."
+  ],
+  "report_digest": "6774776b3103b6b7d8e6e2a3528fae5228a99944e65a70300f4e7e3efc9c9e2e",
+  "signature": "304502202fd7904b6db9d7b7eaca66f2698969568464fe621aacd7dfb23b9c01deaad351022100b162b438a090f996ba12499f3445ad7ca108c35770722fd2878d092619fe6578",
+  "signer_public_key_pem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAED8wispr0yjbl8Qc9PUa5sMEzNCeu\nrLXbwuDdIFzoN+cgfoTDwgdx8swV0cyiHj/5JNXIHabDFs10I5Xi/NQygQ==\n-----END PUBLIC KEY-----\n",
+  "created_at": "2026-09-21T02:13:43.015090Z",
+  "gatekeeper_action": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "hard_veto_triggered": true,
+  "section_overviews": [
+    {
+      "layer_name": "Behavioural Fingerprint",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    },
+    {
+      "layer_name": "Data Integrity",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    },
+    {
+      "layer_name": "Distribution Shift",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    },
+    {
+      "layer_name": "Inference Dna",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    },
+    {
+      "layer_name": "Model Identity",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    }
+  ],
+  "upstream_lineage": [],
+  "downstream_blast_radius": {}
+}

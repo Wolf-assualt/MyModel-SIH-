@@ -1,0 +1,14 @@
+{
+  "evidence_id": "ev_INFERENCE_DNA",
+  "source": "INFERENCE_DNA",
+  "domain": null,
+  "severity": "HIGH",
+  "metric_value": 0.0,
+  "description": "test",
+  "subject_id": "test_model",
+  "related_model_id": null,
+  "related_dataset_id": null,
+  "evidence_digest": "442456eba93e2340ccde1a9432bed9a9d09ba85896dfc4584d901f2202cdb6c1",
+  "confidence": 0.9,
+  "metadata": {}
+}

@@ -1,0 +1,14 @@
+{
+  "evidence_id": "ev_DISTRIBUTION_SHIFT",
+  "source": "DISTRIBUTION_SHIFT",
+  "domain": null,
+  "severity": "HIGH",
+  "metric_value": 0.0,
+  "description": "test",
+  "subject_id": "test_model",
+  "related_model_id": null,
+  "related_dataset_id": null,
+  "evidence_digest": "ba6fa60b78f4f633988e49d7e59d696bbd0b513529a02f30b1cbfda135b3e280",
+  "confidence": 0.9,
+  "metadata": {}
+}

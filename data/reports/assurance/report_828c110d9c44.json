@@ -1,0 +1,28 @@
+{
+  "report_id": "report_828c110d9c44",
+  "target_asset_id": "cli_export_target",
+  "target_asset_type": "MODEL",
+  "assessment_id": "fused_22aeb461bead",
+  "overall_verdict": "QUARANTINED",
+  "risk_score": 0.9,
+  "confidence_score": 1.0,
+  "coverage_ratio": 1.0,
+  "findings_summary": {
+    "CRITICAL": 2,
+    "HIGH": 2,
+    "MEDIUM": 1,
+    "LOW": 0
+  },
+  "threat_narratives": [
+    "Model Identity Compromise: Active model weights mismatch reference baseline manifest.",
+    "Data Poisoning Indicator: Backdoor trigger patterns detected in training partition."
+  ],
+  "limitations_and_disclaimers": [
+    "Integrity and drift metrics are bounded by operational camera sensor dynamics and calibration.",
+    "Zero-trust provenance assurance assumes asymmetric root signing key confidentiality."
+  ],
+  "report_digest": "aaf3cbf59908cd74d664939105e5712f4aedaef939206be529f741dce9adcfdb",
+  "signature": "3044022069e6c3b99e296f48332bc6cfbfc941e65c923bf146b81984baf92a7e9edf481f02206852b46ce02b4fb7000ff73a13ed0a0e4b698dd0a914c3e38ecc2c451ce16572",
+  "signer_public_key_pem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5iNW826nZ4SUnoUkEkg9vMGS32cg\nIlujWHy+ey0wAvAY7VJmwc4OXGv9dF7niCrctJvvAiEj1g0doO1qDNmPrg==\n-----END PUBLIC KEY-----\n",
+  "created_at": "2026-09-21T02:09:40.778026Z"
+}

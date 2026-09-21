@@ -1,0 +1,14 @@
+{
+  "evidence_id": "ev_BEHAVIOURAL_FINGERPRINT",
+  "source": "BEHAVIOURAL_FINGERPRINT",
+  "domain": null,
+  "severity": "HIGH",
+  "metric_value": 0.0,
+  "description": "test",
+  "subject_id": "test_model",
+  "related_model_id": null,
+  "related_dataset_id": null,
+  "evidence_digest": "ad05766965aa232ab686d4138d1c31545e6fd896567b28f6ee20b392dfcefd8d",
+  "confidence": 0.9,
+  "metadata": {}
+}

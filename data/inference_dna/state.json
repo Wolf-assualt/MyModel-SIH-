@@ -1,0 +1,31 @@
+{
+  "last_sequence_number": 2,
+  "seen_nonces": [
+    "82dca5ecd7eba0b08f5f8c56f4496176",
+    "8db6b289ae84938c4063b504e1e01d69"
+  ],
+  "seen_records": [
+    "dna_0ee3a6346ef68197",
+    "dna_1502b9e8354163d9"
+  ],
+  "seen_identities": [
+    "eo_landcover_resnet18:c1fdb140835364b60207e4cee959591acd40aef4f69f12f2eac06fa636ecbf2a:fb9bb76c13f11c07737bd2d0c1fa1394ef9ee8af15d7de9d4cb5c78377ad5c6a:5de7a24b0a975411dc03ef73666cf4a5efa803d2a0f2d6e5d1c8507ddc265611:1111111111111111111111111111111111111111111111111111111111111111",
+    "eo_landcover_resnet18:c1fdb140835364b60207e4cee959591acd40aef4f69f12f2eac06fa636ecbf2a:fb9bb76c13f11c07737bd2d0c1fa1394ef9ee8af15d7de9d4cb5c78377ad5c6a:5de7a24b0a975411dc03ef73666cf4a5efa803d2a0f2d6e5d1c8507ddc265611:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  ],
+  "chain_records": [
+    {
+      "index": 0,
+      "timestamp": "2026-09-21T03:00:25.155137+00:00",
+      "data_hash": "27988417de8f6c1d29aefbd8e4cdf0c93622463b645d6c5113e8c2d1d104ee55",
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "current_hash": "27988417de8f6c1d29aefbd8e4cdf0c93622463b645d6c5113e8c2d1d104ee55"
+    },
+    {
+      "index": 1,
+      "timestamp": "2026-09-21T03:00:25.162880+00:00",
+      "data_hash": "33636f5fe5e6cc4f55238af25097402f38b7b6a973c01090119ab3d1bf151b72",
+      "prev_hash": "27988417de8f6c1d29aefbd8e4cdf0c93622463b645d6c5113e8c2d1d104ee55",
+      "current_hash": "33636f5fe5e6cc4f55238af25097402f38b7b6a973c01090119ab3d1bf151b72"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+================================================================================
+                   TRUST-CV EXECUTIVE SECURITY SITUATION BRIEF                  
+================================================================================
+TARGET ASSET       : yolov8_tactical_v1 (MODEL)
+OPERATIONAL VERDICT: QUARANTINED
+COMPOSITE RISK     : 0.8850 (Coverage: 60.0%)
+FINDINGS TALLY     : CRITICAL: 1 | HIGH: 1 | MEDIUM: 1 | LOW: 0
+SITUATION NARRATIVE: Correlated Targeted Backdoor Poisoning Campaign detected: Training data contains synthetic triggers.
+CRYPTOGRAPHIC SEAL : b8eda7ee937615bb...254ca3b29bf778b5
+TIMESTAMP (UTC)    : 2026-09-21T02:09:36.799744+00:00
+================================================================================

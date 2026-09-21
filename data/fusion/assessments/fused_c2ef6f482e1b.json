@@ -1,0 +1,59 @@
+{
+  "assessment_id": "fused_c2ef6f482e1b",
+  "target_entity_id": "api_model_test",
+  "overall_status": "UNDER_REVIEW",
+  "verdict": "UNDER_REVIEW",
+  "risk_level": "HIGH",
+  "risk_score": 0.5,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "REVIEW",
+  "coverage": {
+    "sources_checked": [
+      "MODEL_IDENTITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "FLAG for security officer and ML engineer secondary review."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "All 1 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_api_test_01",
+      "source": "MODEL_IDENTITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.0,
+      "description": "API test model discrepancy",
+      "subject_id": "api_model_test",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": "eaa71c3a8b76b17814e4817d9dce1163402190715071dd18b42d85da4ecbfa66",
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": null,
+  "assessment_digest": "8805eac63e28d1fb859057644f2c888faa3057a4a87359994af041f8afc480f9",
+  "created_at": "2026-09-21T02:52:33.359004Z"
+}

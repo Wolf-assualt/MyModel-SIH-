@@ -1,0 +1,111 @@
+{
+  "report_id": "rep_3ceb131b454f",
+  "target_asset_id": "cli_list_target",
+  "target_asset_type": "MODEL",
+  "assessment_id": "fused_47d0688b4df0",
+  "overall_verdict": "QUARANTINED",
+  "risk_score": 0.9,
+  "confidence_score": 1.0,
+  "coverage_ratio": 1.0,
+  "findings_summary": {
+    "CRITICAL": 2,
+    "HIGH": 2,
+    "MEDIUM": 1,
+    "LOW": 0
+  },
+  "threat_narratives": [
+    "Model Identity Compromise: Active model weights mismatch reference baseline manifest.",
+    "Data Poisoning Indicator: Backdoor trigger patterns detected in training partition."
+  ],
+  "limitations_and_disclaimers": [
+    "Integrity and drift metrics are bounded by operational camera sensor dynamics and calibration.",
+    "Zero-trust provenance assurance assumes asymmetric root signing key confidentiality.",
+    "Assurance coverage is limited to evidence sources registered in the current fusion session; uninspected layers may conceal latent threats."
+  ],
+  "report_digest": "cac29f4841e4dbc88eb89fd0974a7a56a2c2739100848d94f107e2cd6f1d5f38",
+  "signature": "3046022100918976548966e19cec96bd89d2ef81603c299a81f165be5142755296158181fa022100d893ebdf58d6b8bb91d2a8ca4f800d199a4ebf504318a3c2f8ac14fbd28c81ee",
+  "signer_public_key_pem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAER2hPiZbg2zsbL+xN88uP1xhwVSHz\nnzyDYLJNtnWNllZw2cQ0jiAQPfhBElcLfjHnXsVcJwJ/GfTDjfLTRd51ZA==\n-----END PUBLIC KEY-----\n",
+  "created_at": "2026-09-21T02:27:21.593177Z",
+  "gatekeeper_action": "BLOCK",
+  "risk_level": "CRITICAL",
+  "hard_veto_triggered": true,
+  "section_overviews": [
+    {
+      "layer_name": "Behavioural Fingerprint",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    },
+    {
+      "layer_name": "Data Integrity",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    },
+    {
+      "layer_name": "Distribution Shift",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    },
+    {
+      "layer_name": "Inference Dna",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    },
+    {
+      "layer_name": "Model Identity",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    }
+  ],
+  "upstream_lineage": [],
+  "downstream_blast_radius": {},
+  "dataset_findings": [
+    {
+      "evidence_id": "ev_data_backdoor_01",
+      "description": "Near-duplicate trigger pattern detected in training batch.",
+      "severity": "HIGH",
+      "metric_value": 0.0
+    }
+  ],
+  "model_findings": [
+    {
+      "evidence_id": "ev_model_weight_01",
+      "description": "Layer weight hash discrepancy in backbone layer 4.",
+      "severity": "CRITICAL",
+      "metric_value": 0.0
+    }
+  ],
+  "behavioral_findings": [
+    {
+      "evidence_id": "ev_beh_probe_01",
+      "description": "Behavioral divergence exceeded threshold under contrast perturbation.",
+      "severity": "MEDIUM",
+      "metric_value": 0.0
+    }
+  ],
+  "inference_findings": [
+    {
+      "evidence_id": "ev_inf_replay_01",
+      "description": "Duplicate nonce detected in runtime inference pipeline.",
+      "severity": "CRITICAL",
+      "metric_value": 0.0
+    }
+  ],
+  "drift_findings": [
+    {
+      "evidence_id": "ev_drift_shift_01",
+      "description": "Significant Wasserstein-1 distance detected on optical channel.",
+      "severity": "HIGH",
+      "metric_value": 0.0
+    }
+  ],
+  "quarantine_records": [
+    {
+      "subject_id": "cli_list_target",
+      "reason": "Critical layer weight discrepancy and runtime replay detection."
+    }
+  ],
+  "cryptographic_proofs": {
+    "canonical_report_digest": "cac29f4841e4dbc88eb89fd0974a7a56a2c2739100848d94f107e2cd6f1d5f38",
+    "ecdsa_signature": "3046022100918976548966e19cec96bd89d2ef81603c299a81f165be5142755296158181fa022100d893ebdf58d6b8bb91d2a8ca4f800d199a4ebf504318a3c2f8ac14fbd28c81ee"
+  }
+}

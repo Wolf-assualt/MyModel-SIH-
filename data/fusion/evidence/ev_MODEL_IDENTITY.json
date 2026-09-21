@@ -1,0 +1,14 @@
+{
+  "evidence_id": "ev_MODEL_IDENTITY",
+  "source": "MODEL_IDENTITY",
+  "domain": null,
+  "severity": "HIGH",
+  "metric_value": 0.0,
+  "description": "test",
+  "subject_id": "test_model",
+  "related_model_id": null,
+  "related_dataset_id": null,
+  "evidence_digest": "970f7104190e8823f0adc2951ff8edaa7cad79c2fb34649f1e630be113c2e243",
+  "confidence": 0.9,
+  "metadata": {}
+}

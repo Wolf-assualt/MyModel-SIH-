@@ -1,0 +1,14 @@
+{
+  "evidence_id": "ev_DATA_INTEGRITY",
+  "source": "DATA_INTEGRITY",
+  "domain": null,
+  "severity": "HIGH",
+  "metric_value": 0.0,
+  "description": "test",
+  "subject_id": "test_model",
+  "related_model_id": null,
+  "related_dataset_id": null,
+  "evidence_digest": "d5e559fa3cad41c7be9de24663c6cc700ff1ddbcf2679572f8752e145ada356b",
+  "confidence": 0.9,
+  "metadata": {}
+}

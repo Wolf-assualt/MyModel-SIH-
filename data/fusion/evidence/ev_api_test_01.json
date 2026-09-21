@@ -1,0 +1,14 @@
+{
+  "evidence_id": "ev_api_test_01",
+  "source": "MODEL_IDENTITY",
+  "domain": null,
+  "severity": "HIGH",
+  "metric_value": 0.0,
+  "description": "API test model discrepancy",
+  "subject_id": "api_model_test",
+  "related_model_id": null,
+  "related_dataset_id": null,
+  "evidence_digest": "eaa71c3a8b76b17814e4817d9dce1163402190715071dd18b42d85da4ecbfa66",
+  "confidence": null,
+  "metadata": {}
+}

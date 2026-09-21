@@ -1,0 +1,61 @@
+{
+  "report_id": "rep_ca386fd0c4c2",
+  "target_asset_id": "cli_target_01",
+  "target_asset_type": "MODEL",
+  "assessment_id": "fused_3043860a561c",
+  "overall_verdict": "ACCEPTED",
+  "risk_score": 0.0225,
+  "confidence_score": 0.12,
+  "coverage_ratio": 0.2,
+  "findings_summary": {
+    "CRITICAL": 0,
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 1
+  },
+  "threat_narratives": [],
+  "limitations_and_disclaimers": [
+    "Uninspected assurance layers: [MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT]. Risk scores represent partial assurance.",
+    "Integrity and drift metrics are bounded by operational camera sensor dynamics and calibration.",
+    "Zero-trust provenance assurance assumes asymmetric root signing key confidentiality.",
+    "Assurance coverage is limited to evidence sources registered in the current fusion session; uninspected layers may conceal latent threats."
+  ],
+  "report_digest": "24d244b433d468bf52d7054be28926108592dfbe6c7c27b887bc3c1bdcab25ca",
+  "signature": "30450221008c075aed253043777a4af8a0a14c836452edb34b46554c13b8146a97f5c471360220732a066a46858e2f1fcc76ad452039ea35369ecb830da1902d8f50b26832bf86",
+  "signer_public_key_pem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE8Ei2sFusyxZsuTa8RV6wMwQ7t0wE\nQI+TmprlDZ4xyVF3s4LS25uT3enLFU0XpSA60GxrRg1ft3/eLiOw4DH51A==\n-----END PUBLIC KEY-----\n",
+  "created_at": "2026-09-21T02:59:11.065445Z",
+  "gatekeeper_action": "ALLOW",
+  "risk_level": "LOW",
+  "hard_veto_triggered": false,
+  "section_overviews": [
+    {
+      "layer_name": "Dataset & Training Data Integrity",
+      "status": "ACCEPTED",
+      "risk_contribution": 0.0225
+    }
+  ],
+  "upstream_lineage": [],
+  "downstream_blast_radius": {},
+  "dataset_findings": [
+    {
+      "evidence_id": "ev_cli_test_01",
+      "description": "CLI test evidence baseline",
+      "severity": "LOW",
+      "metric_value": 0.0
+    }
+  ],
+  "model_findings": [],
+  "behavioral_findings": [],
+  "inference_findings": [],
+  "drift_findings": [],
+  "quarantine_records": [
+    {
+      "subject_id": "cli_target_01",
+      "reason": "Critical layer weight discrepancy and runtime replay detection."
+    }
+  ],
+  "cryptographic_proofs": {
+    "canonical_report_digest": "24d244b433d468bf52d7054be28926108592dfbe6c7c27b887bc3c1bdcab25ca",
+    "ecdsa_signature": "30450221008c075aed253043777a4af8a0a14c836452edb34b46554c13b8146a97f5c471360220732a066a46858e2f1fcc76ad452039ea35369ecb830da1902d8f50b26832bf86"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "evidence_id": "ev_cli_test_01",
+  "source": "DATA_INTEGRITY",
+  "domain": null,
+  "severity": "LOW",
+  "metric_value": 0.0,
+  "description": "CLI test evidence baseline",
+  "subject_id": "cli_target_01",
+  "related_model_id": null,
+  "related_dataset_id": null,
+  "evidence_digest": "8098b37f38c0705ebb7a445f86fdc71ccddf9dd3f9779f5b42064fefff45de50",
+  "confidence": null,
+  "metadata": {}
+}

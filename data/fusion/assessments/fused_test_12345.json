@@ -1,0 +1,83 @@
+{
+  "assessment_id": "fused_test_12345",
+  "target_entity_id": "yolov8_tactical_v1",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "LOW",
+  "risk_score": 0.885,
+  "confidence": 0.54,
+  "confidence_score": 0.54,
+  "action": "ALLOW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "DISTRIBUTION_SHIFT"
+    ],
+    "coverage_ratio": 0.6,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "INFERENCE_DNA"
+    ]
+  },
+  "findings": [
+    "Correlated Targeted Backdoor Poisoning Campaign detected: Training data contains synthetic triggers."
+  ],
+  "correlated_findings": [
+    "Correlated Targeted Backdoor Poisoning Campaign detected: Training data contains synthetic triggers."
+  ],
+  "contributors": [],
+  "recommended_actions": [],
+  "limitations": [],
+  "explanation": "CORRELATED: Correlated Targeted Backdoor Poisoning Campaign detected: Training data contains synthetic triggers.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_01",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 0.95,
+      "description": "Synthetic backdoor trigger pattern confirmed in training batch.",
+      "subject_id": null,
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    },
+    {
+      "evidence_id": "ev_02",
+      "source": "BEHAVIOURAL_FINGERPRINT",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.55,
+      "description": "Model output divergence detected on perturbation battery.",
+      "subject_id": null,
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    },
+    {
+      "evidence_id": "ev_03",
+      "source": "DISTRIBUTION_SHIFT",
+      "domain": null,
+      "severity": "MEDIUM",
+      "metric_value": 0.35,
+      "description": "Operational environmental illumination shift observed.",
+      "subject_id": null,
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": null,
+  "assessment_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "created_at": "2026-09-21T02:52:49.685161Z"
+}

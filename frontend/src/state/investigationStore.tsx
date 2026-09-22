@@ -224,8 +224,49 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
       }
       return;
     }
-    // Non-dataset artifacts (model, inference, manifest) are accepted locally;
-    // they are referenced in the backend manifest when a dataset is ingested.
+    // Non-dataset artifacts: model files are uploaded to the backend registry.
+    // Inference and manifest artifacts are accepted locally (no backend upload endpoint yet).
+    const isModel = artifact?.type === 'model';
+    if (isModel) {
+      setArtifacts(prev => prev.map(art => art.id === artifactId ? {
+        ...art,
+        filename: file.name,
+        size: formatFileSize(file.size),
+        hash: '',
+        status: 'uploading',
+        progress: 50,
+        metadata: { ...art.metadata, format: 'Uploading model to backend registry…' },
+      } : art));
+      try {
+        const manifest = await apiService.uploadModel(file);
+        setArtifacts(prev => prev.map(art => art.id === artifactId ? {
+          ...art,
+          filename: file.name,
+          size: formatFileSize(file.size),
+          hash: manifest.artifact_hash,
+          status: 'verified',
+          progress: 100,
+          metadata: {
+            ...art.metadata,
+            format: `Registered — model_id: ${manifest.model_id.substring(0, 8)}…`,
+          },
+        } : art));
+        setBackendError(null);
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : 'Model upload failed';
+        setBackendError(msg);
+        setArtifacts(prev => prev.map(art => art.id === artifactId ? {
+          ...art,
+          filename: file.name,
+          status: 'error',
+          progress: 0,
+          metadata: { ...art.metadata, format: `Model upload failed: ${msg}` },
+        } : art));
+      }
+      return;
+    }
+    // Inference and manifest artifacts: accepted locally for display;
+    // no separate backend upload endpoint exists for these yet.
     setArtifacts(prev => prev.map(art => art.id === artifactId ? {
       ...art,
       filename: file.name,
@@ -233,7 +274,7 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
       hash: '',
       status: 'verified',
       progress: 100,
-      metadata: { ...art.metadata, format: `${getExtension(file.name).toUpperCase()} — awaiting backend analysis` },
+      metadata: { ...art.metadata, format: `${getExtension(file.name).toUpperCase()} — accepted locally` },
     } : art));
   };
 

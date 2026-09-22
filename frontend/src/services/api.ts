@@ -202,6 +202,37 @@ class ApiService {
     return envelope.data;
   }
 
+  /**
+   * Upload a model binary file to the backend registry.
+   * Returns a ModelIdentityManifest with real artifact_hash, identity_digest,
+   * and ECDSA signature — no security analysis is performed client-side.
+   */
+  async uploadModel(
+    file: File,
+    opts: { name?: string; version?: string; format?: string; isReference?: boolean } = {},
+  ): Promise<{ model_id: string; artifact_hash: string; name: string; version: string; identity_digest: string }> {
+    const body = new FormData();
+    body.append('file', file);
+    body.append('name', opts.name ?? file.name.replace(/\.[^.]+$/, ''));
+    body.append('version', opts.version ?? '1.0');
+    body.append('format', opts.format ?? this._inferModelFormat(file.name));
+    body.append('is_reference', String(opts.isReference ?? false));
+    const response = await fetch(`${this.baseUrl}/models/upload`, { method: 'POST', body });
+    const envelope: ApiResponse<{ model_id: string; artifact_hash: string; name: string; version: string; identity_digest: string }> = await response.json();
+    if (!response.ok || !envelope.data) {
+      throw new Error(envelope.error || `Model upload failed with HTTP ${response.status}`);
+    }
+    return envelope.data;
+  }
+
+  private _inferModelFormat(filename: string): string {
+    const ext = filename.split('.').pop()?.toLowerCase() ?? '';
+    if (ext === 'onnx') return 'ONNX';
+    if (ext === 'pt' || ext === 'pth') return 'PYTORCH_WEIGHTS';
+    if (ext === 'bin') return 'GENERIC_BINARY';
+    return 'ONNX';
+  }
+
   async getScanSession(scanId: string): Promise<ScanSession> {
     const response = await fetch(`${this.baseUrl}/scan/${encodeURIComponent(scanId)}`);
     const envelope: ApiResponse<ScanSession> = await response.json();

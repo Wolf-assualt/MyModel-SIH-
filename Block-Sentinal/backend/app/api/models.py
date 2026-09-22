@@ -1,16 +1,21 @@
 """Model Ingestion, Cryptographic Identity, and Baseline Verification API Endpoints."""
 from pathlib import Path
 from typing import Optional
+import shutil
+import uuid
 # pyrefly: ignore [missing-import]
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
 # pyrefly: ignore [missing-import]
 from pydantic import BaseModel
 
+from app.core.config import settings
 from app.crypto.signer import KeyManager
 from app.models_engine.registry import default_model_registry
 from app.schemas.base import ResponseEnvelope
 from app.schemas.model import (
+    AccessMode,
     ModelAssuranceFinding,
+    ModelFormat,
     ModelIdentityManifest,
     ModelIngestRequest,
     ModelVerifyResponse,
@@ -56,6 +61,74 @@ def register_model(payload: ModelIngestRequest) -> ResponseEnvelope[ModelIdentit
         raise HTTPException(status_code=400, detail=f"Model registration failed: {str(exc)}")
 
     return ResponseEnvelope(data=manifest)
+
+
+@router.post("/upload", response_model=ResponseEnvelope[ModelIdentityManifest])
+async def upload_and_register_model(
+    file: UploadFile = File(...),
+    name: str = Form(...),
+    version: str = Form("1.0"),
+    format: str = Form("ONNX"),
+    is_reference: bool = Form(False),
+    access_mode: Optional[str] = Form(None),
+) -> ResponseEnvelope[ModelIdentityManifest]:
+    """Upload a model binary, persist it server-side, and register a cryptographic identity manifest.
+
+    Accepts multipart/form-data so that the frontend can upload a model file directly
+    (closing the Phase 8 limitation where only JSON-path registration was supported).
+
+    Pipeline: UPLOAD → PRESERVE ORIGINAL → SHA-256 → ONNX/TorchScript inspection
+    → PER-LAYER HASHING → ECDSA-SIGNED IDENTITY MANIFEST
+    """
+    upload_root = Path(settings.DATA_DIR) / "models" / "uploads" / str(uuid.uuid4())
+    upload_root.mkdir(parents=True, exist_ok=True)
+
+    raw_name = file.filename or f"model_{uuid.uuid4().hex[:8]}"
+    dest = upload_root / Path(raw_name).name
+
+    try:
+        with dest.open("wb") as fh:
+            shutil.copyfileobj(file.file, fh)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Model file write failed: {exc}")
+
+    # Resolve format enum
+    try:
+        fmt_upper = format.upper()
+        fmt_map = {
+            "ONNX": ModelFormat.ONNX,
+            "TORCHSCRIPT": ModelFormat.TORCHSCRIPT,
+            "PYTORCH": ModelFormat.PYTORCH_WEIGHTS,
+            "PYTORCH_WEIGHTS": ModelFormat.PYTORCH_WEIGHTS,
+            "GENERIC_BINARY": ModelFormat.GENERIC_BINARY,
+            "BLACK_BOX": ModelFormat.BLACK_BOX,
+        }
+        model_format = fmt_map.get(fmt_upper, ModelFormat.ONNX)
+    except Exception:
+        model_format = ModelFormat.ONNX
+
+    # Resolve access_mode enum
+    resolved_access_mode: Optional[AccessMode] = None
+    if access_mode:
+        try:
+            resolved_access_mode = AccessMode(access_mode.upper())
+        except Exception:
+            resolved_access_mode = None
+
+    try:
+        manifest = default_model_registry.register_model(
+            name=name,
+            version=version,
+            model_path=dest,
+            format=model_format,
+            is_reference=is_reference,
+            access_mode=resolved_access_mode,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Model registration failed: {str(exc)}")
+
+    return ResponseEnvelope(data=manifest)
+
 
 
 @router.get("/manifest/{model_id}", response_model=ResponseEnvelope[ModelIdentityManifest])

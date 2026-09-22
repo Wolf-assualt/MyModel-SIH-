@@ -62,6 +62,16 @@ export function createMockApiService() {
       }),
     ),
 
+    uploadModel: track('uploadModel', (_file: File) =>
+      Promise.resolve({
+        model_id: 'model-mock-001',
+        artifact_hash: 'a'.repeat(64),
+        name: 'mock_model',
+        version: '1.0',
+        identity_digest: 'b'.repeat(64),
+      }),
+    ),
+
     getScanSession: track('getScanSession', (_scanId: string) =>
       Promise.resolve<ScanSession>({
         scan_id: 'scan-mock-001',

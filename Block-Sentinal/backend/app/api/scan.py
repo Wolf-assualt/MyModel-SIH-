@@ -496,12 +496,13 @@ async def _run_scan_pipeline(scan_id: str, batch_id: str):
                 explanation="Evidence graph unavailable due to fusion failure"
             )
             
-            # Keep original assessment if fusion fails
+            # Keep original assessment if fusion fails — honour three-tier recommendation
             if not session.assessment:
+                rec_value = report.recommendation.value if hasattr(report.recommendation, "value") else str(report.recommendation)
                 session.assessment = {
                     "assuranceScore": report.overall_health_score,
-                    "disposition": "ACCEPTED" if report.recommendation == "ACCEPTED" else "QUARANTINED",
-                    "hardVetoTriggered": report.recommendation == "QUARANTINED",
+                    "disposition": rec_value,
+                    "hardVetoTriggered": rec_value == "QUARANTINED",
                     "dataRiskScore": report.overall_health_score,
                     "modelRiskScore": -1.0,
                     "inferenceRiskScore": -1.0,
@@ -514,23 +515,41 @@ async def _run_scan_pipeline(scan_id: str, batch_id: str):
         session.stage = ScanStage.REPORT
         session.progress = 0.9
         await asyncio.sleep(0.5)
-        
-        # Create an authoritative assessment result based purely on the real report
-        total_samples = report.total_samples_analyzed
-        flagged = report.findings_count
-        risk_score = report.overall_health_score
-        
-        session.assessment = {
-            "assuranceScore": risk_score,
-            "disposition": "ACCEPTED" if report.recommendation == "ACCEPTED" else "QUARANTINED",
-            "hardVetoTriggered": report.recommendation == "QUARANTINED",
-            "dataRiskScore": risk_score,
-            "modelRiskScore": -1.0,  # UNAVAILABLE
-            "inferenceRiskScore": -1.0,  # UNAVAILABLE
-            "totalSamples": total_samples,
-            "flaggedSamples": flagged,
-            "imageResults": [ir.model_dump(mode="json") for ir in report.image_results]
-        }
+
+        # Finalise the assessment.
+        # Policy: if the Evidence Fusion stage produced a real fused_assessment, use its
+        # risk-based disposition as the authoritative verdict. The fusion engine applies
+        # multi-source weighted risk scoring, DRIFT_ISOLATION, hard-veto rules, and
+        # three-tier disposition (ACCEPTED / UNDER_REVIEW / QUARANTINED).
+        # Only fall back to the integrity-only health_score when fusion was unavailable.
+        #
+        # CRITICAL_SHIFT alone: fusion engine caps risk at 0.65 → UNDER_REVIEW (not ACCEPTED).
+        # CRITICAL_SHIFT + no other findings: integrity health_score can be 1.0 → naive ACCEPTED
+        # would be wrong. Fusion is the authoritative gate.
+        if session.assessment and session.assessment.get("fusionAssessment"):
+            # Fusion succeeded earlier — preserve fusion disposition and enrich with
+            # per-sample image results and sample counts from the integrity report.
+            session.assessment["totalSamples"] = report.total_samples_analyzed
+            session.assessment["flaggedSamples"] = report.findings_count
+            session.assessment["imageResults"] = [ir.model_dump(mode="json") for ir in report.image_results]
+            # dataRiskScore is always the real integrity health score regardless of fusion
+            session.assessment["dataRiskScore"] = report.overall_health_score
+        else:
+            # Fusion was unavailable (no evidence items, or fusion exception).
+            # Fall back to the integrity engine result, but honour the three-tier
+            # recommendation (ACCEPTED / UNDER_REVIEW / QUARANTINED).
+            rec_value = report.recommendation.value if hasattr(report.recommendation, "value") else str(report.recommendation)
+            session.assessment = {
+                "assuranceScore": report.overall_health_score,
+                "disposition": rec_value,
+                "hardVetoTriggered": rec_value == "QUARANTINED",
+                "dataRiskScore": report.overall_health_score,
+                "modelRiskScore": -1.0,   # UNAVAILABLE
+                "inferenceRiskScore": -1.0,  # UNAVAILABLE
+                "totalSamples": report.total_samples_analyzed,
+                "flaggedSamples": report.findings_count,
+                "imageResults": [ir.model_dump(mode="json") for ir in report.image_results],
+            }
         
         session.stage_results["FINAL_VERDICT"] = ComponentState(status=ComponentStatus.PASSED)
         session.stage = ScanStage.COMPLETED

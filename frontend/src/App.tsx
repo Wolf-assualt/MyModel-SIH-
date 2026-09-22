@@ -1,4 +1,5 @@
 import React from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { InvestigationProvider, useInvestigation } from './state/investigationStore';
 import { Header } from './components/layout/Header';
 import { PhaseStepper } from './components/layout/PhaseStepper';
@@ -17,9 +18,19 @@ const MultiPhaseSocView: React.FC = () => {
 
       <main className="flex-1 overflow-x-hidden overflow-y-auto w-full relative">
         <div className="w-full max-w-[1600px] mx-auto min-h-full">
-          {phase === 'launch' && <LaunchPage />}
-          {phase === 'scan' && <ScanPage />}
-          {phase === 'results' && <ResultsPage />}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={phase}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+            >
+              {phase === 'launch' && <LaunchPage />}
+              {phase === 'scan' && <ScanPage />}
+              {phase === 'results' && <ResultsPage />}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
     </div>

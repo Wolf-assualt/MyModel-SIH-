@@ -497,21 +497,21 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           // Stage 3: DATA.INTEGRITY (DATASET_ANALYSIS + 5 sub components)
-          if (backendStage === 'DATA_INTEGRITY' || backendStage.match(/^MODEL|INFERENCE|DISTRIBUTION|EVIDENCE|AUDIT|REPORT|COMPLETED$/) || sess.status === 'FAILED') {
+          if (backendStage === 'DATA_INTEGRITY' || backendStage.match(/^MODEL|INFERENCE|DISTRIBUTION|EVIDENCE|REPORT|COMPLETED$/) || sess.status === 'FAILED') {
             const s3 = (stageResults.DATASET_ANALYSIS && stageResults.DATASET_ANALYSIS.status) || (sess.status === 'IN_PROGRESS' ? 'running' : 'pending');
             updatePipelineStage(3, s3);
           }
 
           // Stage 4: MODEL.IDENTITY
-          if (backendStage === 'MODEL_ASSURANCE' || backendStage.match(/^INFERENCE|DISTRIBUTION|EVIDENCE|AUDIT|REPORT|COMPLETED$/) || sess.status === 'FAILED') {
+          if (backendStage === 'MODEL_ASSURANCE' || backendStage.match(/^INFERENCE|DISTRIBUTION|EVIDENCE|REPORT|COMPLETED$/) || sess.status === 'FAILED') {
             const s4 = (stageResults.MODEL_INTEGRITY && stageResults.MODEL_INTEGRITY.status) || (sess.status === 'IN_PROGRESS' ? 'running' : 'pending');
             updatePipelineStage(4, s4);
           }
 
           // Stage 5: BEHAVIOR.FINGERPRINT — only reported by stage_results.FINGERPRINT.
           // Absent backend evidence must stay UNAVAILABLE, never be assumed passed.
-          if (backendStage === 'INFERENCE_ASSURANCE' || backendStage.match(/^DISTRIBUTION|EVIDENCE|AUDIT|REPORT|COMPLETED$/) || sess.status === 'FAILED') {
-            const fpComp = stageResults.FINGERPRINT || {};
+if (backendStage === 'INFERENCE_ASSURANCE' || backendStage.match(/^DISTRIBUTION|EVIDENCE|REPORT|COMPLETED$/) || sess.status === 'FAILED') {
+             const fpComp = stageResults.FINGERPRINT || {};
             const s5 = fpComp.status
               ? String(fpComp.status).toLowerCase()
               : 'unavailable';
@@ -519,8 +519,8 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           // Stage 6: INFERENCE.DNA (INFERENCE_VALIDATION + BACKDOOR_ANALYSIS)
-          if (backendStage === 'INFERENCE_ASSURANCE' || backendStage.match(/^DISTRIBUTION|EVIDENCE|AUDIT|REPORT|COMPLETED$/) || sess.status === 'FAILED') {
-            const inferComp = stageResults.INFERENCE_VALIDATION || stageResults.BACKDOOR_ANALYSIS || {};
+if (backendStage === 'INFERENCE_ASSURANCE' || backendStage.match(/^DISTRIBUTION|EVIDENCE|REPORT|COMPLETED$/) || sess.status === 'FAILED') {
+             const inferComp = stageResults.INFERENCE_VALIDATION || stageResults.BACKDOOR_ANALYSIS || {};
             const s6 = inferComp.status || (sess.status === 'IN_PROGRESS' ? 'running' : 'pending');
             updatePipelineStage(6, s6);
           }
@@ -528,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
           // Stage 7: DISTRIBUTION.DRIFT — preserve the backend component status exactly.
           // UNAVAILABLE must remain UNAVAILABLE; only a backend PASSED with review
           // language is downgraded to the non-blocking 'review' presentation.
-          if (backendStage === 'DISTRIBUTION_SHIFT' || backendStage.match(/^EVIDENCE|AUDIT|REPORT|COMPLETED$/) || sess.status === 'FAILED') {
+          if (backendStage === 'DISTRIBUTION_SHIFT' || backendStage.match(/^EVIDENCE|REPORT|COMPLETED$/) || sess.status === 'FAILED') {
             const driftComp = stageResults.DISTRIBUTION_SHIFT || {};
             let s7 = driftComp.status || (backendStage === 'DISTRIBUTION_SHIFT' && sess.status === 'IN_PROGRESS' ? 'running' : 'pending');
             if (s7 === 'PASSED' && driftComp.explanation && driftComp.explanation.match(/review/i)) s7 = 'review';
@@ -540,13 +540,13 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           // Stage 8: EVIDENCE.FUSION
-          if (backendStage === 'EVIDENCE_FUSION' || backendStage.match(/^AUDIT|REPORT|COMPLETED$/) || sess.status === 'FAILED') {
-            const s8 = (stageResults.EVIDENCE_FUSION && stageResults.EVIDENCE_FUSION.status) || (sess.status === 'IN_PROGRESS' ? 'running' : 'pending');
+if (backendStage === 'EVIDENCE_FUSION' || backendStage.match(/^REPORT|COMPLETED$/) || sess.status === 'FAILED') {
+             const s8 = (stageResults.EVIDENCE_FUSION && stageResults.EVIDENCE_FUSION.status) || (sess.status === 'IN_PROGRESS' ? 'running' : 'pending');
             updatePipelineStage(8, s8);
           }
 
           // Stage 9: GATEKEEPER.ACTION (uses FINAL_VERDICT once reached or uses disposition)
-          if (backendStage === 'REPORT' || backendStage === 'COMPLETED' || backendStage === 'AUDIT' || sess.status === 'FAILED') {
+          if (backendStage === 'REPORT' || backendStage === 'COMPLETED' || sess.status === 'FAILED') {
             const disposition = (sess.assessment && sess.assessment.disposition) || '';
             let s9 = 'passed';
             if (sess.status === 'FAILED') s9 = 'blocked';
@@ -556,14 +556,18 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           // Stage 10: PROVENANCE.LINEAGE (uses EVIDENCE_GRAPH component)
-          if (backendStage === 'EVIDENCE_FUSION' || backendStage.match(/^AUDIT|REPORT|COMPLETED$/) || sess.status === 'FAILED') {
-            const s10 = (stageResults.EVIDENCE_GRAPH && stageResults.EVIDENCE_GRAPH.status) || 'passed';
+if (backendStage === 'EVIDENCE_FUSION' || backendStage.match(/^REPORT|COMPLETED$/) || sess.status === 'FAILED') {
+             const s10 = (stageResults.EVIDENCE_GRAPH && stageResults.EVIDENCE_GRAPH.status) || 'passed';
             updatePipelineStage(10, s10);
           }
 
-          // Stage 11: BLAST_RADIUS.EVAL (pass-thru — backend currently not explicit, no failures unless global FAILED)
+          // Stage 11: BLAST_RADIUS.EVAL (uses BLAST_RADIUS component)
           if (backendStage.match(/^REPORT|COMPLETED$/) || sess.status === 'FAILED') {
-            updatePipelineStage(11, sess.status === 'FAILED' ? 'blocked' : 'passed');
+            const brComp = stageResults.BLAST_RADIUS || {};
+            const s11 = brComp.status
+              ? String(brComp.status).toLowerCase()
+              : (sess.status === 'FAILED' ? 'blocked' : 'passed');
+            updatePipelineStage(11, s11);
           }
 
           // Stage 12: FORENSIC.REPORT
@@ -622,6 +626,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const eg = stageResults.EVIDENCE_GRAPH;
             if (eg.status === 'PASSED') emitOnce('s10_pass', 'PROVENANCE.LINEAGE', 'Directed property graph updated with fusion assessment.', 'pass');
             else if (eg.status === 'UNAVAILABLE') emitOnce('s10_unavail', 'PROVENANCE.LINEAGE', `UNAVAILABLE: ${eg.explanation || 'Graph unavailable prior to fusion.'}`, 'review');
+          }
+          if (stageResults.FINGERPRINT) {
+            const fp = stageResults.FINGERPRINT;
+            if (fp.status === 'PASSED') emitOnce('s5_pass', 'BEHAVIOR.FINGERPRINT', fp.explanation || 'Behavioral fingerprint computed and sealed.', 'pass');
+            else if (fp.status === 'UNAVAILABLE') emitOnce('s5_unavail', 'BEHAVIOR.FINGERPRINT', `UNAVAILABLE: ${fp.explanation || fp.error_code || 'No model artifact to fingerprint.'}`, 'review');
+          }
+          if (stageResults.BLAST_RADIUS) {
+            const br = stageResults.BLAST_RADIUS;
+            if (br.status === 'PASSED') emitOnce('s11_pass', 'BLAST_RADIUS.EVAL', br.explanation || 'Forensic blast-radius analysis complete.', 'pass');
+            else if (br.status === 'UNAVAILABLE') emitOnce('s11_unavail', 'BLAST_RADIUS.EVAL', `UNAVAILABLE: ${br.explanation || br.error_code || 'Blast radius analysis unavailable.'}`, 'review');
           }
 
           // Update live risk meter using backend assessment
@@ -1316,10 +1330,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function uuidFallback() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
       const r = Math.random() * 16 | 0;
       return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
+    return `FB-${uuid}`;
   }
 
   // =========================================================================
@@ -1644,8 +1659,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (api) api.getReadiness();
   };
 
-  window.triggerAttack = function(attackId) {
-    if (api && api.executeAttack) api.executeAttack(attackId, 'test-target');
+  window.triggerAttack = function(attackId, targetEntityId) {
+    if (api && api.executeAttack) {
+      const target = targetEntityId || AppState.mission.batchId || AppState.mission.scanId || 'test-target';
+      api.executeAttack(attackId, target);
+    }
   };
 
   // Initial Boot

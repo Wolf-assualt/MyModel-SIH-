@@ -258,16 +258,18 @@ export const ValidationChecklist: React.FC = () => {
           </span>
         </div>
 
-        <Button
-          variant="primary"
-          size="lg"
-          onClick={startScan}
-          disabled={!isReadyToScan}
-          iconRight={<ArrowRight size={18} />}
-          style={{ minWidth: '280px' }}
-        >
-          {isReadyToScan ? 'MONITOR ASSURANCE PIPELINE →' : 'UPLOAD DATASET TO ENABLE SCAN'}
-        </Button>
+        <div className="tooltip-host" data-tooltip="A backend scan session must exist before the pipeline can run. Upload a dataset — the scan session is created automatically on upload and the scan becomes available immediately after.">
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={startScan}
+            disabled={!isReadyToScan}
+            iconRight={<ArrowRight size={18} />}
+            style={{ minWidth: '280px' }}
+          >
+            {isReadyToScan ? 'MONITOR ASSURANCE PIPELINE →' : 'UPLOAD DATASET TO ENABLE SCAN'}
+          </Button>
+        </div>
       </div>
     </div>
   );

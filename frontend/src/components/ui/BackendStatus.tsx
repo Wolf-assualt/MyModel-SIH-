@@ -38,17 +38,18 @@ export const BackendStatus: React.FC<BackendStatusProps> = ({ online, compact = 
       >
         {online && (
           <span
+            className="pulse-dot--success pulse-dot"
             style={{
               position: 'absolute',
               inset: 0,
               borderRadius: '50%',
               backgroundColor: 'var(--success)',
               opacity: 0.6,
-              animation: 'ping-subtle 1.4s cubic-bezier(0,0,0.2,1) infinite',
             }}
           />
         )}
         <span
+          className={online ? 'pulse-dot--success pulse-dot' : 'pulse-dot--warning pulse-dot'}
           style={{
             position: 'relative',
             display: 'inline-flex',

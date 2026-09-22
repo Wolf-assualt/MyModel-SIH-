@@ -1,0 +1,7 @@
+# Block Sentinel / TRUST-CV Rules
+- Stack: FastAPI backend (Python 3.11/3.12), SQLite (SQLAlchemy 2.0), Vanilla JS (ES6+) + Cytoscape.js.
+- NEVER install or introduce React, Vite, Tailwind CLI, or Node bundlers.
+- Maintain the 9-stage forensic scan pipeline in `app/api/scan.py`.
+- All operations must remain 100% offline and air-gap compatible.
+- Do not remove working tests in `tests/`.
+- Respond directly without chain-of-thought reasoning or thinking blocks.

@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 import {
   UploadCloud,
   CheckCircle2,
@@ -15,6 +16,7 @@ import { useInvestigation } from '../../state/investigationStore';
 import type { ArtifactType } from '../../types/investigation';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
+import { ProvenanceChain } from './ProvenanceChain';
 
 export const ArtifactUploader: React.FC = () => {
   const {
@@ -114,8 +116,11 @@ export const ArtifactUploader: React.FC = () => {
         </div>
       </div>
 
-      {/* 4 Cards Grid */}
-      <div
+      {/* 4 Cards Grid — staggered mount animation */}
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
@@ -124,27 +129,32 @@ export const ArtifactUploader: React.FC = () => {
       >
         {artifacts.map(art => {
           const isVerified = art.status === 'verified';
+          const isUploading = art.status === 'uploading';
           const isDragOver = dragOverId === art.id;
 
           return (
-            <div
+            <motion.div
               key={art.id}
+              id={`artifact-card-${art.id}`}
+              variants={{
+                hidden: { opacity: 0, y: 10 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' } },
+              }}
+              className="glass-card"
               style={{
-                backgroundColor: 'var(--surface)',
                 borderWidth: '1px',
                 borderStyle: 'solid',
                 borderColor: isDragOver
                   ? 'var(--accent)'
                   : isVerified
-                  ? 'var(--accent)'
+                  ? 'var(--accent-border)'
                   : 'var(--border)',
                 borderRadius: '0.625rem',
                 padding: '1.25rem',
-                boxShadow: isDragOver
-                  ? 'var(--accent-glow)'
-                  : isVerified
-                  ? 'var(--accent-glow)'
-                  : 'var(--card-shadow)',
+                boxShadow:
+                  isDragOver || isVerified
+                    ? 'var(--accent-glow), var(--glass-inner-glow)'
+                    : 'var(--glass-inner-glow), var(--card-shadow)',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
@@ -212,7 +222,11 @@ export const ArtifactUploader: React.FC = () => {
                     </div>
                   </div>
 
-                  {isVerified ? (
+                  {isUploading ? (
+                    <Badge variant="accent" size="sm" pulse>
+                      INGESTING
+                    </Badge>
+                  ) : isVerified ? (
                     <Badge variant="success" size="sm" icon={<CheckCircle2 size={12} />}>
                       READY
                     </Badge>
@@ -279,7 +293,9 @@ export const ArtifactUploader: React.FC = () => {
                     className="font-mono"
                   >
                     <span style={{ color: 'var(--text-tertiary)', fontWeight: 600 }}>SHA-256:</span>
-                    {art.hash ? (
+                    {isUploading ? (
+                      <span className="skeleton" style={{ display: 'inline-block', width: '160px', height: '0.75rem' }} />
+                    ) : art.hash ? (
                       <span style={{ color: 'var(--accent-text)' }}>
                         {art.hash.substring(0, 16)}...{art.hash.substring(art.hash.length - 8)}
                       </span>
@@ -289,6 +305,9 @@ export const ArtifactUploader: React.FC = () => {
                       </span>
                     )}
                   </div>
+
+                  {/* Provenance chain visual once the manifest carries a signature/hash */}
+                  {art.type === 'manifest' && isVerified && <ProvenanceChain />}
 
                   {Boolean(art.metadata?.samplesCount) && (
                     <div
@@ -422,17 +441,18 @@ export const ArtifactUploader: React.FC = () => {
                   style={{ flex: 1 }}
                   onClick={() => fileInputRefs.current[art.id]?.click()}
                   icon={<FolderOpen size={13} />}
+                  className="choose-file-btn"
                 >
                   Choose File
                 </Button>
 
                 {!isVerified ? (
                   <Button
-                    variant="secondary"
+                    variant="gradient"
                     size="sm"
                     style={{ flex: 1 }}
                     onClick={() => verifyArtifact(art.id)}
-                    icon={<Zap size={13} style={{ color: 'var(--accent-text)' }} />}
+                    icon={<Zap size={13} />}
                   >
                     Quick Verify
                   </Button>
@@ -448,10 +468,10 @@ export const ArtifactUploader: React.FC = () => {
                   </Button>
                 )}
               </div>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
     </div>
   );
 };

@@ -1,8 +1,9 @@
 import React from 'react';
-import { ShieldAlert, Sun, Moon } from 'lucide-react';
+import { ShieldAlert, Sun, Moon, Command } from 'lucide-react';
 import { useInvestigation } from '../../state/investigationStore';
 import { Badge } from '../ui/Badge';
 import { BackendStatus } from '../ui/BackendStatus';
+import { CommandPalette } from '../ui/CommandPalette';
 
 export const Header: React.FC = () => {
   const { phase, setPhase, theme, toggleTheme, sessionId, isScanning, backendOnline } = useInvestigation();
@@ -176,6 +177,30 @@ export const Header: React.FC = () => {
         {/* Backend Status Indicator */}
         <BackendStatus online={backendOnline} />
 
+        {/* Command Palette Trigger */}
+        <button
+          onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.45rem 0.75rem',
+            backgroundColor: 'var(--surface-elevated)',
+            border: '1px solid var(--border)',
+            borderRadius: '0.375rem',
+            color: 'var(--text-secondary)',
+            cursor: 'pointer',
+            fontSize: '0.75rem',
+            transition: 'all 0.2s ease',
+          }}
+          className="font-mono"
+          aria-label="Open command palette"
+          title="Open command palette (⌘K)"
+        >
+          <Command size={14} style={{ color: 'var(--accent-text)' }} />
+          <span>⌘K</span>
+        </button>
+
         {/* Theme Toggle Button */}
         <button
           onClick={toggleTheme}
@@ -209,6 +234,9 @@ export const Header: React.FC = () => {
           )}
         </button>
       </div>
+
+      {/* Global command palette (⌘K / Ctrl+K) */}
+      <CommandPalette />
     </header>
   );
 };

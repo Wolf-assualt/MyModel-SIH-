@@ -80,31 +80,32 @@ export const Badge: React.FC<BadgeProps> = ({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-mono font-medium rounded border uppercase tracking-wider ${className}`}
+      className={`inline-flex items-center gap-1.5 font-mono font-medium rounded-full border uppercase tracking-wider ${className}`}
       style={{
         ...getStyles(),
         ...sizeStyles,
         display: 'inline-flex',
         alignItems: 'center',
         gap: '0.375rem',
-        borderRadius: '0.25rem',
+        borderRadius: '999px',
         borderWidth: '1px',
         borderStyle: 'solid',
         lineHeight: 1.2,
       }}
     >
-      {pulse && (
-        <span
-          style={{
-            width: '6px',
-            height: '6px',
-            borderRadius: '50%',
-            backgroundColor: 'currentColor',
-            display: 'inline-block',
-            animation: 'ping-subtle 1.8s infinite ease-in-out',
-          }}
-        />
-      )}
+      {/* Color-coded status dot — pulses subtly for living states */}
+      <span
+        style={{
+          width: '5px',
+          height: '5px',
+          borderRadius: '50%',
+          backgroundColor: 'currentColor',
+          display: 'inline-block',
+          flexShrink: 0,
+        }}
+        className={pulse ? 'pulse-dot' : undefined}
+        aria-hidden="true"
+      />
       {icon && <span style={{ display: 'inline-flex' }}>{icon}</span>}
       {children}
     </span>

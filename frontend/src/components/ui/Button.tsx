@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost' | 'gradient';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -64,6 +64,13 @@ export const Button: React.FC<ButtonProps> = ({
           borderColor: 'transparent',
           color: isHovered ? 'var(--text-primary)' : 'var(--text-secondary)',
         };
+      case 'gradient':
+        // Visuals handled by .btn-gradient class (cyan → violet gradient + glow).
+        return {
+          borderColor: 'transparent',
+          color: '#05060a',
+          fontWeight: 600,
+        };
       case 'secondary':
       default:
         return {
@@ -120,14 +127,20 @@ export const Button: React.FC<ButtonProps> = ({
         borderStyle: 'solid',
         cursor: disabled ? 'not-allowed' : 'pointer',
         transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
-        transform: isActive && !disabled ? 'scale(0.98)' : 'scale(1)',
+        transform: disabled
+          ? 'none'
+          : isActive
+          ? 'scale(0.98)'
+          : isHovered && variant !== 'gradient'
+          ? 'translateY(-1px)'
+          : 'none',
         userSelect: 'none',
         whiteSpace: 'nowrap',
         ...getSizeStyles(),
         ...getVariantStyles(),
         ...style,
       }}
-      className={`font-mono font-medium ${className}`}
+      className={`font-mono font-medium ${variant === 'gradient' ? 'btn-gradient' : ''} ${className}`}
       {...props}
     >
       {isLoading ? (

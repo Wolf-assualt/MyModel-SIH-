@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { AlertOctagon, Skull, Activity, AlertTriangle, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useInvestigation } from '../../state/investigationStore';
 import { Badge } from '../ui/Badge';
@@ -82,7 +83,10 @@ export const VerdictCard: React.FC = () => {
     : 'var(--critical-text)';
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
       style={{
         backgroundColor: 'var(--surface)',
         border: `1px solid ${borderColor}`,
@@ -284,6 +288,6 @@ export const VerdictCard: React.FC = () => {
           </>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };

@@ -135,6 +135,20 @@ python -m pytest backend/tests/test_redteam.py -v
 
 ---
 
+## Deployment
+
+TRUST-CV targets three edge hardware classes. Each guide covers prerequisites, virtual-environment setup, dependency installation from `backend/requirements.txt`, and platform-specific notes:
+
+| Guide | Target | Summary |
+| :--- | :--- | :--- |
+| [**x86_64**](deployment/x86_64/README.md) | Standard 64-bit x86 PCs, workstations & servers | **Default development target.** All packages install from standard PyPI wheels — no special indexes or cross-compilation. |
+| [**ARM64**](deployment/arm64/README.md) | Graviton/Ampere servers, Raspberry Pi 5 (64-bit), Apple Silicon | Requires pre-built aarch64 wheels for `torch` and `onnxruntime`; documents known package-availability issues per Python version. |
+| [**NVIDIA Jetson**](deployment/nvidia_jetson/README.md) | Jetson Orin / Xavier (JetPack 5.x / 6.x, L4T) | L4T-compatible GPU wheels (`onnxruntime-gpu` from the Jetson wheels index) plus a ready-to-build Dockerfile on the NVIDIA L4T base image. |
+
+> **Note:** Jetson is aarch64 but not a generic ARM64 target — always use the Jetson guide for Jetson hardware. The latency benchmark (`backend/tests/benchmark_latency.py`, p95 < 42 ms target) can be run on any of the three platforms to verify deployment health.
+
+---
+
 ## Directory Structure
 
 ```text

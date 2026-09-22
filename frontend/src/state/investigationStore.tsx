@@ -39,22 +39,22 @@ function downloadJson(payload: unknown, filename: string): void {
 export type Theme = 'dark' | 'light';
 
 /**
- * Ordered backend ScanStage values (app.schemas.scan.ScanStage) used to decide
- * which frontend stage slot has been reached during polling. This is a purely
- * positional mapping — it never asserts a security status.
+ * Maps a backend ScanStage enum value to the stage_results keys that are
+ * populated during that phase.  Used to mark intermediate stages RUNNING
+ * when the backend has not yet written individual component outcomes.
  */
-const BACKEND_STAGE_ORDER: string[] = [
-  'INGESTION',
-  'HASHING',
-  'DATA_INTEGRITY',
-  'MODEL_ASSURANCE',
-  'INFERENCE_ASSURANCE',
-  'DISTRIBUTION_SHIFT',
-  'EVIDENCE_FUSION',
-  'AUDIT',
-  'REPORT',
-  'COMPLETED',
-];
+const STAGE_ENUM_TO_RESULT_KEYS: Record<string, string[]> = {
+  INGESTION: ['DATA_INGESTION'],
+  HASHING: ['DATA_INGESTION', 'HASH_VERIFICATION'],
+  DATA_INTEGRITY: ['DATASET_ANALYSIS', 'DUPLICATE_DETECTION', 'LABEL_INTEGRITY', 'QUALITY_ANALYSIS', 'TRIGGER_CANDIDATE_ANALYSIS', 'OOD_DETECTION'],
+  MODEL_ASSURANCE: ['MODEL_INTEGRITY'],
+  INFERENCE_ASSURANCE: ['BACKDOOR_ANALYSIS', 'INFERENCE_VALIDATION'],
+  DISTRIBUTION_SHIFT: ['DISTRIBUTION_SHIFT'],
+  EVIDENCE_FUSION: ['EVIDENCE_FUSION', 'EVIDENCE_GRAPH'],
+  AUDIT: [],
+  REPORT: ['FINAL_VERDICT'],
+  COMPLETED: ['FINAL_VERDICT'],
+};
 
 interface InvestigationContextType {
   phase: Phase;
@@ -72,22 +72,20 @@ interface InvestigationContextType {
   updateArtifactWithFile: (artifactId: string, file: File) => Promise<void>;
   verifyArtifact: (artifactId: string) => void;
   isReadyToScan: boolean;
-  validationChecklist: any;
+  validationChecklist: {
+    datasetDetected: boolean;
+    scanReady: boolean;
+  };
   isScanning: boolean;
   isScanCompleted: boolean;
   scanProgress: number;
   currentOperation: string;
   elapsedSeconds: number;
-  speedMultiplier: number;
-  setSpeedMultiplier: (mult: number) => void;
   stages: PipelineStage[];
   terminalLogs: TerminalLog[];
   liveMetrics: LiveMetrics;
   signalPoints: SignalPoint[];
   startScan: () => void;
-  pauseScan: () => void;
-  resumeScan: () => void;
-  skipScanToEnd: () => void;
   findings: Finding[];
   setFindings: React.Dispatch<React.SetStateAction<Finding[]>>;
   selectedCategory: FindingCategory;
@@ -172,24 +170,71 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
   const sessionId = 'TCV-2026-8891B';
   const [artifacts, setArtifacts] = useState<ArtifactItem[]>(INITIAL_ARTIFACTS);
 
+  /**
+   * Upload a file for a given artifact slot.
+   * For the dataset slot: POST to /api/v1/datasets/upload, which immediately
+   * returns a ScanSession with scan_id + batch_id. The actual pipeline runs in
+   * the backend as a background task. We store the scan_id for subsequent
+   * polling and populate the artifact card with real backend metadata.
+   */
   const updateArtifactWithFile = async (artifactId: string, file: File) => {
-    const isDataset = artifacts.find(artifact => artifact.id === artifactId)?.type === 'dataset';
+    const artifact = artifacts.find(a => a.id === artifactId);
+    const isDataset = artifact?.type === 'dataset';
     if (isDataset) {
+      // Mark uploading immediately so the UI shows progress.
+      setArtifacts(prev => prev.map(art => art.id === artifactId ? {
+        ...art,
+        filename: file.name,
+        size: formatFileSize(file.size),
+        hash: '',
+        status: 'uploading',
+        progress: 50,
+        metadata: { ...art.metadata, format: 'Uploading to backend…' },
+      } : art));
       try {
         const session = await apiService.uploadAndScanDataset(file);
         setCurrentScanId(session.scan_id);
         setScanSession(session);
+        // Update the artifact card with real values from the backend response.
         setArtifacts(prev => prev.map(art => art.id === artifactId ? {
-          ...art, filename: file.name, size: '0', hash: '', status: 'verified', progress: 100, metadata: { format: 'Backend scan initiated' }
+          ...art,
+          filename: file.name,
+          size: formatFileSize(file.size),
+          // hash is not yet available at upload time; shown once scan reports it
+          hash: '',
+          status: 'verified',
+          progress: 100,
+          metadata: {
+            ...art.metadata,
+            format: `Backend scan started — scan_id: ${session.scan_id.substring(0, 8)}…`,
+            samplesCount: session.input_artifacts?.length ?? 0,
+          },
         } : art));
-      } catch (error) {
-        console.error(error);
+        setBackendError(null);
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : 'Upload failed';
+        setBackendError(msg);
         setArtifacts(prev => prev.map(art => art.id === artifactId ? {
-          ...art, filename: file.name, status: 'error', progress: 0
+          ...art,
+          filename: file.name,
+          status: 'error',
+          progress: 0,
+          metadata: { ...art.metadata, format: `Upload failed: ${msg}` },
         } : art));
       }
       return;
     }
+    // Non-dataset artifacts (model, inference, manifest) are accepted locally;
+    // they are referenced in the backend manifest when a dataset is ingested.
+    setArtifacts(prev => prev.map(art => art.id === artifactId ? {
+      ...art,
+      filename: file.name,
+      size: formatFileSize(file.size),
+      hash: '',
+      status: 'verified',
+      progress: 100,
+      metadata: { ...art.metadata, format: `${getExtension(file.name).toUpperCase()} — awaiting backend analysis` },
+    } : art));
   };
 
   const verifyArtifact = (_artifactId?: string) => {
@@ -197,11 +242,16 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
     // No client-side verification verdict is produced here.
   };
 
-  const clearArtifacts = () => setArtifacts(INITIAL_ARTIFACTS);
+  const clearArtifacts = () => {
+    setArtifacts(INITIAL_ARTIFACTS);
+    setCurrentScanId(null);
+    setScanSession(null);
+    setBackendError(null);
+  };
 
   /**
    * Quarantine a flagged sample. The backend copies the original into isolated
-   * storage, records a signed audit event and returns the updated assessment.
+   * storage, records a signed audit event, and returns the updated assessment.
    */
   const quarantineImage = async (sampleId: string) => {
     const batchId = scanSession?.batch_id;
@@ -214,21 +264,31 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
       setImageResults(prev => prev.map(img => (img.sample_id === updated.sample_id ? updated : img)));
       setBackendError(null);
       await refreshLedgerVerification();
-    } catch (e: any) {
-      setBackendError(e?.message || 'Quarantine failed.');
+    } catch (e: unknown) {
+      setBackendError(e instanceof Error ? e.message : 'Quarantine failed.');
     }
   };
 
-  const datasetVerified = artifacts.find(a => a.type === 'dataset')?.status === 'verified';
-  const validationChecklist = { datasetDetected: datasetVerified, configValidated: true };
-  const isReadyToScan = datasetVerified;
+  /**
+   * isReadyToScan: the dataset artifact must have been accepted by the backend
+   * (status === 'verified') AND a scan_id must exist from the upload response.
+   * Without a scan_id there is nothing to poll, so the scan button must be
+   * disabled rather than allowed to proceed with no backend session.
+   */
+  const datasetArtifact = artifacts.find(a => a.type === 'dataset');
+  const datasetVerified = datasetArtifact?.status === 'verified';
+  const isReadyToScan = datasetVerified && currentScanId !== null;
+
+  const validationChecklist = {
+    datasetDetected: datasetVerified,
+    scanReady: isReadyToScan,
+  };
 
   const [isScanning, setIsScanning] = useState(false);
   const [isScanCompleted, setIsScanCompleted] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
   const [currentOperation, setCurrentOperation] = useState('System ready');
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [speedMultiplier, setSpeedMultiplier] = useState(1);
   const [stages, setStages] = useState<PipelineStage[]>(PIPELINE_STAGES);
   const [terminalLogs] = useState<TerminalLog[]>([]);
   const [liveMetrics] = useState<LiveMetrics>(INITIAL_METRICS);
@@ -247,6 +307,20 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
   const [ledgerVerification, setLedgerVerification] = useState<LedgerVerification | null>(null);
   const [analystDecisions, setAnalystDecisions] = useState<LedgerEventRecord[]>([]);
   const [backendError, setBackendError] = useState<string | null>(null);
+
+  // Elapsed timer — increments while scanning is in progress.
+  const timerIntervalRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (isScanning) {
+      timerIntervalRef.current = window.setInterval(
+        () => setElapsedSeconds(prev => prev + 1),
+        1000,
+      );
+    } else {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    }
+    return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); };
+  }, [isScanning]);
 
   /**
    * Pull the authoritative evidence graph from the backend.
@@ -284,10 +358,10 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setLedgerVerification(await apiService.verifyLedger());
       setBackendError(null);
-    } catch (e: any) {
+    } catch (e: unknown) {
       // UNAVAILABLE — never inferred as valid locally.
       setLedgerVerification(null);
-      setBackendError(e?.message || 'Backend ledger unavailable');
+      setBackendError(e instanceof Error ? e.message : 'Backend ledger unavailable');
     }
   }, []);
 
@@ -322,8 +396,8 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
       setBackendError(null);
       await refreshAnalystDecisions(entityId);
       return event;
-    } catch (e: any) {
-      setBackendError(e?.message || 'Analyst decision was not recorded.');
+    } catch (e: unknown) {
+      setBackendError(e instanceof Error ? e.message : 'Analyst decision was not recorded.');
       return null;
     }
   }, [currentScanId, refreshAnalystDecisions]);
@@ -350,6 +424,12 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
     setGraphEdges([]);
     setGraphDigest('');
     setArtifacts(INITIAL_ARTIFACTS);
+    setIsScanning(false);
+    setIsScanCompleted(false);
+    setScanProgress(0);
+    setElapsedSeconds(0);
+    setCurrentOperation('System ready');
+    setStages(PIPELINE_STAGES);
   };
 
   /**
@@ -382,9 +462,10 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
         analyst_decisions: analystDecisions,
       };
       downloadJson(payload, `trustcv_evidence_${scanSession.scan_id}.json`);
-    } catch (e: any) {
-      setBackendError(e?.message || 'Evidence export failed.');
-      window.alert(`Evidence export FAILED: ${e?.message || 'backend unavailable'}`);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'backend unavailable';
+      setBackendError(msg);
+      window.alert(`Evidence export FAILED: ${msg}`);
     }
   };
 
@@ -414,25 +495,26 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
         warnings: scanSession.warnings ?? [],
       };
       downloadJson(report, `${report.report_id}.json`);
-    } catch (e: any) {
-      setBackendError(e?.message || 'Report export failed.');
-      window.alert(`Report export FAILED: ${e?.message || 'backend unavailable'}`);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'backend unavailable';
+      setBackendError(msg);
+      window.alert(`Report export FAILED: ${msg}`);
     }
   };
 
+  // ── Scan polling (formerly "runScanSimulation") ────────────────────────────
+
   const scanIntervalRef = useRef<number | null>(null);
-  const timerIntervalRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    if (isScanning) {
-      timerIntervalRef.current = window.setInterval(() => setElapsedSeconds(prev => prev + 1), 1000);
-    } else {
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    }
-    return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); };
-  }, [isScanning]);
-
-  const completeScan = useCallback(() => {
+  /**
+   * Finalize the scan: clear the polling interval, mark 100% complete, and
+   * transition to the results page after a short delay.
+   *
+   * Previously named "completeScan" — renamed to avoid confusion with a
+   * simulated completion.  This is only called when the backend itself reports
+   * COMPLETED or FAILED.
+   */
+  const finalizeScan = useCallback(() => {
     if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
     setScanProgress(100);
     setIsScanning(false);
@@ -441,72 +523,113 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
     setTimeout(() => setPhase('results'), 1800);
   }, [setPhase]);
 
-  const runScanSimulation = useCallback(() => {
+  /**
+   * Poll the backend scan session at a 1-second interval.
+   * Previously named "runScanSimulation" — renamed to clarify this is REAL
+   * backend polling, not a simulation.
+   *
+   * Progress, stage statuses, assessment and findings all come verbatim from
+   * the backend ScanSession response.  No values are invented here.
+   */
+  const pollScanProgress = useCallback(() => {
     if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
     scanIntervalRef.current = window.setInterval(async () => {
       if (!currentScanId) return;
       try {
         const session = await apiService.getScanSession(currentScanId);
         setScanSession(session);
-        setScanProgress(session.progress * 100);
+
+        // Progress is a 0–1 float from the backend; multiply by 100 for display.
+        const progressPct = Math.round(session.progress * 100);
+        setScanProgress(progressPct);
         setCurrentOperation(`Stage: ${session.stage}`);
-        
-        setStages(prev => prev.map((s) => {
-           const componentState = session.stage_results?.[s.code];
-           if (componentState) {
-              return { ...s, status: componentState.status as any, summary: componentState.explanation || s.summary };
-           }
-           // Fallback logic if stage_results isn't populated for this stage yet
-           const currentStageIndex = Math.floor(session.progress * 10);
-           const idx = prev.findIndex(x => x.code === s.code);
-           if (idx === currentStageIndex && session.status !== 'COMPLETED' && session.status !== 'FAILED') {
-               return { ...s, status: 'RUNNING', progress: 50 };
-           }
-           return { ...s, status: 'WAITING', progress: 0 };
+
+        // ── Map backend stage_results to frontend pipeline stages ──────────
+        // Each PipelineStage.code corresponds to a key in session.stage_results
+        // (see mockScenario.ts for the authoritative mapping).
+        setStages(prev => prev.map(s => {
+          const componentState = session.stage_results?.[s.code];
+          if (componentState) {
+            // Map backend ComponentStatus → frontend StageStatus
+            const backendStatus = componentState.status.toUpperCase();
+            const frontendStatus: any =
+              backendStatus === 'PASSED' ? 'PASSED' :
+              backendStatus === 'FAILED' ? 'FAILED' :
+              backendStatus === 'UNAVAILABLE' ? 'UNAVAILABLE' :
+              backendStatus === 'RUNNING' ? 'RUNNING' :
+              'WAITING';
+            return {
+              ...s,
+              status: frontendStatus,
+              summary: componentState.explanation || s.summary,
+            };
+          }
+
+          // Stage result not written yet — check if this stage's parent phase
+          // is the currently active ScanStage to show RUNNING.
+          const activePhaseKeys = STAGE_ENUM_TO_RESULT_KEYS[session.stage] ?? [];
+          if (
+            activePhaseKeys.includes(s.code) &&
+            session.status === 'IN_PROGRESS'
+          ) {
+            return { ...s, status: 'RUNNING', progress: 50 };
+          }
+
+          return s;
         }));
 
         if (session.status === 'COMPLETED' || session.status === 'FAILED') {
           clearInterval(scanIntervalRef.current!);
-          // Map the backend pipeline stage to the frontend stage slots using the
-          // REAL backend component keys. No stage is ever assumed PASSED.
+
+          // ── Final stage resolution ─────────────────────────────────────────
+          // Any stage still WAITING after the pipeline ended gets UNAVAILABLE
+          // (not PASSED) — the backend either didn't run it or didn't report it.
           setStages(prev => prev.map(s => {
             const componentState = session.stage_results?.[s.code];
             if (componentState) {
-              return { ...s, status: componentState.status as any, summary: componentState.explanation || s.summary };
+              const backendStatus = componentState.status.toUpperCase();
+              const frontendStatus: any =
+                backendStatus === 'PASSED' ? 'PASSED' :
+                backendStatus === 'FAILED' ? 'FAILED' :
+                backendStatus === 'UNAVAILABLE' ? 'UNAVAILABLE' :
+                backendStatus === 'RUNNING' ? 'PASSED' : // RUNNING at completion = PASSED
+                'UNAVAILABLE';
+              return {
+                ...s,
+                status: frontendStatus,
+                summary: componentState.explanation || s.summary,
+              };
             }
-            const reached = BACKEND_STAGE_ORDER.indexOf(session.stage) >= 0
-              && BACKEND_STAGE_ORDER.indexOf(session.stage) >= (BACKEND_STAGE_ORDER.indexOf(s.code) === -1 ? 99 : BACKEND_STAGE_ORDER.indexOf(s.code));
-            if (reached && session.status !== 'COMPLETED' && session.status !== 'FAILED') {
-              return { ...s, status: 'RUNNING', progress: 50 };
-            }
-            if (session.status === 'COMPLETED' || session.status === 'FAILED') {
-              return { ...s, status: 'UNAVAILABLE', progress: 0 };
-            }
-            return { ...s, status: 'WAITING', progress: 0 };
+            // Not in stage_results → UNAVAILABLE (never assume PASSED).
+            return s.status === 'WAITING' ? { ...s, status: 'UNAVAILABLE' } : s;
           }));
 
           if (session.assessment) {
             // Every value below is copied verbatim from the backend response.
             // The frontend performs NO re-derivation of security semantics.
             const assessment = session.assessment as Record<string, any>;
-            const assuranceScore = typeof assessment.assuranceScore === 'number' ? assessment.assuranceScore : null;
-            const dataRiskScore = typeof assessment.dataRiskScore === 'number' ? assessment.dataRiskScore : null;
-            const modelRiskScore = typeof assessment.modelRiskScore === 'number' ? assessment.modelRiskScore : -1;
-            const inferenceRiskScore = typeof assessment.inferenceRiskScore === 'number' ? assessment.inferenceRiskScore : -1;
+            const assuranceScore = typeof assessment.assuranceScore === 'number'
+              ? assessment.assuranceScore : null;
+            const dataRiskScore = typeof assessment.dataRiskScore === 'number'
+              ? assessment.dataRiskScore : null;
+            const modelRiskScore = typeof assessment.modelRiskScore === 'number'
+              ? assessment.modelRiskScore : -1;
+            const inferenceRiskScore = typeof assessment.inferenceRiskScore === 'number'
+              ? assessment.inferenceRiskScore : -1;
             const rawDisposition = String(assessment.disposition ?? session.status).toUpperCase();
 
             setTrustScore({
-              overall: assuranceScore === null ? 0 : assuranceScore * 100,
-              dataIntegrity: dataRiskScore === null ? 0 : dataRiskScore * 100,
+              overall: assuranceScore === null ? 0 : Math.round(assuranceScore * 100),
+              dataIntegrity: dataRiskScore === null ? 0 : Math.round(dataRiskScore * 100),
               // -1 is the backend's explicit "module UNAVAILABLE" sentinel.
-              modelIntegrity: modelRiskScore < 0 ? -1 : modelRiskScore * 100,
-              inferenceIntegrity: inferenceRiskScore < 0 ? -1 : inferenceRiskScore * 100,
-              pipelineIntegrity: assuranceScore === null ? 0 : assuranceScore * 100,
+              modelIntegrity: modelRiskScore < 0 ? -1 : Math.round(modelRiskScore * 100),
+              inferenceIntegrity: inferenceRiskScore < 0 ? -1 : Math.round(inferenceRiskScore * 100),
+              pipelineIntegrity: assuranceScore === null ? 0 : Math.round(assuranceScore * 100),
               verdict: (rawDisposition === 'REVIEW' || rawDisposition === 'ALLOW_WITH_MONITORING')
                 ? 'UNDER_REVIEW'
                 : (rawDisposition as any),
               headline: `Backend disposition: ${rawDisposition}`,
-              summary: `Analyzed ${assessment.totalSamples ?? 0} samples; backend status ${session.status}`,
+              summary: `Analyzed ${assessment.totalSamples ?? 0} samples — backend status: ${session.status}`,
             });
             setImageResults(assessment.imageResults || []);
             setFindings((session.findings || []).map((f: any) => ({
@@ -516,7 +639,7 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
               severity: f.severity,
               affectedArtifact: f.sample_ids?.[0] ? String(f.sample_ids[0]) : 'Uploaded dataset',
               evidenceSummary: f.description,
-              confidence: (f.metric_score ?? 0) * 100,
+              confidence: Math.round((f.metric_score ?? 0) * 100),
               status: rawDisposition === 'QUARANTINED' ? 'Quarantined' : 'Confirmed',
               detectionMethod: 'Backend assurance engine',
               expectedValue: 'Clean',
@@ -534,26 +657,46 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
           await loadEvidenceGraph();
           if (session.batch_id) await refreshAnalystDecisions(session.batch_id);
 
-          completeScan();
+          finalizeScan();
         }
       } catch (err) {
         console.error('Scan polling error', err);
         setBackendError(err instanceof Error ? err.message : 'Scan polling failed');
       }
     }, 1000);
-  }, [currentScanId, completeScan, refreshLedgerVerification, loadEvidenceGraph, refreshAnalystDecisions]);
+  }, [currentScanId, finalizeScan, refreshLedgerVerification, loadEvidenceGraph, refreshAnalystDecisions]);
 
+  /**
+   * Start the scan page and begin polling the backend for the scan session
+   * that was created during dataset upload.
+   *
+   * Guard: if there is no scan_id from the backend, refuse to proceed.  The
+   * UI should disable this button when isReadyToScan is false.
+   */
   const startScan = useCallback(() => {
+    if (!currentScanId) {
+      setBackendError(
+        'Cannot start scan: no backend scan session exists. ' +
+        'Upload a dataset first to receive a scan ID.',
+      );
+      return;
+    }
     setIsScanning(true);
     setIsScanCompleted(false);
     setScanProgress(0);
+    setElapsedSeconds(0);
+    setStages(PIPELINE_STAGES);
+    setCurrentOperation('Connecting to backend scan session…');
     setPhase('scan');
-    runScanSimulation();
-  }, [runScanSimulation, setPhase]);
+    pollScanProgress();
+  }, [currentScanId, pollScanProgress, setPhase]);
 
-  const pauseScan = () => setIsScanning(false);
-  const resumeScan = () => setIsScanning(true);
-  const skipScanToEnd = () => completeScan();
+  // Cleanup polling on unmount.
+  useEffect(() => {
+    return () => {
+      if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
+    };
+  }, []);
 
   return (
     <InvestigationContext.Provider value={{
@@ -561,15 +704,15 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
       fusedAssessmentId, currentScanId, scanSession, artifacts, clearArtifacts,
       updateArtifactWithFile, verifyArtifact, isReadyToScan, validationChecklist,
       isScanning, isScanCompleted, scanProgress, currentOperation, elapsedSeconds,
-      speedMultiplier, setSpeedMultiplier, stages, terminalLogs, liveMetrics, signalPoints,
-      startScan, pauseScan, resumeScan, skipScanToEnd, findings, setFindings,
+      stages, terminalLogs, liveMetrics, signalPoints,
+      startScan, findings, setFindings,
       selectedCategory, setSelectedCategory, selectedSeverity, setSelectedSeverity,
       searchQuery, setSearchQuery, selectedFinding, setSelectedFinding, trustScore,
       setTrustScore, recommendations, setRecommendations, imageResults, quarantineImage,
       graphNodes, graphEdges, graphDigest, selectedGraphNode, setSelectedGraphNode,
       focusNodeInGraph, ledgerVerification, analystDecisions, backendError,
       refreshLedgerVerification, loadEvidenceGraph, refreshAnalystDecisions,
-      submitAnalystDecision, resetInvestigation, exportReport, exportEvidencePackage
+      submitAnalystDecision, resetInvestigation, exportReport, exportEvidencePackage,
     }}>
       {children}
     </InvestigationContext.Provider>
@@ -581,3 +724,16 @@ export const useInvestigation = () => {
   if (!context) throw new Error('useInvestigation must be used within an InvestigationProvider');
   return context;
 };
+
+// ── Utilities ────────────────────────────────────────────────────────────────
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${units[i]}`;
+}
+
+function getExtension(filename: string): string {
+  return filename.split('.').pop() ?? '';
+}

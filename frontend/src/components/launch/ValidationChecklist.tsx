@@ -4,56 +4,61 @@ import { useInvestigation } from '../../state/investigationStore';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 
+/**
+ * ValidationChecklist — pre-scan artifact readiness panel.
+ *
+ * Phase 8 changes:
+ * - Removed hardcoded "52,000 samples / 24 layers / 52,000 records" counts.
+ *   Those were presentation placeholders for a demo scenario; real counts come
+ *   from the backend scan session after upload.
+ * - Removed undefined checklist items (modelDetected, inferenceDetected,
+ *   fileIntegrityVerified) that were always false because the store never sets
+ *   them.  Only items backed by real state are shown.
+ * - START SCAN button is disabled unless isReadyToScan is true (dataset
+ *   uploaded AND backend scan_id received).
+ */
 export const ValidationChecklist: React.FC = () => {
   const {
     validationChecklist,
     isReadyToScan,
     startScan,
     clearArtifacts,
-    verifyArtifact,
+    currentScanId,
+    scanSession,
     artifacts,
+    backendOnline,
   } = useInvestigation();
+
+  const datasetArtifact = artifacts.find(a => a.type === 'dataset');
 
   const checklistItems = [
     {
       id: 'dataset',
-      label: 'Computer vision dataset detected (52,000 samples)',
+      label: datasetArtifact?.filename
+        ? `Dataset accepted: ${datasetArtifact.filename} (${datasetArtifact.size})`
+        : 'Computer vision dataset — upload an image folder or .zip archive',
       checked: validationChecklist.datasetDetected,
-      artifactId: artifacts.find(a => a.type === 'dataset')?.id || 'art-dataset',
     },
     {
-      id: 'model',
-      label: 'Target ONNX model detected (24 neural layers)',
-      checked: validationChecklist.modelDetected,
-      artifactId: artifacts.find(a => a.type === 'model')?.id || 'art-model',
+      id: 'scan_id',
+      label: currentScanId
+        ? `Backend scan session created — ID: ${currentScanId.substring(0, 8)}…`
+        : 'Backend scan session — created automatically on dataset upload',
+      checked: validationChecklist.scanReady,
     },
     {
-      id: 'inference',
-      label: 'Inference telemetry outputs detected (52,000 records)',
-      checked: validationChecklist.inferenceDetected,
-      artifactId: artifacts.find(a => a.type === 'inference')?.id || 'art-inference',
-    },
-    {
-      id: 'integrity',
-      label: 'Air-gapped file SHA-256 integrity verified',
-      checked: validationChecklist.fileIntegrityVerified,
-      artifactId: artifacts.find(a => a.type === 'manifest')?.id || 'art-manifest',
+      id: 'backend',
+      label: backendOnline
+        ? 'Backend assurance pipeline — reachable and ready'
+        : 'Backend assurance pipeline — unreachable (air-gapped mode)',
+      checked: backendOnline,
     },
     {
       id: 'config',
       label: 'Zero-Trust defense audit configuration validated',
-      checked: validationChecklist.configValidated,
-      artifactId: null,
+      checked: true,
     },
   ];
-
-  const handleItemClick = (item: typeof checklistItems[0]) => {
-    if (item.artifactId) {
-      verifyArtifact(item.artifactId);
-    } else {
-      verifyArtifact('art-dataset');
-    }
-  };
 
   return (
     <div
@@ -101,7 +106,9 @@ export const ValidationChecklist: React.FC = () => {
               margin: 0,
             }}
           >
-            All artifacts satisfy zero-trust checksum assertions. Click any item to verify individually.
+            {isReadyToScan
+              ? 'Backend scan session is active. All checks passed — ready to monitor the pipeline.'
+              : 'Upload a dataset to create a backend scan session before starting analysis.'}
           </p>
         </div>
 
@@ -117,7 +124,7 @@ export const ValidationChecklist: React.FC = () => {
         </div>
       </div>
 
-      {/* Checklist grid */}
+      {/* Checklist items */}
       <div
         style={{
           display: 'grid',
@@ -125,10 +132,9 @@ export const ValidationChecklist: React.FC = () => {
           gap: '0.875rem',
         }}
       >
-        {checklistItems.map((item, index) => (
+        {checklistItems.map((item) => (
           <div
-            key={index}
-            onClick={() => handleItemClick(item)}
+            key={item.id}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -137,11 +143,8 @@ export const ValidationChecklist: React.FC = () => {
               backgroundColor: item.checked ? 'var(--success-surface)' : 'var(--surface-elevated)',
               border: `1px solid ${item.checked ? 'var(--success-border)' : 'var(--border)'}`,
               borderRadius: '0.375rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
               userSelect: 'none',
             }}
-            title={item.checked ? 'Verified ✓ (Click to re-validate)' : 'Click to quickly verify'}
           >
             <div
               style={{
@@ -159,7 +162,14 @@ export const ValidationChecklist: React.FC = () => {
               {item.checked ? (
                 <Check size={12} strokeWidth={3} />
               ) : (
-                <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'currentColor' }} />
+                <span
+                  style={{
+                    width: '4px',
+                    height: '4px',
+                    borderRadius: '50%',
+                    background: 'currentColor',
+                  }}
+                />
               )}
             </div>
             <span
@@ -175,6 +185,49 @@ export const ValidationChecklist: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Scan session info (only when session exists) */}
+      {scanSession && (
+        <div
+          style={{
+            padding: '0.625rem 1rem',
+            backgroundColor: 'var(--surface-elevated)',
+            border: '1px solid var(--accent-border)',
+            borderRadius: '0.375rem',
+            fontSize: '0.75rem',
+            color: 'var(--text-secondary)',
+            display: 'flex',
+            gap: '1.5rem',
+            flexWrap: 'wrap',
+          }}
+          className="font-mono"
+        >
+          <span>
+            <span style={{ color: 'var(--text-muted)' }}>SCAN_ID: </span>
+            <strong style={{ color: 'var(--accent-text)' }}>{scanSession.scan_id}</strong>
+          </span>
+          {scanSession.batch_id && (
+            <span>
+              <span style={{ color: 'var(--text-muted)' }}>BATCH_ID: </span>
+              <strong style={{ color: 'var(--accent-text)' }}>{scanSession.batch_id}</strong>
+            </span>
+          )}
+          <span>
+            <span style={{ color: 'var(--text-muted)' }}>STATUS: </span>
+            <strong
+              style={{
+                color: scanSession.status === 'COMPLETED'
+                  ? 'var(--success-text)'
+                  : scanSession.status === 'FAILED'
+                  ? 'var(--critical-text)'
+                  : 'var(--accent-text)',
+              }}
+            >
+              {scanSession.status}
+            </strong>
+          </span>
+        </div>
+      )}
 
       {/* Footer Action Bar */}
       <div
@@ -195,18 +248,13 @@ export const ValidationChecklist: React.FC = () => {
             </Badge>
           ) : (
             <Badge variant="warning" size="md" icon={<AlertCircle size={15} />}>
-              READY FOR INGESTION
+              UPLOAD DATASET FIRST
             </Badge>
           )}
-          <span
-            style={{
-              fontSize: '0.8125rem',
-              color: 'var(--text-secondary)',
-            }}
-          >
+          <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
             {isReadyToScan
-              ? 'All mission artifacts verified. Ready to launch 11-stage forensic kernel.'
-              : 'Click "Initialize Scan" to auto-verify and run, or upload files above.'}
+              ? 'Dataset ingested and backend scan session active. Proceed to monitor the pipeline.'
+              : 'Upload a dataset above. A backend scan session is created automatically on upload.'}
           </span>
         </div>
 
@@ -214,12 +262,11 @@ export const ValidationChecklist: React.FC = () => {
           variant="primary"
           size="lg"
           onClick={startScan}
+          disabled={!isReadyToScan}
           iconRight={<ArrowRight size={18} />}
-          style={{
-            minWidth: '280px',
-          }}
+          style={{ minWidth: '280px' }}
         >
-          {isReadyToScan ? 'INITIALIZE INTEGRITY SCAN →' : '⚡ INITIALIZE SCAN (AUTO-VERIFY) →'}
+          {isReadyToScan ? 'MONITOR ASSURANCE PIPELINE →' : 'UPLOAD DATASET TO ENABLE SCAN'}
         </Button>
       </div>
     </div>

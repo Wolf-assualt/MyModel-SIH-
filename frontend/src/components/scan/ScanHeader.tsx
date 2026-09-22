@@ -1,23 +1,30 @@
 import React from 'react';
-import { Terminal, Clock, Play, Pause, FastForward } from 'lucide-react';
+import { Terminal, Clock, Play } from 'lucide-react';
 import { useInvestigation } from '../../state/investigationStore';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { BackendStatus } from '../ui/BackendStatus';
 
+/**
+ * ScanHeader — displays real backend scan progress controls.
+ *
+ * Phase 8 changes:
+ * - Removed "Speed Multiplier" (1X/2X/5X) — meaningless when progress comes
+ *   from the backend; incrementing the interval would not accelerate analysis.
+ * - Removed "Skip to End" — would have moved to the results page before the
+ *   backend completed, showing UNAVAILABLE for all results.
+ * - "Re-Run Scan" re-uses the existing scan_id from the current upload session
+ *   rather than starting a new one; the upload must be repeated for a new scan.
+ */
 export const ScanHeader: React.FC = () => {
   const {
     sessionId,
+    currentScanId,
     elapsedSeconds,
     isScanning,
     isScanCompleted,
     scanProgress,
     startScan,
-    pauseScan,
-    resumeScan,
-    skipScanToEnd,
-    speedMultiplier,
-    setSpeedMultiplier,
     backendOnline,
     setPhase,
   } = useInvestigation();
@@ -74,27 +81,27 @@ export const ScanHeader: React.FC = () => {
               INTEGRITY ANALYSIS TERMINAL
             </h2>
             {isScanCompleted ? (
-              <Badge variant="success" size="sm">
-                ANALYSIS COMPLETE
-              </Badge>
+              <Badge variant="success" size="sm">ANALYSIS COMPLETE</Badge>
             ) : isScanning ? (
-              <Badge variant="accent" size="sm" pulse>
-                SCAN IN PROGRESS
-              </Badge>
+              <Badge variant="accent" size="sm" pulse>SCAN IN PROGRESS</Badge>
             ) : scanProgress > 0 ? (
-              <Badge variant="warning" size="sm">
-                PAUSED ({scanProgress}%)
-              </Badge>
+              <Badge variant="warning" size="sm">PAUSED ({scanProgress}%)</Badge>
             ) : (
-              <Badge variant="default" size="sm">
-                READY TO INITIALIZE
-              </Badge>
+              <Badge variant="default" size="sm">READY TO INITIALIZE</Badge>
             )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.25rem' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }} className="font-mono">
               SESSION: <strong style={{ color: 'var(--accent-text)' }}>{sessionId}</strong>
             </span>
+            {currentScanId && (
+              <>
+                <span style={{ color: 'var(--border-strong)', fontSize: '0.75rem' }}>•</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }} className="font-mono">
+                  SCAN: <strong style={{ color: 'var(--accent-text)' }}>{currentScanId.substring(0, 8)}…</strong>
+                </span>
+              </>
+            )}
             <span style={{ color: 'var(--border-strong)', fontSize: '0.75rem' }}>•</span>
             <span
               style={{
@@ -114,43 +121,9 @@ export const ScanHeader: React.FC = () => {
         </div>
       </div>
 
-      {/* Interactive Controls: Speed + Skip + Pause */}
+      {/* Scan Controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-        {/* Speed Multiplier */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            backgroundColor: 'var(--surface-elevated)',
-            border: '1px solid var(--border)',
-            borderRadius: '0.375rem',
-            padding: '0.125rem',
-          }}
-        >
-          {[1, 2, 5].map(multiplier => (
-            <button
-              key={multiplier}
-              onClick={() => setSpeedMultiplier(multiplier)}
-              style={{
-                padding: '0.25rem 0.5rem',
-                fontSize: '0.6875rem',
-                fontWeight: 600,
-                border: 'none',
-                borderRadius: '0.25rem',
-                cursor: 'pointer',
-                backgroundColor: speedMultiplier === multiplier ? 'var(--accent)' : 'transparent',
-                color: speedMultiplier === multiplier ? 'var(--text-inverse)' : 'var(--text-secondary)',
-                transition: 'all 0.15s ease',
-              }}
-              className="font-mono"
-            >
-              {multiplier}X
-            </button>
-          ))}
-        </div>
-
-        {/* Context-aware scan controls */}
-        {!isScanCompleted && scanProgress === 0 && !isScanning && (
+        {!isScanCompleted && !isScanning && (
           <Button
             variant="primary"
             size="sm"
@@ -161,46 +134,14 @@ export const ScanHeader: React.FC = () => {
           </Button>
         )}
 
-        {!isScanCompleted && (isScanning || scanProgress > 0) && (
-          <Button
-            variant={isScanning ? 'outline' : 'primary'}
-            size="sm"
-            onClick={isScanning ? pauseScan : resumeScan}
-            icon={isScanning ? <Pause size={14} /> : <Play size={14} />}
-          >
-            {isScanning ? 'Pause' : 'Resume Scan'}
-          </Button>
-        )}
-
-        {!isScanCompleted && (isScanning || scanProgress > 0) && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={skipScanToEnd}
-            icon={<FastForward size={14} />}
-          >
-            Skip to End
-          </Button>
-        )}
-
         {isScanCompleted && (
-          <>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setPhase('results')}
-            >
-              VIEW VERDICT & EVIDENCE →
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={startScan}
-              icon={<Play size={14} />}
-            >
-              Re-Run Scan
-            </Button>
-          </>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setPhase('results')}
+          >
+            VIEW VERDICT & EVIDENCE →
+          </Button>
         )}
       </div>
     </div>

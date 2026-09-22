@@ -10,36 +10,36 @@ export const PipelineStages: React.FC = () => {
   const getStatusIcon = (status: StageStatus) => {
     switch (status) {
       case 'PASSED':
-        return <CheckCircle2 size={15} style={{ color: 'var(--success-text)' }} />;
+        return <CheckCircle2 size={15} strokeWidth={1.5} style={{ color: 'var(--success-text)' }} />;
       case 'WARNING':
-        return <AlertTriangle size={15} style={{ color: 'var(--warning-text)' }} />;
+        return <AlertTriangle size={15} strokeWidth={1.5} style={{ color: 'var(--warning-text)' }} />;
       case 'FAILED':
-        return <XCircle size={15} style={{ color: 'var(--critical-text)' }} />;
+        return <XCircle size={15} strokeWidth={1.5} style={{ color: 'var(--critical-text)' }} />;
       case 'UNAVAILABLE':
-        return <XCircle size={15} style={{ color: 'var(--text-muted)' }} />;
+        return <XCircle size={15} strokeWidth={1.5} style={{ color: 'var(--text-muted)' }} />;
       case 'RUNNING':
-        return <Loader2 size={15} style={{ color: 'var(--accent-text)', animation: 'radar-sweep 1s linear infinite' }} />;
+        return <Loader2 size={15} strokeWidth={1.5} style={{ color: 'var(--accent-text)', animation: 'radar-sweep 1s linear infinite' }} />;
       case 'WAITING':
       default:
-        return <Clock size={15} style={{ color: 'var(--text-muted)' }} />;
+        return <Clock size={15} strokeWidth={1.5} style={{ color: 'var(--text-muted)' }} />;
     }
   };
 
   const getStatusBadge = (status: StageStatus) => {
     switch (status) {
       case 'PASSED':
-        return <Badge variant="success" size="sm">PASSED</Badge>;
+        return <Badge variant="success" size="sm">Passed</Badge>;
       case 'WARNING':
-        return <Badge variant="warning" size="sm">WARNING</Badge>;
+        return <Badge variant="warning" size="sm">Warning</Badge>;
       case 'FAILED':
-        return <Badge variant="critical" size="sm">FAILED</Badge>;
+        return <Badge variant="critical" size="sm">Failed</Badge>;
       case 'UNAVAILABLE':
-        return <Badge variant="default" size="sm">UNAVAIL</Badge>;
+        return <Badge variant="default" size="sm">Unavail</Badge>;
       case 'RUNNING':
-        return <Badge variant="accent" size="sm" pulse>RUNNING</Badge>;
+        return <Badge variant="accent" size="sm">Running</Badge>;
       case 'WAITING':
       default:
-        return <Badge variant="default" size="sm">WAITING</Badge>;
+        return <Badge variant="default" size="sm">Waiting</Badge>;
     }
   };
 
@@ -48,52 +48,43 @@ export const PipelineStages: React.FC = () => {
       style={{
         backgroundColor: 'var(--surface)',
         border: '1px solid var(--border)',
-        borderRadius: '0.625rem',
-        padding: '1.25rem 1.5rem',
-        boxShadow: 'var(--card-shadow)',
+        borderRadius: '12px',
+        padding: '20px 24px',
       }}
     >
       <div
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '1rem',
+          marginBottom: '16px',
           borderBottom: '1px solid var(--border-subtle)',
-          paddingBottom: '0.75rem',
+          paddingBottom: '12px',
         }}
       >
-        <div>
-          <h3
-            style={{
-              fontSize: '0.9375rem',
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-              margin: 0,
-            }}
-            className="font-display"
-          >
-            Forensic Analysis Pipeline
-          </h3>
-          <p
-            style={{
-              fontSize: '0.75rem',
-              color: 'var(--text-muted)',
-              margin: 0,
-            }}
-          >
-            11 zero-trust verification phases executed in isolated cryptographic order
-          </p>
-        </div>
+        <h3
+          style={{
+            fontSize: '0.9375rem',
+            fontWeight: 600,
+            color: 'var(--text-primary)',
+            margin: 0,
+          }}
+        >
+          Forensic Analysis Pipeline
+        </h3>
+        <p
+          style={{
+            fontSize: '12px',
+            color: 'var(--text-muted)',
+            margin: '4px 0 0 0',
+          }}
+        >
+          13 zero-trust verification phases executed in isolated cryptographic order
+        </p>
       </div>
 
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: '0.625rem',
+          gap: '12px',
         }}
       >
         {stages.map(stage => {
@@ -107,60 +98,58 @@ export const PipelineStages: React.FC = () => {
             <div
               key={stage.id}
               style={{
-                backgroundColor: isRunning
-                  ? 'var(--surface-elevated)'
-                  : isFailed
-                  ? 'var(--critical-surface)'
-                  : isWarning
-                  ? 'var(--warning-surface)'
-                  : isPassed
-                  ? 'var(--surface-elevated)'
-                  : isUnavailable
-                  ? 'var(--surface)'
-                  : 'var(--surface)',
+                backgroundColor: 'var(--surface-elevated)',
                 borderWidth: '1px',
                 borderStyle: 'solid',
                 borderColor: isRunning
-                  ? 'var(--accent)'
+                  ? 'var(--accent-border)'
                   : isFailed
                   ? 'var(--critical-border)'
                   : isWarning
                   ? 'var(--warning-border)'
                   : isPassed
-                  ? 'var(--success-border)'
+                  ? 'var(--border)'
                   : isUnavailable
                   ? 'var(--border-subtle)'
                   : 'var(--border)',
+                borderLeftWidth: '2px',
+                borderLeftColor: isRunning
+                  ? 'var(--accent)'
+                  : isFailed
+                  ? 'var(--critical)'
+                  : isWarning
+                  ? 'var(--warning)'
+                  : isPassed
+                  ? 'var(--success)'
+                  : 'var(--border-strong)',
                 borderRadius: '0.375rem',
-                padding: '0.625rem 0.875rem',
+                padding: '12px 16px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                gap: '0.5rem',
-                boxShadow: isRunning ? 'var(--accent-glow)' : 'none',
+                gap: '8px',
                 opacity: isUnavailable ? 0.6 : 1,
-                transition: 'all 0.2s ease',
+                transition: 'border-color 0.15s ease',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
                 {getStatusIcon(stage.status)}
                 <div style={{ overflow: 'hidden' }}>
                   <div
                     style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
+                      fontSize: '12px',
+                      fontWeight: 500,
                       color: 'var(--text-primary)',
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                     }}
-                    className="font-mono"
                   >
                     {stage.title}
                   </div>
                   <div
                     style={{
-                      fontSize: '0.625rem',
+                      fontSize: '11px',
                       color: 'var(--text-muted)',
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',

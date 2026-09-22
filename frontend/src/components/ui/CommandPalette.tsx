@@ -162,8 +162,7 @@ export const CommandPalette: React.FC = () => {
               position: 'fixed',
               inset: 0,
               zIndex: 10000,
-              backgroundColor: 'rgba(5, 6, 10, 0.7)',
-              backdropFilter: 'blur(6px)',
+              backgroundColor: 'rgba(5, 6, 8, 0.6)',
               display: 'flex',
               alignItems: 'flex-start',
               justifyContent: 'center',
@@ -183,7 +182,7 @@ export const CommandPalette: React.FC = () => {
               style={{
                 width: '100%',
                 maxWidth: '560px',
-                borderRadius: '0.75rem',
+                borderRadius: '12px',
                 overflow: 'hidden',
                 borderColor: 'var(--border-strong)',
               }}
@@ -198,7 +197,7 @@ export const CommandPalette: React.FC = () => {
                   borderBottom: '1px solid var(--border)',
                 }}
               >
-                <Search size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                <Search size={16} strokeWidth={1.5} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
                 <input
                   ref={inputRef}
                   value={query}
@@ -237,11 +236,8 @@ export const CommandPalette: React.FC = () => {
               {/* Command list */}
               <div ref={listRef} style={{ padding: '0.375rem', maxHeight: '320px', overflowY: 'auto' }}>
                 {filtered.length === 0 && (
-                  <div
-                    className="font-mono"
-                    style={{ padding: '1rem', fontSize: '0.8125rem', color: 'var(--text-muted)', textAlign: 'center' }}
-                  >
-                    NO MATCHING COMMANDS
+                  <div style={{ padding: '1rem', fontSize: '0.8125rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                    No matching commands
                   </div>
                 )}
                 {filtered.map((item, i) => (
@@ -269,10 +265,7 @@ export const CommandPalette: React.FC = () => {
                   >
                     <span style={{ display: 'inline-flex', flexShrink: 0 }}>{item.icon}</span>
                     <span style={{ flex: 1, fontSize: '0.875rem', fontWeight: 500 }}>{item.label}</span>
-                    <span
-                      className="font-mono"
-                      style={{ fontSize: '0.625rem', color: 'var(--text-muted)', letterSpacing: '0.05em' }}
-                    >
+                    <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>
                       {item.hint}
                     </span>
                     {i === activeIndex && <CornerDownLeft size={12} style={{ opacity: 0.6 }} />}

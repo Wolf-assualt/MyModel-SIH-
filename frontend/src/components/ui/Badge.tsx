@@ -14,86 +14,64 @@ interface BadgeProps {
   variant?: BadgeVariant;
   icon?: React.ReactNode;
   size?: 'sm' | 'md';
+  /** Accepted for API compatibility; dots are static. */
   pulse?: boolean;
   className?: string;
 }
 
+/**
+ * Quiet status pill: small static dot + label in sentence case.
+ * No pulse animation, no tinted backgrounds, no uppercase tracking.
+ */
 export const Badge: React.FC<BadgeProps> = ({
   children,
   variant = 'default',
   icon,
   size = 'md',
-  pulse = false,
   className = '',
 }) => {
-  const getStyles = (): React.CSSProperties => {
+  const getColor = (): string => {
     switch (variant) {
       case 'accent':
-        return {
-          backgroundColor: 'var(--accent-surface)',
-          borderColor: 'var(--accent-border)',
-          color: 'var(--accent-text)',
-        };
+        return 'var(--accent-text)';
       case 'success':
-        return {
-          backgroundColor: 'var(--success-surface)',
-          borderColor: 'var(--success-border)',
-          color: 'var(--success-text)',
-        };
+        return 'var(--success-text)';
       case 'warning':
-        return {
-          backgroundColor: 'var(--warning-surface)',
-          borderColor: 'var(--warning-border)',
-          color: 'var(--warning-text)',
-        };
+        return 'var(--warning-text)';
       case 'danger':
-        return {
-          backgroundColor: 'var(--danger-surface)',
-          borderColor: 'var(--danger-border)',
-          color: 'var(--danger-text)',
-        };
       case 'critical':
-        return {
-          backgroundColor: 'var(--critical-surface)',
-          borderColor: 'var(--critical-border)',
-          color: 'var(--critical-text)',
-        };
+        return 'var(--critical-text)';
       case 'info':
-        return {
-          backgroundColor: 'var(--info-surface)',
-          borderColor: 'var(--info-border)',
-          color: 'var(--info-text)',
-        };
+        return 'var(--info-text)';
       default:
-        return {
-          backgroundColor: 'var(--surface-elevated)',
-          borderColor: 'var(--border)',
-          color: 'var(--text-secondary)',
-        };
+        return 'var(--text-secondary)';
     }
   };
 
+  const color = getColor();
+
   const sizeStyles: React.CSSProperties =
     size === 'sm'
-      ? { padding: '2px 6px', fontSize: '11px' }
-      : { padding: '3px 9px', fontSize: '12px' };
+      ? { padding: '2px 8px', fontSize: '11px' }
+      : { padding: '3px 10px', fontSize: '12px' };
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-mono font-medium rounded-full border uppercase tracking-wider ${className}`}
+      className={`inline-flex items-center rounded-full border font-medium ${className}`}
       style={{
-        ...getStyles(),
         ...sizeStyles,
         display: 'inline-flex',
         alignItems: 'center',
         gap: '0.375rem',
-        borderRadius: '999px',
+        borderColor: 'var(--border)',
+        backgroundColor: 'var(--surface-elevated)',
+        color,
         borderWidth: '1px',
         borderStyle: 'solid',
-        lineHeight: 1.2,
+        lineHeight: 1.4,
       }}
     >
-      {/* Color-coded status dot — pulses subtly for living states */}
+      {/* Small static status dot — color communicates state, motion does not */}
       <span
         style={{
           width: '5px',
@@ -103,7 +81,6 @@ export const Badge: React.FC<BadgeProps> = ({
           display: 'inline-block',
           flexShrink: 0,
         }}
-        className={pulse ? 'pulse-dot' : undefined}
         aria-hidden="true"
       />
       {icon && <span style={{ display: 'inline-flex' }}>{icon}</span>}

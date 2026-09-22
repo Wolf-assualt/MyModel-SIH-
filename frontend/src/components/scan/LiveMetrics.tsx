@@ -9,55 +9,54 @@ export const LiveMetrics: React.FC = () => {
     {
       label: 'Samples Analyzed',
       value: `${liveMetrics.samplesAnalyzed.toLocaleString()} / ${liveMetrics.totalSamples.toLocaleString()}`,
-      icon: <Database size={16} style={{ color: 'var(--accent-text)' }} />,
-      color: 'var(--accent-text)',
+      icon: <Database size={16} strokeWidth={1.5} style={{ color: 'var(--text-muted)' }} />,
     },
     {
       label: 'Hashes Verified',
       value: liveMetrics.hashesVerified.toLocaleString(),
-      icon: <CheckCircle2 size={16} style={{ color: 'var(--success-text)' }} />,
-      color: 'var(--success-text)',
+      icon: <CheckCircle2 size={16} strokeWidth={1.5} style={{ color: 'var(--success-text)' }} />,
+      isAlert: liveMetrics.hashesVerified === 0,
+      alertColor: 'var(--warning-text)',
     },
     {
       label: 'Model Layers Inspected',
       value: `${liveMetrics.modelLayersInspected} / ${liveMetrics.totalLayers}`,
-      icon: <Cpu size={16} style={{ color: 'var(--info-text)' }} />,
-      color: 'var(--info-text)',
+      icon: <Cpu size={16} strokeWidth={1.5} style={{ color: 'var(--text-muted)' }} />,
     },
     {
       label: 'Duplicates Found',
       value: liveMetrics.duplicatesFound.toString(),
-      icon: <Copy size={16} style={{ color: 'var(--warning-text)' }} />,
-      color: 'var(--warning-text)',
-      isWarning: liveMetrics.duplicatesFound > 0,
+      icon: <Copy size={16} strokeWidth={1.5} style={{ color: liveMetrics.duplicatesFound > 0 ? 'var(--warning-text)' : 'var(--text-muted)' }} />,
+      isAlert: liveMetrics.duplicatesFound > 0,
+      alertColor: 'var(--warning-text)',
     },
     {
       label: 'Poisoned Samples',
       value: liveMetrics.poisonedSamples.toString(),
-      icon: <Skull size={16} style={{ color: 'var(--critical-text)' }} />,
-      color: 'var(--critical-text)',
-      isCritical: liveMetrics.poisonedSamples > 0,
+      icon: <Skull size={16} strokeWidth={1.5} style={{ color: liveMetrics.poisonedSamples > 0 ? 'var(--critical-text)' : 'var(--text-muted)' }} />,
+      isAlert: liveMetrics.poisonedSamples > 0,
+      alertColor: 'var(--critical-text)',
     },
     {
       label: 'OOD Candidates',
       value: liveMetrics.oodCandidates.toString(),
-      icon: <Compass size={16} style={{ color: 'var(--warning-text)' }} />,
-      color: 'var(--warning-text)',
-      isWarning: liveMetrics.oodCandidates > 0,
+      icon: <Compass size={16} strokeWidth={1.5} style={{ color: liveMetrics.oodCandidates > 0 ? 'var(--warning-text)' : 'var(--text-muted)' }} />,
+      isAlert: liveMetrics.oodCandidates > 0,
+      alertColor: 'var(--warning-text)',
     },
     {
       label: 'Model Anomalies',
       value: liveMetrics.modelAnomalies.toString(),
-      icon: <AlertOctagon size={16} style={{ color: 'var(--critical-text)' }} />,
-      color: 'var(--critical-text)',
-      isCritical: liveMetrics.modelAnomalies > 0,
+      icon: <AlertOctagon size={16} strokeWidth={1.5} style={{ color: liveMetrics.modelAnomalies > 0 ? 'var(--critical-text)' : 'var(--text-muted)' }} />,
+      isAlert: liveMetrics.modelAnomalies > 0,
+      alertColor: 'var(--critical-text)',
     },
     {
       label: 'Inference Anomalies',
       value: liveMetrics.inferenceAnomalies.toString(),
-      icon: <Activity size={16} style={{ color: 'var(--danger-text)' }} />,
-      color: 'var(--danger-text)',
-      isWarning: liveMetrics.inferenceAnomalies > 0,
+      icon: <Activity size={16} strokeWidth={1.5} style={{ color: liveMetrics.inferenceAnomalies > 0 ? 'var(--warning-text)' : 'var(--text-muted)' }} />,
+      isAlert: liveMetrics.inferenceAnomalies > 0,
+      alertColor: 'var(--warning-text)',
     },
   ];
 
@@ -66,7 +65,7 @@ export const LiveMetrics: React.FC = () => {
       style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(175px, 1fr))',
-        gap: '0.75rem',
+        gap: '12px',
       }}
     >
       {metrics.map((m, i) => {
@@ -75,20 +74,12 @@ export const LiveMetrics: React.FC = () => {
             key={i}
             style={{
               backgroundColor: 'var(--surface)',
-              border: `1px solid ${
-                m.isCritical
-                  ? 'var(--critical-border)'
-                  : m.isWarning
-                  ? 'var(--warning-border)'
-                  : 'var(--border)'
-              }`,
-              borderRadius: '0.5rem',
-              padding: '0.875rem 1rem',
-              boxShadow: m.isCritical ? 'var(--critical-glow)' : 'var(--card-shadow)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              padding: '16px',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              transition: 'all 0.2s ease',
             }}
           >
             <div
@@ -96,18 +87,16 @@ export const LiveMetrics: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                marginBottom: '0.375rem',
+                marginBottom: '8px',
               }}
             >
               <span
                 style={{
-                  fontSize: '0.6875rem',
-                  fontWeight: 600,
+                  fontSize: '12px',
+                  fontWeight: 500,
                   color: 'var(--text-muted)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.04em',
+                  letterSpacing: '0.02em',
                 }}
-                className="font-mono"
               >
                 {m.label}
               </span>
@@ -115,12 +104,13 @@ export const LiveMetrics: React.FC = () => {
             </div>
 
             <div
-              style={{
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                color: m.isCritical ? 'var(--critical-text)' : 'var(--text-primary)',
-              }}
               className="font-mono"
+              style={{
+                fontSize: '20px',
+                fontWeight: 600,
+                color: m.isAlert ? m.alertColor : 'var(--text-primary)',
+                fontVariantNumeric: 'tabular-nums',
+              }}
             >
               {m.value}
             </div>

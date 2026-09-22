@@ -26,7 +26,7 @@ export const ResultsPage: React.FC = () => {
 
   if (!hasRunScan) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <EmptyState
           title="No Forensic Scan Has Run Yet"
           description="Results will appear here once the backend assurance pipeline has processed a dataset. Head back to Launch, upload a computer-vision dataset, and let the 13-stage zero-trust pipeline produce an authoritative verdict."
@@ -40,7 +40,7 @@ export const ResultsPage: React.FC = () => {
       initial="hidden"
       animate="visible"
       variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
-      style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}
     >
       <motion.section variants={sectionVariants}>
         {/* Backend failures/partial states are surfaced, never hidden. */}

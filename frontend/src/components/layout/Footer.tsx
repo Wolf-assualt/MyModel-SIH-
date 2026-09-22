@@ -5,7 +5,7 @@ export const Footer: React.FC = () => {
   return (
     <footer
       style={{
-        backgroundColor: 'var(--surface-elevated)',
+        backgroundColor: 'var(--bg-primary)',
         borderTop: '1px solid var(--border)',
         padding: '0.75rem 2rem',
         marginTop: 'auto',
@@ -13,61 +13,35 @@ export const Footer: React.FC = () => {
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '1rem',
+        gap: '12px',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Lock size={13} style={{ color: 'var(--success-text)' }} />
-          <span
-            style={{
-              fontSize: '0.6875rem',
-              fontWeight: 700,
-              color: 'var(--text-secondary)',
-              letterSpacing: '0.04em',
-            }}
-            className="font-mono"
-          >
-            UNCLASSIFIED // DEFENSE ASSURANCE USE ONLY
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Lock size={13} strokeWidth={1.5} style={{ color: 'var(--text-muted)' }} />
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+            Unclassified — defense assurance use only
           </span>
         </div>
-        <span style={{ color: 'var(--border-strong)', fontSize: '0.75rem' }}>|</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-          <Check size={13} style={{ color: 'var(--success-text)' }} />
-          <span
-            style={{
-              fontSize: '0.6875rem',
-              color: 'var(--text-tertiary)',
-            }}
-            className="font-mono"
-          >
-            HASH CONTINUITY: CONTINUOUS MERKLE SEAL
+        <span style={{ color: 'var(--border-strong)', fontSize: '12px' }}>·</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Check size={13} strokeWidth={1.5} style={{ color: 'var(--success-text)' }} />
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+            Hash continuity: continuous Merkle seal
           </span>
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-          <Cpu size={13} style={{ color: 'var(--accent-text)' }} />
-          <span
-            style={{
-              fontSize: '0.6875rem',
-              color: 'var(--text-muted)',
-            }}
-            className="font-mono"
-          >
-            HARDWARE SHA-256 ACCELERATION ACTIVE
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Cpu size={13} strokeWidth={1.5} style={{ color: 'var(--text-muted)' }} />
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+            Hardware SHA-256 acceleration active
           </span>
         </div>
-        <span style={{ color: 'var(--border-strong)', fontSize: '0.75rem' }}>|</span>
-        <span
-          style={{
-            fontSize: '0.6875rem',
-            color: 'var(--text-muted)',
-          }}
-          className="font-mono"
-        >
-          TRUST-CV v2.4 (OFFLINE SOC DEFENSE)
+        <span style={{ color: 'var(--border-strong)', fontSize: '12px' }}>·</span>
+        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+          TRUST-CV v2.4 (offline SOC defense)
         </span>
       </div>
     </footer>

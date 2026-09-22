@@ -40,81 +40,80 @@ export const ScanHeader: React.FC = () => {
       style={{
         backgroundColor: 'var(--surface)',
         border: '1px solid var(--border)',
-        borderRadius: '0.625rem',
-        padding: '1rem 1.5rem',
+        borderRadius: '12px',
+        padding: '16px 24px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '1rem',
+        gap: '16px',
       }}
     >
       {/* Title & Status */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <div
           style={{
             width: '36px',
             height: '36px',
             borderRadius: '0.375rem',
-            backgroundColor: 'var(--accent-surface)',
-            border: '1px solid var(--accent)',
+            backgroundColor: 'var(--surface-elevated)',
+            border: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'var(--accent-text)',
+            color: 'var(--text-secondary)',
+            flexShrink: 0,
           }}
         >
-          <Terminal size={20} />
+          <Terminal size={18} strokeWidth={1.5} />
         </div>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <h2
               style={{
-                fontSize: '1.125rem',
-                fontWeight: 700,
+                fontSize: '16px',
+                fontWeight: 600,
                 color: 'var(--text-primary)',
-                letterSpacing: '0.04em',
+                letterSpacing: '-0.01em',
                 margin: 0,
               }}
-              className="font-display"
             >
-              INTEGRITY ANALYSIS TERMINAL
+              Integrity Analysis Terminal
             </h2>
             {isScanCompleted ? (
-              <Badge variant="success" size="sm">ANALYSIS COMPLETE</Badge>
+              <Badge variant="success" size="sm">Analysis complete</Badge>
             ) : isScanning ? (
-              <Badge variant="accent" size="sm" pulse>SCAN IN PROGRESS</Badge>
+              <Badge variant="accent" size="sm">Scan in progress</Badge>
             ) : scanProgress > 0 ? (
-              <Badge variant="warning" size="sm">PAUSED ({scanProgress}%)</Badge>
+              <Badge variant="warning" size="sm">Paused ({scanProgress}%)</Badge>
             ) : (
-              <Badge variant="default" size="sm">READY TO INITIALIZE</Badge>
+              <Badge variant="default" size="sm">Ready to initialize</Badge>
             )}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.25rem' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }} className="font-mono">
-              SESSION: <strong style={{ color: 'var(--accent-text)' }}>{sessionId}</strong>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              Session: <strong className="font-mono" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>{sessionId}</strong>
             </span>
             {currentScanId && (
               <>
-                <span style={{ color: 'var(--border-strong)', fontSize: '0.75rem' }}>•</span>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }} className="font-mono">
-                  SCAN: <strong style={{ color: 'var(--accent-text)' }}>{currentScanId.substring(0, 8)}…</strong>
+                <span style={{ color: 'var(--border-strong)', fontSize: '12px' }}>·</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                  Scan: <strong className="font-mono" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>{currentScanId.substring(0, 8)}…</strong>
                 </span>
               </>
             )}
-            <span style={{ color: 'var(--border-strong)', fontSize: '0.75rem' }}>•</span>
+            <span style={{ color: 'var(--border-strong)', fontSize: '12px' }}>·</span>
             <span
               style={{
-                fontSize: '0.75rem',
-                color: 'var(--text-secondary)',
+                fontSize: '12px',
+                color: 'var(--text-muted)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.375rem',
+                gap: '6px',
               }}
-              className="font-mono"
             >
-              <Clock size={13} style={{ color: 'var(--text-muted)' }} />
-              ELAPSED: <strong style={{ color: 'var(--text-primary)' }}>{formatElapsed(elapsedSeconds)}</strong>
+              <Clock size={13} strokeWidth={1.5} />
+              Elapsed: <strong className="font-mono" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>{formatElapsed(elapsedSeconds)}</strong>
             </span>
             <BackendStatus online={backendOnline} compact />
           </div>
@@ -122,15 +121,15 @@ export const ScanHeader: React.FC = () => {
       </div>
 
       {/* Scan Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {!isScanCompleted && !isScanning && (
           <Button
             variant="primary"
             size="sm"
             onClick={startScan}
-            icon={<Play size={14} />}
+            icon={<Play size={14} strokeWidth={1.5} />}
           >
-            START FORENSIC SCAN
+            Start Forensic Scan
           </Button>
         )}
 
@@ -140,7 +139,7 @@ export const ScanHeader: React.FC = () => {
             size="sm"
             onClick={() => setPhase('results')}
           >
-            VIEW VERDICT & EVIDENCE →
+            View Verdict & Evidence
           </Button>
         )}
       </div>

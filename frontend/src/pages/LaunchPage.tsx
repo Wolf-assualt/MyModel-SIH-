@@ -16,41 +16,34 @@ export const LaunchPage: React.FC = () => {
       initial="hidden"
       animate="visible"
       variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
-      style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}
     >
       <motion.section variants={sectionVariants}>
         <HeroSection />
       </motion.section>
 
       <motion.section variants={sectionVariants}>
-        <LatencyHistogram />
-      </motion.section>
-
-      <motion.section variants={sectionVariants}>
-        <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <h2
-              style={{
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                color: 'var(--text-primary)',
-                letterSpacing: '0.04em',
-                margin: 0,
-              }}
-              className="font-display"
-            >
-              Investigation Artifact Setup
-            </h2>
-            <p
-              style={{
-                fontSize: '0.8125rem',
-                color: 'var(--text-secondary)',
-                margin: 0,
-              }}
-            >
-              Provide surveillance datasets, neural network weights, and inference outputs for validation.
-            </p>
-          </div>
+        <div style={{ marginBottom: '16px' }}>
+          <h2
+            style={{
+              fontSize: '20px',
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              letterSpacing: '-0.01em',
+              margin: 0,
+            }}
+          >
+            Investigation Artifact Setup
+          </h2>
+          <p
+            style={{
+              fontSize: '14px',
+              color: 'var(--text-secondary)',
+              margin: '4px 0 0 0',
+            }}
+          >
+            Provide surveillance datasets, neural network weights, and inference outputs for validation.
+          </p>
         </div>
 
         <ArtifactUploader />
@@ -58,6 +51,27 @@ export const LaunchPage: React.FC = () => {
 
       <motion.section variants={sectionVariants}>
         <ValidationChecklist />
+      </motion.section>
+
+      {/* Subdued system performance strip — benchmark presentation data only */}
+      <motion.section variants={sectionVariants}>
+        <div style={{ marginBottom: '16px' }}>
+          <h2
+            style={{
+              fontSize: '20px',
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              letterSpacing: '-0.01em',
+              margin: 0,
+            }}
+          >
+            System Performance
+          </h2>
+          <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+            Benchmark measurements from the verification harness.
+          </p>
+        </div>
+        <LatencyHistogram />
       </motion.section>
     </motion.div>
   );

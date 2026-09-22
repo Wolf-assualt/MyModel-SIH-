@@ -12,40 +12,32 @@ export const SummaryCards: React.FC = () => {
 
   const cards = [
     {
-      label: 'TOTAL ARTIFACTS',
+      label: 'Total artifacts',
       value: totalArtifacts.toLocaleString(),
       sublabel: totalArtifacts === 1 ? 'Single surveillance frame (Direct Ingestion)' : 'Surveillance frames, neural weights & telemetry',
-      icon: <Database size={20} style={{ color: 'var(--accent-text)' }} />,
-      borderColor: 'var(--border)',
-      glow: 'none',
-      textColor: 'var(--text-primary)',
+      icon: <Database size={16} strokeWidth={1.5} style={{ color: 'var(--text-muted)' }} />,
+      valueColor: 'var(--text-primary)',
     },
     {
-      label: 'VERIFIED ASSETS',
+      label: 'Verified assets',
       value: verifiedCount.toLocaleString(),
       sublabel: 'Cryptographically passed zero-trust assertions',
-      icon: <CheckCircle2 size={20} style={{ color: 'var(--success-text)' }} />,
-      borderColor: 'var(--success-border)',
-      glow: 'var(--success-glow)',
-      textColor: 'var(--success-text)',
+      icon: <CheckCircle2 size={16} strokeWidth={1.5} style={{ color: 'var(--success-text)' }} />,
+      valueColor: 'var(--text-primary)',
     },
     {
-      label: 'INTEGRITY WARNINGS',
+      label: 'Integrity warnings',
       value: warningCount.toString(),
       sublabel: 'Out-of-distribution & near-duplicate frames',
-      icon: <AlertTriangle size={20} style={{ color: 'var(--warning-text)' }} />,
-      borderColor: 'var(--warning-border)',
-      glow: 'var(--warning-glow)',
-      textColor: 'var(--warning-text)',
+      icon: <AlertTriangle size={16} strokeWidth={1.5} style={{ color: warningCount > 0 ? 'var(--warning-text)' : 'var(--text-muted)' }} />,
+      valueColor: warningCount > 0 ? 'var(--warning-text)' : 'var(--text-primary)',
     },
     {
-      label: 'CRITICAL FINDINGS',
+      label: 'Critical findings',
       value: criticalCount.toString(),
       sublabel: 'Clean-label poisoning & weight backdoor matches',
-      icon: <ShieldAlert size={20} style={{ color: 'var(--critical-text)' }} />,
-      borderColor: 'var(--critical-border)',
-      glow: 'var(--critical-glow)',
-      textColor: 'var(--critical-text)',
+      icon: <ShieldAlert size={16} strokeWidth={1.5} style={{ color: criticalCount > 0 ? 'var(--critical-text)' : 'var(--text-muted)' }} />,
+      valueColor: criticalCount > 0 ? 'var(--critical-text)' : 'var(--text-primary)',
     },
   ];
 
@@ -54,7 +46,7 @@ export const SummaryCards: React.FC = () => {
       style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-        gap: '1.25rem',
+        gap: '24px',
       }}
     >
       {cards.map((c, idx) => (
@@ -62,14 +54,12 @@ export const SummaryCards: React.FC = () => {
           key={idx}
           style={{
             backgroundColor: 'var(--surface)',
-            border: `1px solid ${c.borderColor}`,
-            borderRadius: '0.625rem',
-            padding: '1.25rem 1.5rem',
-            boxShadow: c.glow !== 'none' ? c.glow : 'var(--card-shadow)',
+            border: '1px solid var(--border)',
+            borderRadius: '12px',
+            padding: '20px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            transition: 'all 0.2s ease',
           }}
         >
           <div
@@ -77,53 +67,40 @@ export const SummaryCards: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              marginBottom: '0.5rem',
+              marginBottom: '8px',
             }}
           >
             <span
               style={{
-                fontSize: '0.75rem',
-                fontWeight: 700,
+                fontSize: '12px',
+                fontWeight: 500,
                 color: 'var(--text-muted)',
-                letterSpacing: '0.04em',
+                letterSpacing: '0.02em',
               }}
-              className="font-mono"
             >
               {c.label}
             </span>
-            <div
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '0.375rem',
-                backgroundColor: 'var(--surface-elevated)',
-                border: '1px solid var(--border)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              {c.icon}
-            </div>
+            {c.icon}
           </div>
 
           <div
-            style={{
-              fontSize: '2rem',
-              fontWeight: 700,
-              color: c.textColor,
-              lineHeight: 1.1,
-              marginBottom: '0.375rem',
-            }}
             className="font-mono"
+            style={{
+              fontSize: '24px',
+              fontWeight: 600,
+              color: c.valueColor,
+              lineHeight: 1.2,
+              marginBottom: '4px',
+              fontVariantNumeric: 'tabular-nums',
+            }}
           >
             {c.value}
           </div>
 
           <p
             style={{
-              fontSize: '0.75rem',
-              color: 'var(--text-secondary)',
+              fontSize: '12px',
+              color: 'var(--text-muted)',
               margin: 0,
             }}
           >

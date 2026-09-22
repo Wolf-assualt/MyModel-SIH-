@@ -13,17 +13,17 @@ export const VerdictCard: React.FC = () => {
         style={{
           backgroundColor: 'var(--surface)',
           border: '1px solid var(--border)',
-          borderRadius: '0.75rem',
-          padding: '1.5rem 2rem',
+          borderRadius: '12px',
+          padding: '24px 32px',
           display: 'flex',
           alignItems: 'center',
-          gap: '1.25rem',
+          gap: '20px',
         }}
       >
         <div
           style={{
-            width: '54px',
-            height: '54px',
+            width: '48px',
+            height: '48px',
             borderRadius: '0.5rem',
             backgroundColor: 'var(--surface-elevated)',
             border: '1px solid var(--border)',
@@ -34,17 +34,16 @@ export const VerdictCard: React.FC = () => {
             flexShrink: 0,
           }}
         >
-          <AlertTriangle size={32} />
+          <AlertTriangle size={24} strokeWidth={1.5} />
         </div>
         <div>
           <span
-            style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em' }}
-            className="font-mono"
+            style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)', letterSpacing: '0.02em' }}
           >
-            INTEGRITY VERDICT
+            Integrity verdict
           </span>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-secondary)', margin: '0.25rem 0' }} className="font-display">
-            UNAVAILABLE — NO BACKEND ASSESSMENT
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-secondary)', margin: '4px 0' }}>
+            Unavailable — no backend assessment
           </h2>
           <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', margin: 0 }}>
             No authoritative assessment has been received from the backend assurance pipeline.
@@ -58,23 +57,11 @@ export const VerdictCard: React.FC = () => {
   const isAccepted = trustScore.verdict === 'ACCEPTED' || trustScore.verdict === 'TRUSTED';
   const isUnderReview = trustScore.verdict === 'UNDER_REVIEW' || trustScore.verdict === 'CAUTION';
 
-  const borderColor = isAccepted
-    ? 'var(--success-border)'
+  const edgeColor = isAccepted
+    ? 'var(--success)'
     : isUnderReview
-    ? 'var(--warning-border)'
-    : 'var(--critical-border)';
-
-  const glowStyle = isAccepted
-    ? 'var(--success-glow)'
-    : isUnderReview
-    ? 'var(--warning-glow)'
-    : 'var(--critical-glow)';
-
-  const iconSurface = isAccepted
-    ? 'var(--success-surface)'
-    : isUnderReview
-    ? 'var(--warning-surface)'
-    : 'var(--critical-surface)';
+    ? 'var(--warning)'
+    : 'var(--critical)';
 
   const iconColor = isAccepted
     ? 'var(--success-text)'
@@ -89,25 +76,25 @@ export const VerdictCard: React.FC = () => {
       transition={{ duration: 0.25, ease: 'easeOut' }}
       style={{
         backgroundColor: 'var(--surface)',
-        border: `1px solid ${borderColor}`,
-        borderRadius: '0.75rem',
-        padding: '1.5rem 2rem',
-        boxShadow: glowStyle,
+        border: '1px solid var(--border)',
+        borderLeft: `2px solid ${edgeColor}`,
+        borderRadius: '12px',
+        padding: '24px 32px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '1.5rem',
+        gap: '24px',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
         <div
           style={{
-            width: '54px',
-            height: '54px',
+            width: '48px',
+            height: '48px',
             borderRadius: '0.5rem',
-            backgroundColor: iconSurface,
-            border: `1px solid ${borderColor}`,
+            backgroundColor: 'var(--surface-elevated)',
+            border: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -116,46 +103,42 @@ export const VerdictCard: React.FC = () => {
           }}
         >
           {isAccepted ? (
-            <ShieldCheck size={32} />
+            <ShieldCheck size={24} strokeWidth={1.5} />
           ) : isUnderReview ? (
-            <AlertTriangle size={32} />
+            <AlertTriangle size={24} strokeWidth={1.5} />
           ) : (
-            <AlertOctagon size={32} />
+            <AlertOctagon size={24} strokeWidth={1.5} />
           )}
         </div>
 
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span
               style={{
-                fontSize: '0.75rem',
-                fontWeight: 700,
+                fontSize: '12px',
+                fontWeight: 500,
                 color: 'var(--text-muted)',
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
+                letterSpacing: '0.02em',
               }}
-              className="font-mono"
             >
-              INTEGRITY VERDICT
+              Integrity verdict
             </span>
             <Badge
               variant={isAccepted ? 'success' : isUnderReview ? 'warning' : 'critical'}
               size="md"
-              pulse={!isAccepted}
             >
-              {isAccepted ? '✓' : '⚠'} {trustScore.verdict}
+              {trustScore.verdict}
             </Badge>
           </div>
 
           <h2
             style={{
-              fontSize: '1.5rem',
-              fontWeight: 700,
+              fontSize: '1.25rem',
+              fontWeight: 600,
               color: 'var(--text-primary)',
-              letterSpacing: '0.02em',
-              margin: '0.25rem 0',
+              letterSpacing: '-0.01em',
+              margin: '4px 0',
             }}
-            className="font-display"
           >
             {trustScore.headline}
           </h2>
@@ -174,62 +157,62 @@ export const VerdictCard: React.FC = () => {
         </div>
       </div>
 
-      {/* Dynamic Summary Chips */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+      {/* Summary chips — quiet labels, color only where meaningful */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
         {isAccepted ? (
           <>
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 0.875rem',
-                backgroundColor: 'var(--success-surface)',
-                border: '1px solid var(--success-border)',
-                borderRadius: '0.375rem',
-              }}
-            >
-              <CheckCircle2 size={15} style={{ color: 'var(--success-text)' }} />
-              <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--success-text)' }} className="font-mono">
-                0 ANOMALIES DETECTED
-              </span>
-            </div>
-
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 0.875rem',
-                backgroundColor: 'var(--success-surface)',
-                border: '1px solid var(--success-border)',
-                borderRadius: '0.375rem',
-              }}
-            >
-              <ShieldCheck size={15} style={{ color: 'var(--success-text)' }} />
-              <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--success-text)' }} className="font-mono">
-                {trustScore.overall}% BACKEND ASSURANCE SCORE
-              </span>
-            </div>
-
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 0.875rem',
+                gap: '8px',
+                padding: '8px 12px',
                 backgroundColor: 'var(--surface-elevated)',
                 border: '1px solid var(--border)',
                 borderRadius: '0.375rem',
               }}
             >
-              <Activity size={15} style={{ color: 'var(--accent-text)' }} />
-              <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--accent-text)' }} className="font-mono">
+              <CheckCircle2 size={15} strokeWidth={1.5} style={{ color: 'var(--success-text)' }} />
+              <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text-primary)' }}>
+                0 anomalies detected
+              </span>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 12px',
+                backgroundColor: 'var(--surface-elevated)',
+                border: '1px solid var(--border)',
+                borderRadius: '0.375rem',
+              }}
+            >
+              <ShieldCheck size={15} strokeWidth={1.5} style={{ color: 'var(--text-secondary)' }} />
+              <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text-primary)' }}>
+                {trustScore.overall}% assurance score
+              </span>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 12px',
+                backgroundColor: 'var(--surface-elevated)',
+                border: '1px solid var(--border)',
+                borderRadius: '0.375rem',
+              }}
+            >
+              <Activity size={15} strokeWidth={1.5} style={{ color: 'var(--text-secondary)' }} />
+              <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text-primary)' }}>
                 {ledgerVerification?.valid === true
-                  ? `LEDGER VALID (${ledgerVerification.events_checked} EVENTS)`
+                  ? `Ledger valid (${ledgerVerification.events_checked} events)`
                   : ledgerVerification?.valid === false
-                  ? 'LEDGER VERIFICATION FAILED'
-                  : 'LEDGER VERIFICATION UNAVAILABLE'}
+                  ? 'Ledger verification failed'
+                  : 'Ledger verification unavailable'}
               </span>
             </div>
           </>
@@ -239,16 +222,16 @@ export const VerdictCard: React.FC = () => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 0.875rem',
-                backgroundColor: 'var(--critical-surface)',
-                border: '1px solid var(--critical-border)',
+                gap: '8px',
+                padding: '8px 12px',
+                backgroundColor: 'var(--surface-elevated)',
+                border: '1px solid var(--border)',
                 borderRadius: '0.375rem',
               }}
             >
-              <Skull size={15} style={{ color: 'var(--critical-text)' }} />
-              <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--critical-text)' }} className="font-mono">
-                {liveMetrics.poisonedSamples} POISONED SAMPLES
+              <Skull size={15} strokeWidth={1.5} style={{ color: 'var(--critical-text)' }} />
+              <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text-primary)' }}>
+                {liveMetrics.poisonedSamples} poisoned samples
               </span>
             </div>
 
@@ -256,16 +239,16 @@ export const VerdictCard: React.FC = () => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 0.875rem',
-                backgroundColor: 'var(--critical-surface)',
-                border: '1px solid var(--critical-border)',
+                gap: '8px',
+                padding: '8px 12px',
+                backgroundColor: 'var(--surface-elevated)',
+                border: '1px solid var(--border)',
                 borderRadius: '0.375rem',
               }}
             >
-              <AlertTriangle size={15} style={{ color: 'var(--critical-text)' }} />
-              <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--critical-text)' }} className="font-mono">
-                {liveMetrics.modelAnomalies} MODEL ANOMALIES
+              <AlertTriangle size={15} strokeWidth={1.5} style={{ color: 'var(--critical-text)' }} />
+              <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text-primary)' }}>
+                {liveMetrics.modelAnomalies} model anomalies
               </span>
             </div>
 
@@ -273,16 +256,16 @@ export const VerdictCard: React.FC = () => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 0.875rem',
-                backgroundColor: 'var(--warning-surface)',
-                border: '1px solid var(--warning-border)',
+                gap: '8px',
+                padding: '8px 12px',
+                backgroundColor: 'var(--surface-elevated)',
+                border: '1px solid var(--border)',
                 borderRadius: '0.375rem',
               }}
             >
-              <Activity size={15} style={{ color: 'var(--warning-text)' }} />
-              <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--warning-text)' }} className="font-mono">
-                {liveMetrics.inferenceAnomalies} INFERENCE DEVIATIONS
+              <Activity size={15} strokeWidth={1.5} style={{ color: 'var(--warning-text)' }} />
+              <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text-primary)' }}>
+                {liveMetrics.inferenceAnomalies} inference deviations
               </span>
             </div>
           </>

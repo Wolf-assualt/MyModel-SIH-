@@ -10,20 +10,20 @@ export const PhaseStepper: React.FC = () => {
     {
       id: 'launch',
       stepNum: '01',
-      label: 'PHASE 01 — LAUNCH / UPLOAD',
-      desc: 'Dataset & Model Ingestion',
+      label: 'Launch & Upload',
+      desc: 'Dataset & model ingestion',
     },
     {
       id: 'scan',
       stepNum: '02',
-      label: 'PHASE 02 — SCAN / ANALYZE',
-      desc: '11-Stage Forensic Pipeline',
+      label: 'Scan & Analyze',
+      desc: '13-stage forensic pipeline',
     },
     {
       id: 'results',
       stepNum: '03',
-      label: 'PHASE 03 — RESULTS / EVIDENCE',
-      desc: 'Zero-Trust Verdict & Lineage',
+      label: 'Results & Evidence',
+      desc: 'Verdict, findings & lineage',
     },
   ];
 
@@ -39,8 +39,8 @@ export const PhaseStepper: React.FC = () => {
       style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '1rem',
-        marginBottom: '1.5rem',
+        gap: '12px',
+        marginBottom: '24px',
       }}
     >
       {steps.map(step => {
@@ -58,54 +58,53 @@ export const PhaseStepper: React.FC = () => {
               if (e.key === 'Enter' || e.key === ' ') setPhase(step.id);
             }}
             style={{
-              padding: '0.875rem 1.25rem',
-              backgroundColor: isActive ? 'var(--surface)' : 'var(--surface-elevated)',
+              padding: '12px 20px',
+              backgroundColor: isActive ? 'var(--surface)' : 'transparent',
               borderWidth: '1px',
               borderStyle: 'solid',
-              borderColor: isActive
-                ? 'var(--accent)'
-                : isCompleted
-                ? 'var(--success-border)'
-                : 'var(--border)',
-              borderRadius: '0.5rem',
-              boxShadow: isActive ? 'var(--accent-glow)' : 'none',
+              borderColor: isActive ? 'var(--border-strong)' : 'transparent',
+              borderRadius: '8px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               cursor: 'pointer',
-              transition: 'all 0.2s ease',
+              transition: 'border-color 0.15s ease, background-color 0.15s ease',
             }}
             onMouseEnter={e => {
-              if (!isActive) e.currentTarget.style.borderColor = 'var(--border-strong)';
+              if (!isActive) e.currentTarget.style.borderColor = 'var(--border)';
             }}
             onMouseLeave={e => {
-              if (!isActive) e.currentTarget.style.borderColor = isCompleted ? 'var(--success-border)' : 'var(--border)';
+              if (!isActive) e.currentTarget.style.borderColor = 'transparent';
             }}
           >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span
+                  className="font-mono"
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    color: isActive ? 'var(--accent-text)' : 'var(--text-muted)',
+                  }}
+                >
+                  {step.stepNum}
+                </span>
                 <span
                   style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    color: isActive
-                      ? 'var(--accent-text)'
-                      : isCompleted
-                      ? 'var(--success-text)'
-                      : 'var(--text-muted)',
+                    fontSize: '0.8125rem',
+                    fontWeight: 500,
+                    color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
                   }}
-                  className="font-mono"
                 >
                   {step.label}
                 </span>
               </div>
               <p
                 style={{
-                  fontSize: '0.8125rem',
-                  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                  fontWeight: isActive ? 600 : 500,
-                  marginTop: '0.125rem',
+                  fontSize: '12px',
+                  color: 'var(--text-muted)',
                   margin: 0,
+                  marginTop: '2px',
                 }}
               >
                 {step.desc}
@@ -114,50 +113,27 @@ export const PhaseStepper: React.FC = () => {
 
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {isCompleted ? (
-                <CheckCircle2 size={18} style={{ color: 'var(--success-text)' }} />
+                <CheckCircle2 size={16} strokeWidth={1.5} style={{ color: 'var(--success-text)' }} />
               ) : isActive ? (
-                <div
+                <span
                   style={{
-                    width: '24px',
-                    height: '24px',
+                    width: '10px',
+                    height: '10px',
                     borderRadius: '50%',
-                    backgroundColor: 'var(--accent-surface)',
-                    border: '1px solid var(--accent)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'var(--accent-text)',
+                    backgroundColor: isScanning ? 'var(--accent)' : 'var(--border-strong)',
+                    display: 'inline-block',
                   }}
-                >
-                  <span
-                    style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: 'var(--accent)',
-                      display: 'inline-block',
-                      animation: isScanning ? 'ping-subtle 1.2s infinite ease-in-out' : 'none',
-                    }}
-                  />
-                </div>
+                />
               ) : (
-                <div
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '50%',
-                    backgroundColor: 'var(--surface-active)',
-                    border: '1px solid var(--border)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'var(--text-muted)',
-                    fontSize: '0.6875rem',
-                  }}
+                <span
                   className="font-mono"
+                  style={{
+                    fontSize: '11px',
+                    color: 'var(--text-muted)',
+                  }}
                 >
                   {step.stepNum}
-                </div>
+                </span>
               )}
             </div>
           </div>

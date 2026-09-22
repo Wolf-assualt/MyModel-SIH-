@@ -1,77 +1,88 @@
 import React from 'react';
 import { ShieldAlert, Sun, Moon, Command } from 'lucide-react';
 import { useInvestigation } from '../../state/investigationStore';
-import { Badge } from '../ui/Badge';
 import { BackendStatus } from '../ui/BackendStatus';
 import { CommandPalette } from '../ui/CommandPalette';
 
 export const Header: React.FC = () => {
   const { phase, setPhase, theme, toggleTheme, sessionId, isScanning, backendOnline } = useInvestigation();
 
+  const navItems: Array<{ id: 'launch' | 'scan' | 'results'; num: string; label: string }> = [
+    { id: 'launch', num: '01', label: 'Launch' },
+    { id: 'scan', num: '02', label: 'Scan' },
+    { id: 'results', num: '03', label: 'Results' },
+  ];
+
   return (
     <header
       style={{
-        backgroundColor: 'var(--surface)',
+        backgroundColor: 'var(--bg-primary)',
         borderBottom: '1px solid var(--border)',
         padding: '0.75rem 2rem',
         position: 'sticky',
         top: 0,
         zIndex: 50,
-        backdropFilter: 'blur(12px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: '1.5rem',
+        gap: '24px',
       }}
     >
-      {/* Brand Identity */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+      {/* Brand */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <div
           style={{
-            width: '40px',
-            height: '40px',
+            width: '32px',
+            height: '32px',
             borderRadius: '0.5rem',
-            background: 'linear-gradient(135deg, var(--accent), #1d4ed8)',
+            backgroundColor: 'var(--accent)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: 'var(--accent-glow)',
             color: '#ffffff',
+            flexShrink: 0,
           }}
         >
-          <ShieldAlert size={22} />
+          <ShieldAlert size={16} strokeWidth={1.5} />
         </div>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span
               style={{
-                fontSize: '1.125rem',
-                fontWeight: 700,
-                color: 'var(--accent-text)',
-                letterSpacing: '0.05em',
+                fontSize: '14px',
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+                letterSpacing: '-0.01em',
               }}
-              className="font-mono"
             >
               TRUST-CV
             </span>
-            <Badge variant="accent" size="sm">
-              DEFENSE SOC
-            </Badge>
             <span
               style={{
-                fontSize: '0.75rem',
+                fontSize: '11px',
+                fontWeight: 500,
+                color: 'var(--text-muted)',
+                border: '1px solid var(--border)',
+                borderRadius: '999px',
+                padding: '1px 8px',
+              }}
+            >
+              SOC
+            </span>
+            <span
+              className="font-mono"
+              style={{
+                fontSize: '11px',
                 color: 'var(--text-muted)',
               }}
-              className="font-mono"
             >
               {sessionId}
             </span>
           </div>
           <p
             style={{
-              fontSize: '0.75rem',
-              color: 'var(--text-tertiary)',
-              letterSpacing: '-0.01em',
+              fontSize: '12px',
+              color: 'var(--text-muted)',
               margin: 0,
             }}
           >
@@ -80,156 +91,108 @@ export const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Center: Phase Navigation Bar */}
+      {/* Center: Phase Navigation */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          backgroundColor: 'var(--surface-elevated)',
+          backgroundColor: 'var(--surface)',
           border: '1px solid var(--border)',
           borderRadius: '0.5rem',
-          padding: '0.25rem',
-          gap: '0.25rem',
+          padding: '2px',
+          gap: '2px',
         }}
       >
-        <button
-          onClick={() => setPhase('launch')}
-          style={{
-            padding: '0.375rem 0.875rem',
-            borderRadius: '0.375rem',
-            border: 'none',
-            fontSize: '0.8125rem',
-            fontWeight: phase === 'launch' ? 600 : 500,
-            backgroundColor: phase === 'launch' ? 'var(--accent-surface)' : 'transparent',
-            color: phase === 'launch' ? 'var(--accent-text)' : 'var(--text-secondary)',
-            cursor: 'pointer',
-            transition: 'all 0.15s ease',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.375rem',
-          }}
-          className="font-mono"
-        >
-          <span style={{ opacity: 0.6 }}>01</span> LAUNCH
-        </button>
-
-        <span style={{ color: 'var(--border-strong)', fontSize: '0.75rem' }}>/</span>
-
-        <button
-          onClick={() => setPhase('scan')}
-          style={{
-            padding: '0.375rem 0.875rem',
-            borderRadius: '0.375rem',
-            border: 'none',
-            fontSize: '0.8125rem',
-            fontWeight: phase === 'scan' ? 600 : 500,
-            backgroundColor: phase === 'scan' ? 'var(--accent-surface)' : 'transparent',
-            color: phase === 'scan' ? 'var(--accent-text)' : 'var(--text-secondary)',
-            cursor: 'pointer',
-            transition: 'all 0.15s ease',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.375rem',
-          }}
-          className="font-mono"
-        >
-          <span style={{ opacity: 0.6 }}>02</span> SCAN
-          {isScanning && (
-            <span
+        {navItems.map((item, i) => (
+          <React.Fragment key={item.id}>
+            {i > 0 && <span style={{ color: 'var(--border-strong)', fontSize: '12px' }}>/</span>}
+            <button
+              onClick={() => setPhase(item.id)}
               style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--accent)',
-                display: 'inline-block',
-                animation: 'ping-subtle 1.2s infinite ease-in-out',
+                padding: '0.375rem 0.875rem',
+                borderRadius: '0.375rem',
+                border: 'none',
+                fontSize: '0.8125rem',
+                fontWeight: phase === item.id ? 500 : 400,
+                backgroundColor: phase === item.id ? 'var(--accent-surface)' : 'transparent',
+                color: phase === item.id ? 'var(--accent-text)' : 'var(--text-secondary)',
+                cursor: 'pointer',
+                transition: 'color 0.15s ease, background-color 0.15s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
               }}
-            />
-          )}
-        </button>
-
-        <span style={{ color: 'var(--border-strong)', fontSize: '0.75rem' }}>/</span>
-
-        <button
-          onClick={() => setPhase('results')}
-          style={{
-            padding: '0.375rem 0.875rem',
-            borderRadius: '0.375rem',
-            border: 'none',
-            fontSize: '0.8125rem',
-            fontWeight: phase === 'results' ? 600 : 500,
-            backgroundColor: phase === 'results' ? 'var(--accent-surface)' : 'transparent',
-            color: phase === 'results' ? 'var(--accent-text)' : 'var(--text-secondary)',
-            cursor: 'pointer',
-            transition: 'all 0.15s ease',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.375rem',
-          }}
-          className="font-mono"
-        >
-          <span style={{ opacity: 0.6 }}>03</span> RESULTS
-        </button>
+            >
+              <span style={{ opacity: 0.5 }} className="font-mono">{item.num}</span> {item.label}
+              {item.id === 'scan' && isScanning && (
+                <span
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    backgroundColor: 'var(--accent)',
+                    display: 'inline-block',
+                  }}
+                />
+              )}
+            </button>
+          </React.Fragment>
+        ))}
       </div>
 
-      {/* Right Controls: Air-Gap Indicator + Theme Switcher */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        {/* Backend Status Indicator */}
+      {/* Right Controls */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <BackendStatus online={backendOnline} />
 
-        {/* Command Palette Trigger */}
         <button
           onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem',
+            gap: '6px',
             padding: '0.45rem 0.75rem',
-            backgroundColor: 'var(--surface-elevated)',
+            backgroundColor: 'var(--surface)',
             border: '1px solid var(--border)',
             borderRadius: '0.375rem',
             color: 'var(--text-secondary)',
             cursor: 'pointer',
-            fontSize: '0.75rem',
-            transition: 'all 0.2s ease',
+            fontSize: '12px',
+            transition: 'border-color 0.15s ease, color 0.15s ease',
           }}
-          className="font-mono"
           aria-label="Open command palette"
           title="Open command palette (⌘K)"
         >
-          <Command size={14} style={{ color: 'var(--accent-text)' }} />
-          <span>⌘K</span>
+          <Command size={14} strokeWidth={1.5} />
+          <span className="font-mono">⌘K</span>
         </button>
 
-        {/* Theme Toggle Button */}
         <button
           onClick={toggleTheme}
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem',
+            gap: '6px',
             padding: '0.45rem 0.75rem',
-            backgroundColor: 'var(--surface-elevated)',
+            backgroundColor: 'var(--surface)',
             border: '1px solid var(--border)',
             borderRadius: '0.375rem',
-            color: 'var(--text-primary)',
+            color: 'var(--text-secondary)',
             cursor: 'pointer',
-            fontSize: '0.8125rem',
-            transition: 'all 0.2s ease',
+            fontSize: '12px',
+            transition: 'border-color 0.15s ease, color 0.15s ease',
           }}
-          className="font-mono"
           aria-label="Toggle Light and Dark Theme"
-          title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
         >
           {theme === 'dark' ? (
             <>
-              <Sun size={15} style={{ color: '#fbbf24' }} />
-              <span style={{ fontWeight: 600 }}>LIGHT</span>
+              <Sun size={14} strokeWidth={1.5} />
+              <span style={{ fontWeight: 500 }}>Light</span>
             </>
           ) : (
             <>
-              <Moon size={15} style={{ color: '#0284c7' }} />
-              <span style={{ fontWeight: 600 }}>DARK</span>
+              <Moon size={14} strokeWidth={1.5} />
+              <span style={{ fontWeight: 500 }}>Dark</span>
             </>
           )}
         </button>

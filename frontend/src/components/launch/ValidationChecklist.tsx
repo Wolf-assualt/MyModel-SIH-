@@ -63,15 +63,14 @@ export const ValidationChecklist: React.FC = () => {
   return (
     <div
       style={{
-        marginTop: '1rem',
+        marginTop: '16px',
         backgroundColor: 'var(--surface)',
         border: '1px solid var(--border)',
-        borderRadius: '0.75rem',
-        padding: '1.75rem 2rem',
-        boxShadow: isReadyToScan ? 'var(--accent-glow)' : 'var(--card-shadow)',
+        borderRadius: '12px',
+        padding: '24px 32px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '1.5rem',
+        gap: '24px',
       }}
     >
       <div
@@ -80,30 +79,29 @@ export const ValidationChecklist: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
-          gap: '1rem',
+          gap: '16px',
           borderBottom: '1px solid var(--border-subtle)',
-          paddingBottom: '1rem',
+          paddingBottom: '16px',
         }}
       >
         <div>
           <h2
             style={{
-              fontSize: '1.125rem',
-              fontWeight: 700,
+              fontSize: '16px',
+              fontWeight: 600,
               color: 'var(--text-primary)',
-              letterSpacing: '0.04em',
+              letterSpacing: '-0.01em',
               margin: 0,
             }}
-            className="font-display"
           >
             Pre-Scan Forensic Validation
           </h2>
           <p
             style={{
-              fontSize: '0.8125rem',
+              fontSize: '13px',
               color: 'var(--text-secondary)',
-              marginTop: '0.25rem',
-              margin: 0,
+              marginTop: '4px',
+              margin: '4px 0 0 0',
             }}
           >
             {isReadyToScan
@@ -112,12 +110,12 @@ export const ValidationChecklist: React.FC = () => {
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <Button
             variant="ghost"
             size="sm"
             onClick={clearArtifacts}
-            icon={<RotateCcw size={14} />}
+            icon={<RotateCcw size={14} strokeWidth={1.5} />}
           >
             Reset
           </Button>
@@ -129,7 +127,7 @@ export const ValidationChecklist: React.FC = () => {
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '0.875rem',
+          gap: '12px',
         }}
       >
         {checklistItems.map((item) => (
@@ -138,10 +136,10 @@ export const ValidationChecklist: React.FC = () => {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.625rem 0.875rem',
-              backgroundColor: item.checked ? 'var(--success-surface)' : 'var(--surface-elevated)',
-              border: `1px solid ${item.checked ? 'var(--success-border)' : 'var(--border)'}`,
+              gap: '12px',
+              padding: '12px',
+              backgroundColor: 'var(--surface-elevated)',
+              border: '1px solid var(--border)',
               borderRadius: '0.375rem',
               userSelect: 'none',
             }}
@@ -155,19 +153,19 @@ export const ValidationChecklist: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#ffffff',
+                color: '#0B0C0F',
                 flexShrink: 0,
               }}
             >
               {item.checked ? (
-                <Check size={12} strokeWidth={3} />
+                <Check size={12} strokeWidth={2} />
               ) : (
                 <span
                   style={{
                     width: '4px',
                     height: '4px',
                     borderRadius: '50%',
-                    background: 'currentColor',
+                    background: 'var(--bg-primary)',
                   }}
                 />
               )}
@@ -176,9 +174,8 @@ export const ValidationChecklist: React.FC = () => {
               style={{
                 fontSize: '0.8125rem',
                 color: item.checked ? 'var(--text-primary)' : 'var(--text-muted)',
-                fontWeight: item.checked ? 600 : 400,
+                fontWeight: item.checked ? 500 : 400,
               }}
-              className="font-mono"
             >
               {item.label}
             </span>
@@ -190,37 +187,38 @@ export const ValidationChecklist: React.FC = () => {
       {scanSession && (
         <div
           style={{
-            padding: '0.625rem 1rem',
+            padding: '12px 16px',
             backgroundColor: 'var(--surface-elevated)',
-            border: '1px solid var(--accent-border)',
+            border: '1px solid var(--border)',
             borderRadius: '0.375rem',
-            fontSize: '0.75rem',
+            fontSize: '12px',
             color: 'var(--text-secondary)',
             display: 'flex',
-            gap: '1.5rem',
+            gap: '24px',
             flexWrap: 'wrap',
           }}
-          className="font-mono"
         >
           <span>
-            <span style={{ color: 'var(--text-muted)' }}>SCAN_ID: </span>
-            <strong style={{ color: 'var(--accent-text)' }}>{scanSession.scan_id}</strong>
+            <span style={{ color: 'var(--text-muted)' }}>Scan ID: </span>
+            <strong className="font-mono" style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{scanSession.scan_id}</strong>
           </span>
           {scanSession.batch_id && (
             <span>
-              <span style={{ color: 'var(--text-muted)' }}>BATCH_ID: </span>
-              <strong style={{ color: 'var(--accent-text)' }}>{scanSession.batch_id}</strong>
+              <span style={{ color: 'var(--text-muted)' }}>Batch ID: </span>
+              <strong className="font-mono" style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{scanSession.batch_id}</strong>
             </span>
           )}
           <span>
-            <span style={{ color: 'var(--text-muted)' }}>STATUS: </span>
+            <span style={{ color: 'var(--text-muted)' }}>Status: </span>
             <strong
               style={{
-                color: scanSession.status === 'COMPLETED'
-                  ? 'var(--success-text)'
-                  : scanSession.status === 'FAILED'
-                  ? 'var(--critical-text)'
-                  : 'var(--accent-text)',
+                fontWeight: 500,
+                color:
+                  scanSession.status === 'COMPLETED'
+                    ? 'var(--success-text)'
+                    : scanSession.status === 'FAILED'
+                    ? 'var(--critical-text)'
+                    : 'var(--text-primary)',
               }}
             >
               {scanSession.status}
@@ -236,19 +234,19 @@ export const ValidationChecklist: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
-          gap: '1rem',
+          gap: '16px',
           borderTop: '1px solid var(--border-subtle)',
-          paddingTop: '1.25rem',
+          paddingTop: '20px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {isReadyToScan ? (
-            <Badge variant="success" size="md" pulse icon={<ShieldCheck size={15} />}>
-              READY TO SCAN
+            <Badge variant="success" size="md" icon={<ShieldCheck size={15} strokeWidth={1.5} />}>
+              Ready to scan
             </Badge>
           ) : (
-            <Badge variant="warning" size="md" icon={<AlertCircle size={15} />}>
-              UPLOAD DATASET FIRST
+            <Badge variant="warning" size="md" icon={<AlertCircle size={15} strokeWidth={1.5} />}>
+              Upload dataset first
             </Badge>
           )}
           <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
@@ -264,10 +262,10 @@ export const ValidationChecklist: React.FC = () => {
             size="lg"
             onClick={startScan}
             disabled={!isReadyToScan}
-            iconRight={<ArrowRight size={18} />}
+            iconRight={<ArrowRight size={16} strokeWidth={1.5} />}
             style={{ minWidth: '280px' }}
           >
-            {isReadyToScan ? 'MONITOR ASSURANCE PIPELINE →' : 'UPLOAD DATASET TO ENABLE SCAN'}
+            {isReadyToScan ? 'Monitor Assurance Pipeline' : 'Upload Dataset to Enable Scan'}
           </Button>
         </div>
       </div>

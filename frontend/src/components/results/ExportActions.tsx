@@ -33,18 +33,16 @@ export const ExportActions: React.FC = () => {
       <div>
         <h4
           style={{
-            fontSize: '1rem',
-            fontWeight: 700,
+            fontSize: '15px',
+            fontWeight: 600,
             color: 'var(--text-primary)',
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
+            letterSpacing: '-0.01em',
             margin: 0,
           }}
-          className="font-display"
         >
           Forensic Report & Evidence Preservation
         </h4>
-        <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', margin: '0.25rem 0 0 0' }}>
+        <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
           Export certified forensic audits or initialize a new zero-trust computer vision investigation.
         </p>
 
@@ -58,16 +56,15 @@ export const ExportActions: React.FC = () => {
               gap: '0.375rem',
               fontSize: '0.75rem',
             }}
-            className="font-mono"
           >
             {reportStatus === 'loading' ? (
               <>
-                <Loader2 size={12} style={{ color: 'var(--accent-text)', animation: 'spin 1s linear infinite' }} />
-                <span style={{ color: 'var(--accent-text)' }}>Sealing report to backend…</span>
+                <Loader2 size={12} strokeWidth={1.5} style={{ color: 'var(--text-secondary)', animation: 'radar-sweep 1s linear infinite' }} />
+                <span style={{ color: 'var(--text-secondary)' }}>Sealing report to backend…</span>
               </>
             ) : (
               <>
-                <CheckCircle2 size={12} style={{ color: 'var(--success-text)' }} />
+                <CheckCircle2 size={12} strokeWidth={1.5} style={{ color: 'var(--success-text)' }} />
                 <span style={{ color: 'var(--success-text)' }}>Report sealed to backend ✓</span>
               </>
             )}
@@ -81,7 +78,6 @@ export const ExportActions: React.FC = () => {
               fontSize: '0.6875rem',
               color: 'var(--text-muted)',
             }}
-            className="font-mono"
           >
             Run a scan first to enable backend report sealing.
           </div>
@@ -94,9 +90,8 @@ export const ExportActions: React.FC = () => {
               fontSize: '0.6875rem',
               color: 'var(--warning-text)',
             }}
-            className="font-mono"
           >
-            AIR-GAPPED MODE — local export only
+            Air-gapped mode — local export only
           </div>
         )}
       </div>
@@ -108,10 +103,10 @@ export const ExportActions: React.FC = () => {
           onClick={handleExportReport}
           icon={
             reportStatus === 'loading'
-              ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+              ? <Loader2 size={16} strokeWidth={1.5} style={{ animation: 'radar-sweep 1s linear infinite' }} />
               : reportStatus === 'done'
-              ? <CheckCircle2 size={16} />
-              : <FileText size={16} />
+              ? <CheckCircle2 size={16} strokeWidth={1.5} />
+              : <FileText size={16} strokeWidth={1.5} />
           }
         >
           {reportStatus === 'done' ? 'EXPORTED ✓' : 'EXPORT REPORT (JSON)'}
@@ -121,18 +116,18 @@ export const ExportActions: React.FC = () => {
           variant="primary"
           size="md"
           onClick={exportEvidencePackage}
-          icon={<ShieldCheck size={16} />}
+          icon={<ShieldCheck size={16} strokeWidth={1.5} />}
         >
-          EXPORT EVIDENCE (.SIG)
+          Export Evidence (.sig)
         </Button>
 
         <Button
           variant="secondary"
           size="md"
           onClick={resetInvestigation}
-          icon={<RotateCcw size={16} />}
+          icon={<RotateCcw size={16} strokeWidth={1.5} />}
         >
-          NEW INVESTIGATION
+          New Investigation
         </Button>
       </div>
     </div>

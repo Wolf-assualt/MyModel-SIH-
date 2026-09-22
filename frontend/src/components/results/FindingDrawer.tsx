@@ -71,14 +71,12 @@ export const FindingDrawer: React.FC = () => {
         >
           <h4
             style={{
-              fontSize: '0.8125rem',
-              fontWeight: 700,
+              fontSize: '12px',
+              fontWeight: 500,
               color: 'var(--text-muted)',
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-              margin: '0 0 0.5rem 0',
+              letterSpacing: '0.02em',
+              margin: '0 0 8px 0',
             }}
-            className="font-mono"
           >
             Forensic Evidence Summary
           </h4>
@@ -103,10 +101,10 @@ export const FindingDrawer: React.FC = () => {
               padding: '0.875rem 1rem',
             }}
           >
-            <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }} className="font-mono">
-              AFFECTED ARTIFACT
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.02em' }}>
+              Affected artifact
             </span>
-            <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '0.25rem' }} className="font-mono">
+            <div style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text-primary)', marginTop: '4px' }} className="font-mono">
               {selectedFinding.affectedArtifact}
             </div>
           </div>
@@ -119,10 +117,10 @@ export const FindingDrawer: React.FC = () => {
               padding: '0.875rem 1rem',
             }}
           >
-            <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }} className="font-mono">
-              DETECTION METHOD
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.02em' }}>
+              Detection method
             </span>
-            <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '0.25rem' }} className="font-mono">
+            <div style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text-primary)', marginTop: '4px' }} className="font-mono">
               {selectedFinding.detectionMethod}
             </div>
           </div>
@@ -144,10 +142,10 @@ export const FindingDrawer: React.FC = () => {
               padding: '0.875rem 1rem',
             }}
           >
-            <span style={{ fontSize: '0.6875rem', color: 'var(--success-text)', fontWeight: 600 }} className="font-mono">
-              EXPECTED BASELINE VALUE
+            <span style={{ fontSize: '11px', color: 'var(--success-text)', fontWeight: 500 }}>
+              Expected baseline value
             </span>
-            <div style={{ fontSize: '0.8125rem', color: 'var(--text-primary)', marginTop: '0.25rem' }} className="font-mono">
+            <div style={{ fontSize: '0.8125rem', color: 'var(--text-primary)', marginTop: '4px' }} className="font-mono">
               {selectedFinding.expectedValue}
             </div>
           </div>
@@ -160,10 +158,10 @@ export const FindingDrawer: React.FC = () => {
               padding: '0.875rem 1rem',
             }}
           >
-            <span style={{ fontSize: '0.6875rem', color: 'var(--critical-text)', fontWeight: 600 }} className="font-mono">
-              OBSERVED ANOMALY VALUE
+            <span style={{ fontSize: '11px', color: 'var(--critical-text)', fontWeight: 500 }}>
+              Observed anomaly value
             </span>
-            <div style={{ fontSize: '0.8125rem', color: 'var(--critical-text)', fontWeight: 600, marginTop: '0.25rem' }} className="font-mono">
+            <div style={{ fontSize: '0.8125rem', color: 'var(--critical-text)', fontWeight: 500, marginTop: '4px' }} className="font-mono">
               {selectedFinding.observedValue}
             </div>
           </div>
@@ -179,8 +177,8 @@ export const FindingDrawer: React.FC = () => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.375rem' }}>
-            <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }} className="font-mono">
-              CRYPTOGRAPHIC EVIDENCE SHA-256 DIGEST
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.02em' }}>
+              Cryptographic evidence SHA-256 digest
             </span>
             <button
               onClick={handleCopyHash}
@@ -189,14 +187,13 @@ export const FindingDrawer: React.FC = () => {
                 border: 'none',
                 color: 'var(--accent-text)',
                 cursor: 'pointer',
-                fontSize: '0.6875rem',
+                fontSize: '11px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.25rem',
+                gap: '4px',
               }}
-              className="font-mono"
             >
-              <Copy size={11} /> COPY
+              <Copy size={11} strokeWidth={1.5} /> Copy
             </button>
           </div>
           <div
@@ -224,8 +221,8 @@ export const FindingDrawer: React.FC = () => {
             padding: '1rem 1.25rem',
           }}
         >
-          <span style={{ fontSize: '0.6875rem', color: 'var(--warning-text)', fontWeight: 700 }} className="font-mono">
-            RECOMMENDED FORENSIC MITIGATION
+          <span style={{ fontSize: '11px', color: 'var(--warning-text)', fontWeight: 500 }}>
+            Recommended forensic mitigation
           </span>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-primary)', margin: '0.375rem 0 0 0', lineHeight: 1.5 }}>
             {selectedFinding.recommendedAction}

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Bar, BarChart, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { Activity } from 'lucide-react';
 
 /**
  * End-to-end verification latency distribution measured by
@@ -25,11 +24,10 @@ export const LatencyHistogram: React.FC = () => {
     <div
       className="glass-card"
       style={{
-        borderRadius: '0.625rem',
-        padding: '1rem 1.25rem',
+        padding: '20px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '0.5rem',
+        gap: '12px',
       }}
     >
       <div
@@ -37,36 +35,24 @@ export const LatencyHistogram: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '0.75rem',
+          gap: '12px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Activity size={15} style={{ color: 'var(--accent-text)' }} />
-          <span
-            className="font-mono"
-            style={{
-              fontSize: '0.6875rem',
-              fontWeight: 700,
-              letterSpacing: '0.08em',
-              color: 'var(--text-secondary)',
-            }}
-          >
-            VERIFICATION LATENCY DISTRIBUTION
-          </span>
-        </div>
+        <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+          Verification latency distribution
+        </h3>
         <span
           className="font-mono"
           style={{
-            fontSize: '0.6875rem',
-            fontWeight: 700,
-            color: 'var(--success-text)',
-            padding: '0.125rem 0.5rem',
-            border: '1px solid var(--success-border)',
+            fontSize: '11px',
+            color: 'var(--text-secondary)',
+            padding: '2px 8px',
+            border: '1px solid var(--border)',
             borderRadius: '999px',
-            backgroundColor: 'var(--success-surface)',
+            backgroundColor: 'var(--surface-elevated)',
           }}
         >
-          p95 = {P95_MS}ms &lt; {TARGET_MS}ms TARGET
+          p95 {P95_MS}ms · target {TARGET_MS}ms
         </span>
       </div>
 
@@ -75,62 +61,51 @@ export const LatencyHistogram: React.FC = () => {
           <BarChart data={BINS} margin={{ top: 4, right: 4, bottom: 0, left: -28 }}>
             <XAxis
               dataKey="range"
-              tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'JetBrains Mono' }}
+              tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'Inter, sans-serif' }}
               axisLine={{ stroke: 'var(--border)' }}
               tickLine={false}
             />
             <YAxis
-              tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'JetBrains Mono' }}
+              tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'Inter, sans-serif' }}
               axisLine={false}
               tickLine={false}
             />
             <Tooltip
-              cursor={{ fill: 'var(--accent-surface)' }}
+              cursor={{ fill: 'var(--surface-hover)' }}
               contentStyle={{
                 backgroundColor: 'var(--surface-elevated)',
                 border: '1px solid var(--border-strong)',
                 borderRadius: '0.375rem',
                 fontSize: '0.75rem',
-                fontFamily: 'JetBrains Mono',
                 color: 'var(--text-primary)',
               }}
               formatter={((value: unknown) => [`${value} runs`, 'Latency bin']) as never}
             />
-            <Bar dataKey="count" radius={[3, 3, 0, 0]} maxBarSize={36}>
+            <Bar dataKey="count" radius={[2, 2, 0, 0]} maxBarSize={36}>
               {BINS.map((bin, i) => (
                 <Cell
                   key={bin.range}
-                  fill={
-                    bin.overTarget
-                      ? 'var(--warning)'
-                      : i === 2
-                      ? 'var(--accent)'
-                      : 'rgba(0, 229, 255, 0.35)'
-                  }
+                  fill={i === 2 ? 'var(--accent)' : 'var(--surface-active)'}
                 />
               ))}
             </Bar>
             <ReferenceLine
               x="29–32"
-              stroke="var(--accent)"
+              stroke="var(--accent-text)"
               strokeDasharray="3 3"
               label={{
                 value: 'p95',
                 position: 'insideTopRight',
-                fill: 'var(--accent-text)',
+                fill: 'var(--text-secondary)',
                 fontSize: 10,
-                fontFamily: 'JetBrains Mono',
               }}
             />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      <span
-        className="font-mono"
-        style={{ fontSize: '0.5625rem', color: 'var(--text-muted)', letterSpacing: '0.04em' }}
-      >
-        SOURCE: backend/tests/benchmark_latency.py — 100 END-TO-END RUNS (WARM-UP EXCLUDED)
+      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+        Source: <span className="font-mono">backend/tests/benchmark_latency.py</span> — 100 end-to-end runs (warm-up excluded)
       </span>
     </div>
   );

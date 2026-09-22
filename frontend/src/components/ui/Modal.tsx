@@ -40,12 +40,11 @@ export const Modal: React.FC<ModalProps> = ({
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        backgroundColor: 'rgba(3, 7, 18, 0.75)',
-        backdropFilter: 'blur(6px)',
+        backgroundColor: 'rgba(5, 6, 8, 0.6)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '1.5rem',
+        padding: '24px',
       }}
       onClick={onClose}
     >
@@ -55,22 +54,20 @@ export const Modal: React.FC<ModalProps> = ({
           maxWidth,
           backgroundColor: 'var(--surface)',
           border: '1px solid var(--border-strong)',
-          borderRadius: '0.75rem',
+          borderRadius: '12px',
           boxShadow: 'var(--card-shadow-hover)',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
           maxHeight: '90vh',
-          animation: 'modal-appear 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div
           style={{
-            padding: '1.25rem 1.5rem',
+            padding: '20px',
             borderBottom: '1px solid var(--border)',
-            backgroundColor: 'var(--surface-elevated)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -79,22 +76,21 @@ export const Modal: React.FC<ModalProps> = ({
           <div>
             <h2
               style={{
-                fontSize: '1.125rem',
+                fontSize: '15px',
                 fontWeight: 600,
                 color: 'var(--text-primary)',
-                letterSpacing: '0.03em',
+                letterSpacing: '-0.01em',
                 margin: 0,
               }}
-              className="font-display"
             >
               {title}
             </h2>
             {subtitle && (
               <p
                 style={{
-                  fontSize: '0.8125rem',
+                  fontSize: '13px',
                   color: 'var(--text-muted)',
-                  marginTop: '0.25rem',
+                  marginTop: '4px',
                   margin: 0,
                 }}
               >
@@ -118,14 +114,14 @@ export const Modal: React.FC<ModalProps> = ({
             }}
             aria-label="Close dialog"
           >
-            <X size={18} />
+            <X size={16} strokeWidth={1.5} />
           </button>
         </div>
 
         {/* Content */}
         <div
           style={{
-            padding: '1.5rem',
+            padding: '24px',
             overflowY: 'auto',
             flex: 1,
             color: 'var(--text-primary)',

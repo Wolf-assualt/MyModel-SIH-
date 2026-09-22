@@ -23,13 +23,12 @@ export const BackendErrorBanner: React.FC = () => {
         padding: '1rem 1.25rem',
       }}
     >
-      <AlertOctagon size={18} style={{ color: 'var(--critical-text)', flexShrink: 0, marginTop: '2px' }} />
+      <AlertOctagon size={18} strokeWidth={1.5} style={{ color: 'var(--critical-text)', flexShrink: 0, marginTop: '2px' }} />
       <div>
         <div
-          style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--critical-text)', letterSpacing: '0.04em' }}
-          className="font-mono"
+          style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--critical-text)' }}
         >
-          BACKEND REPORTED AN ERROR
+          Backend reported an error
         </div>
         <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.25rem', lineHeight: 1.5 }}>
           {backendError}

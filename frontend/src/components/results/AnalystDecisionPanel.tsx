@@ -75,10 +75,9 @@ export const AnalystDecisionPanel: React.FC = () => {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <UserCheck size={18} style={{ color: 'var(--accent-text)' }} />
+          <UserCheck size={16} strokeWidth={1.5} style={{ color: 'var(--text-muted)' }} />
           <h3
-            style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.04em', textTransform: 'uppercase', margin: 0 }}
-            className="font-display"
+            style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.01em', margin: 0 }}
           >
             Analyst Disposition (Human Decision)
           </h3>
@@ -115,8 +114,8 @@ export const AnalystDecisionPanel: React.FC = () => {
         <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
             <div>
-              <label htmlFor="analyst-actor" style={{ display: 'block', fontSize: '0.6875rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }} className="font-mono">
-                ANALYST IDENTITY
+              <label htmlFor="analyst-actor" style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', letterSpacing: '0.02em' }}>
+                Analyst identity
               </label>
               <input
                 id="analyst-actor"
@@ -132,8 +131,8 @@ export const AnalystDecisionPanel: React.FC = () => {
               />
             </div>
             <div>
-              <label htmlFor="analyst-reason" style={{ display: 'block', fontSize: '0.6875rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }} className="font-mono">
-                JUSTIFICATION (OPTIONAL)
+              <label htmlFor="analyst-reason" style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', letterSpacing: '0.02em' }}>
+                Justification (optional)
               </label>
               <input
                 id="analyst-reason"
@@ -191,7 +190,7 @@ export const AnalystDecisionPanel: React.FC = () => {
           }}
           className="font-mono"
         >
-          <span style={{ color: 'var(--text-muted)' }}>LATEST RECORDED LEDGER EVENT (backend-confirmed)</span>
+          <span style={{ color: 'var(--text-muted)' }}>Latest recorded ledger event (backend-confirmed)</span>
           <span>decision payload seq: {latest.sequence}</span>
           <span>actor: {latest.actor}</span>
           <span>entity_id: {latest.entity_id}</span>

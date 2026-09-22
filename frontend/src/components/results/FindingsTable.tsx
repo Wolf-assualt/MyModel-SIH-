@@ -53,16 +53,16 @@ export const FindingsTable: React.FC = () => {
   const getSeverityBadge = (severity: Severity) => {
     switch (severity) {
       case 'CRITICAL':
-        return <Badge variant="critical" size="sm">CRITICAL</Badge>;
+        return <Badge variant="critical" size="sm">Critical</Badge>;
       case 'HIGH':
-        return <Badge variant="danger" size="sm">HIGH</Badge>;
+        return <Badge variant="danger" size="sm">High</Badge>;
       case 'WARNING':
       case 'MEDIUM':
-        return <Badge variant="warning" size="sm">WARNING</Badge>;
+        return <Badge variant="warning" size="sm">Warning</Badge>;
       case 'LOW':
       case 'INFO':
       default:
-        return <Badge variant="info" size="sm">INFO</Badge>;
+        return <Badge variant="info" size="sm">Info</Badge>;
     }
   };
 
@@ -71,12 +71,11 @@ export const FindingsTable: React.FC = () => {
       style={{
         backgroundColor: 'var(--surface)',
         border: '1px solid var(--border)',
-        borderRadius: '0.625rem',
-        padding: '1.5rem',
-        boxShadow: 'var(--card-shadow)',
+        borderRadius: '12px',
+        padding: '24px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '1.25rem',
+        gap: '20px',
       }}
     >
       {/* Header with Title & Search */}
@@ -86,45 +85,43 @@ export const FindingsTable: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
-          gap: '1rem',
+          gap: '16px',
           borderBottom: '1px solid var(--border-subtle)',
-          paddingBottom: '1rem',
+          paddingBottom: '16px',
         }}
       >
         <div>
           <h3
             style={{
-              fontSize: '1.125rem',
-              fontWeight: 700,
+              fontSize: '16px',
+              fontWeight: 600,
               color: 'var(--text-primary)',
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
+              letterSpacing: '-0.01em',
               margin: 0,
             }}
-            className="font-display"
           >
             Forensic Findings & Evidence Log
           </h3>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
             Showing {filteredFindings.length} of {findings.length} total integrity findings
           </p>
         </div>
 
         {/* Search & Severity Filter Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           {/* Search Box */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
+              gap: '8px',
               backgroundColor: 'var(--surface-elevated)',
               border: '1px solid var(--border)',
               borderRadius: '0.375rem',
               padding: '0.375rem 0.75rem',
             }}
           >
-            <Search size={14} style={{ color: 'var(--text-muted)' }} />
+            <Search size={14} strokeWidth={1.5} style={{ color: 'var(--text-muted)' }} />
             <input
               type="text"
               placeholder="Search findings, samples, hashes..."
@@ -138,7 +135,6 @@ export const FindingsTable: React.FC = () => {
                 fontSize: '0.8125rem',
                 width: '210px',
               }}
-              className="font-mono"
             />
           </div>
 
@@ -156,7 +152,6 @@ export const FindingsTable: React.FC = () => {
               outline: 'none',
               cursor: 'pointer',
             }}
-            className="font-mono"
           >
             <option value="ALL">All Severities</option>
             <option value="CRITICAL">Critical</option>
@@ -170,9 +165,9 @@ export const FindingsTable: React.FC = () => {
       <div
         style={{
           display: 'flex',
-          gap: '0.375rem',
+          gap: '6px',
           overflowX: 'auto',
-          paddingBottom: '0.25rem',
+          paddingBottom: '4px',
         }}
       >
         {categories.map(cat => {
@@ -188,18 +183,17 @@ export const FindingsTable: React.FC = () => {
               onClick={() => setSelectedCategory(cat)}
               style={{
                 padding: '0.375rem 0.75rem',
-                fontSize: '0.75rem',
-                fontWeight: isSelected ? 600 : 500,
+                fontSize: '12px',
+                fontWeight: isSelected ? 500 : 400,
                 border: '1px solid',
-                borderColor: isSelected ? 'var(--accent)' : 'var(--border)',
+                borderColor: isSelected ? 'var(--accent-border)' : 'var(--border)',
                 backgroundColor: isSelected ? 'var(--accent-surface)' : 'var(--surface-elevated)',
                 color: isSelected ? 'var(--accent-text)' : 'var(--text-secondary)',
                 borderRadius: '0.375rem',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
-                transition: 'all 0.15s ease',
+                transition: 'border-color 0.15s ease, color 0.15s ease',
               }}
-              className="font-mono"
             >
               {cat} ({count})
             </button>
@@ -211,16 +205,16 @@ export const FindingsTable: React.FC = () => {
       {findings.length === 0 ? (
         <div
           style={{
-            padding: '3rem 2rem',
+            padding: '48px 32px',
             textAlign: 'center',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '0.75rem',
+            gap: '12px',
             backgroundColor: 'var(--surface-elevated)',
-            borderRadius: '0.5rem',
-            border: '1px solid var(--success-border)',
+            borderRadius: '8px',
+            border: '1px solid var(--border)',
           }}
         >
           <div
@@ -228,30 +222,30 @@ export const FindingsTable: React.FC = () => {
               width: '48px',
               height: '48px',
               borderRadius: '50%',
-              backgroundColor: 'var(--success-surface)',
+              backgroundColor: 'var(--surface)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'var(--success-text)',
             }}
           >
-            <ShieldCheck size={28} />
+            <ShieldCheck size={24} strokeWidth={1.5} />
           </div>
-          <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }} className="font-display">
+          <h4 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
             Zero Forensic Vulnerabilities Detected
           </h4>
           <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', maxWidth: '540px', margin: 0, lineHeight: 1.5 }}>
             All cryptographic checksums, latent space embeddings, and neural parameter weights conform to Golden Baseline specifications with zero anomalies.
           </p>
           <Badge variant="success" size="sm">
-            ✓ 100% CLEAN ZERO-TRUST AUDIT
+            100% clean audit
           </Badge>
         </div>
       ) : (
         <div
           style={{
             border: '1px solid var(--border)',
-            borderRadius: '0.5rem',
+            borderRadius: '8px',
             overflow: 'hidden',
           }}
         >
@@ -271,22 +265,21 @@ export const FindingsTable: React.FC = () => {
                     borderBottom: '1px solid var(--border)',
                     color: 'var(--text-muted)',
                   }}
-                  className="font-mono"
                 >
-                  <th style={{ padding: '0.75rem 1rem', width: '110px' }}>SEVERITY</th>
-                  <th style={{ padding: '0.75rem 1rem', width: '130px' }}>ID</th>
-                  <th style={{ padding: '0.75rem 1rem' }}>FINDING</th>
-                  <th style={{ padding: '0.75rem 1rem', width: '130px' }}>CATEGORY</th>
-                  <th style={{ padding: '0.75rem 1rem' }}>AFFECTED ARTIFACT</th>
-                  <th style={{ padding: '0.75rem 1rem', width: '100px' }}>CONFIDENCE</th>
-                  <th style={{ padding: '0.75rem 1rem', width: '100px' }}>STATUS</th>
-                  <th style={{ padding: '0.75rem 1rem', width: '90px', textAlign: 'center' }}>ACTION</th>
+                  <th style={{ padding: '12px 16px', width: '110px', fontSize: '12px', fontWeight: 500 }}>Severity</th>
+                  <th style={{ padding: '12px 16px', width: '130px', fontSize: '12px', fontWeight: 500 }}>ID</th>
+                  <th style={{ padding: '12px 16px', fontSize: '12px', fontWeight: 500 }}>Finding</th>
+                  <th style={{ padding: '12px 16px', width: '130px', fontSize: '12px', fontWeight: 500 }}>Category</th>
+                  <th style={{ padding: '12px 16px', fontSize: '12px', fontWeight: 500 }}>Affected artifact</th>
+                  <th style={{ padding: '12px 16px', width: '100px', fontSize: '12px', fontWeight: 500 }}>Confidence</th>
+                  <th style={{ padding: '12px 16px', width: '100px', fontSize: '12px', fontWeight: 500 }}>Status</th>
+                  <th style={{ padding: '12px 16px', width: '90px', textAlign: 'center', fontSize: '12px', fontWeight: 500 }}>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredFindings.length === 0 ? (
                   <tr>
-                    <td colSpan={8} style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                    <td colSpan={8} style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
                       No findings matching selected category and filter parameters.
                     </td>
                   </tr>
@@ -307,15 +300,15 @@ export const FindingsTable: React.FC = () => {
                         i % 2 === 0 ? 'var(--surface)' : 'var(--surface-elevated)')
                     }
                   >
-                    <td style={{ padding: '0.75rem 1rem' }}>{getSeverityBadge(f.severity)}</td>
-                    <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: 'var(--accent-text)' }} className="font-mono">
+                    <td style={{ padding: '12px 16px' }}>{getSeverityBadge(f.severity)}</td>
+                    <td style={{ padding: '12px 16px', fontWeight: 500, color: 'var(--text-secondary)' }} className="font-mono">
                       {f.id}
                     </td>
-                    <td style={{ padding: '0.75rem 1rem' }}>
-                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{f.title}</div>
+                    <td style={{ padding: '12px 16px' }}>
+                      <div style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{f.title}</div>
                       <div
                         style={{
-                          fontSize: '0.75rem',
+                          fontSize: '12px',
                           color: 'var(--text-muted)',
                           maxWidth: '380px',
                           whiteSpace: 'nowrap',
@@ -326,39 +319,51 @@ export const FindingsTable: React.FC = () => {
                         {f.evidenceSummary}
                       </div>
                     </td>
-                    <td style={{ padding: '0.75rem 1rem' }}>
+                    <td style={{ padding: '12px 16px' }}>
                       <span
                         style={{
-                          fontSize: '0.6875rem',
-                          padding: '2px 6px',
-                          borderRadius: '3px',
-                          backgroundColor: 'var(--surface-active)',
+                          fontSize: '11px',
+                          padding: '2px 8px',
+                          borderRadius: '999px',
+                          backgroundColor: 'var(--surface)',
+                          border: '1px solid var(--border)',
                           color: 'var(--text-secondary)',
                         }}
-                        className="font-mono"
                       >
                         {f.category}
                       </span>
                     </td>
-                    <td style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)' }} className="font-mono">
+                    <td style={{ padding: '12px 16px', color: 'var(--text-secondary)' }} className="font-mono">
                       {f.affectedArtifact}
                     </td>
-                    <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: 'var(--text-primary)' }} className="font-mono">
+                    <td style={{ padding: '12px 16px', fontWeight: 500, color: 'var(--text-primary)' }} className="font-mono">
                       {f.confidence}%
                     </td>
-                    <td style={{ padding: '0.75rem 1rem' }}>
+                    <td style={{ padding: '12px 16px' }}>
                       <span
                         style={{
-                          fontSize: '0.6875rem',
-                          fontWeight: 600,
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
                           color: f.status === 'Confirmed' ? 'var(--critical-text)' : 'var(--warning-text)',
                         }}
-                        className="font-mono"
                       >
-                        ● {f.status}
+                        <span
+                          style={{
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                            backgroundColor: 'currentColor',
+                            display: 'inline-block',
+                          }}
+                          aria-hidden="true"
+                        />
+                        {f.status}
                       </span>
                     </td>
-                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                    <td style={{ padding: '12px 16px', textAlign: 'center' }}>
                       <button
                         onClick={e => {
                           e.stopPropagation();
@@ -373,14 +378,13 @@ export const FindingsTable: React.FC = () => {
                           cursor: 'pointer',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '0.25rem',
-                          fontSize: '0.6875rem',
+                          gap: '4px',
+                          fontSize: '11px',
                         }}
-                        className="font-mono"
                         title="Inspect Finding Evidence"
                       >
-                        <Eye size={12} />
-                        VIEW
+                        <Eye size={12} strokeWidth={1.5} />
+                        View
                       </button>
                     </td>
                   </tr>

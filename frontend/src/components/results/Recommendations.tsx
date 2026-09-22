@@ -53,18 +53,16 @@ export const Recommendations: React.FC = () => {
         <div>
           <h3
             style={{
-              fontSize: '1.125rem',
-              fontWeight: 700,
+              fontSize: '16px',
+              fontWeight: 600,
               color: 'var(--text-primary)',
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
+              letterSpacing: '-0.01em',
               margin: 0,
             }}
-            className="font-display"
           >
             Actionable Forensic Mitigation Playbook
           </h3>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
             Mandatory defense countermeasures required before granting mission operational authorization
           </p>
         </div>
@@ -74,7 +72,7 @@ export const Recommendations: React.FC = () => {
         </Badge>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {recommendations.length === 0 ? (
           <div
             style={{
@@ -100,12 +98,12 @@ export const Recommendations: React.FC = () => {
             <div
               key={rec.id}
               style={{
-                backgroundColor: isExecuted ? 'var(--success-surface)' : 'var(--surface-elevated)',
+                backgroundColor: 'var(--surface-elevated)',
                 borderWidth: '1px',
                 borderStyle: 'solid',
                 borderColor: isExecuted ? 'var(--success-border)' : 'var(--border)',
-                borderRadius: '0.5rem',
-                padding: '1rem 1.25rem',
+                borderRadius: '8px',
+                padding: '16px 20px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -120,7 +118,7 @@ export const Recommendations: React.FC = () => {
                   <h4
                     style={{
                       fontSize: '0.9375rem',
-                      fontWeight: 600,
+                      fontWeight: 500,
                       color: 'var(--text-primary)',
                       margin: 0,
                     }}

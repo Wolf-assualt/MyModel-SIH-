@@ -1,146 +1,132 @@
 /* ==========================================================================
-   TRUST-CV Semantic Design Token System
-   Zero hardcoded black/white text. Defense-grade contrast in both modes.
+   TRUST-CV Design Tokens — restrained dark theme
+   One accent (blue) reserved for primary actions, active nav, focus rings.
+   Status colors are functional and desaturated; used on dots/labels only.
    ========================================================================== */
 
 :root,
 [data-theme="dark"] {
-  /* Surface & Background — premium dark base (0A0B0F) with elevated panels */
-  --bg-primary: #0A0B0F;
-  --bg-secondary: #0e0f15;
-  --bg-tertiary: #12141A;
-  --surface: #12141A;
-  --surface-elevated: #171a21;
-  --surface-hover: #1c202a;
-  --surface-active: #232838;
+  /* Surface & Background */
+  --bg-primary: #0B0C0F;
+  --bg-secondary: #0F1014;
+  --bg-tertiary: #14161B;
+  --surface: #14161B;
+  --surface-elevated: #1A1D24;
+  --surface-hover: #1E2129;
+  --surface-active: #242830;
 
   /* Typography */
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-tertiary: #94a3b8;
-  --text-muted: #64748b;
-  --text-inverse: #030712;
+  --text-primary: #E6E8EB;
+  --text-secondary: #8B909A;
+  --text-tertiary: #6B7079;
+  --text-muted: #5A5F6B;
+  --text-inverse: #FFFFFF;
 
   /* Borders & Dividers */
-  --border: #1F2330;
-  --border-subtle: #191c26;
-  --border-strong: #2e3446;
+  --border: #262932;
+  --border-subtle: #202329;
+  --border-strong: #333741;
 
-  /* Accent (Electric Cyan) — interactive elements only */
-  --accent: #00E5FF;
-  --accent-hover: #33ebff;
-  --accent-surface: rgba(0, 229, 255, 0.1);
-  --accent-border: rgba(0, 229, 255, 0.38);
-  --accent-text: #00E5FF;
-  --accent-glow: 0 0 20px rgba(0, 229, 255, 0.28);
+  /* Single accent — primary CTA, active nav, focus rings only */
+  --accent: #3B82F6;
+  --accent-hover: #2F6FE0;
+  --accent-surface: rgba(59, 130, 246, 0.1);
+  --accent-border: rgba(59, 130, 246, 0.4);
+  --accent-text: #60A5FA;
 
-  /* Status Tokens */
-  --success: #10b981;
-  --success-surface: rgba(16, 185, 129, 0.12);
-  --success-border: rgba(16, 185, 129, 0.4);
-  --success-text: #34d399;
-  --success-glow: 0 0 16px rgba(16, 185, 129, 0.3);
+  /* Status tokens — desaturated, tiny elements only */
+  --success: #10B981;
+  --success-surface: rgba(16, 185, 129, 0.1);
+  --success-border: rgba(16, 185, 129, 0.35);
+  --success-text: #34D399;
 
-  /* Amber reserved for warnings only; red reserved for threats only. */
-  --warning: #FFB020;
-  --warning-surface: rgba(255, 176, 32, 0.12);
-  --warning-border: rgba(255, 176, 32, 0.4);
-  --warning-text: #FFB020;
-  --warning-glow: 0 0 16px rgba(255, 176, 32, 0.25);
+  --warning: #F59E0B;
+  --warning-surface: rgba(245, 158, 11, 0.1);
+  --warning-border: rgba(245, 158, 11, 0.35);
+  --warning-text: #F5B23F;
 
-  --danger: #FF3B5C;
-  --danger-surface: rgba(255, 59, 92, 0.12);
-  --danger-border: rgba(255, 59, 92, 0.4);
-  --danger-text: #FF5C77;
-  --danger-glow: 0 0 16px rgba(255, 59, 92, 0.3);
+  --danger: #EF4444;
+  --danger-surface: rgba(239, 68, 68, 0.1);
+  --danger-border: rgba(239, 68, 68, 0.35);
+  --danger-text: #F87171;
 
-  --critical: #FF3B5C;
-  --critical-surface: rgba(255, 59, 92, 0.15);
-  --critical-border: rgba(255, 59, 92, 0.45);
-  --critical-text: #FF5C77;
-  --critical-glow: 0 0 20px rgba(255, 59, 92, 0.35);
+  --critical: #EF4444;
+  --critical-surface: rgba(239, 68, 68, 0.12);
+  --critical-border: rgba(239, 68, 68, 0.4);
+  --critical-text: #F87171;
 
-  --info: #3b82f6;
-  --info-surface: rgba(59, 130, 246, 0.12);
-  --info-border: rgba(59, 130, 246, 0.4);
-  --info-text: #60a5fa;
+  --info: #3B82F6;
+  --info-surface: rgba(59, 130, 246, 0.1);
+  --info-border: rgba(59, 130, 246, 0.35);
+  --info-text: #60A5FA;
 
-  /* Tactical Elements */
-  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-  --card-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.65);
-  --grid-line: rgba(255, 255, 255, 0.03);
-  --glass-bg: rgba(18, 20, 26, 0.72);
-  --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  --terminal-bg: #07080c;
-  --terminal-border: #1F2330;
-  --terminal-text: #e2e8f0;
+  /* Elevation — subtle neutral shadows only, no colored glows */
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --terminal-bg: #0B0C0F;
+  --terminal-border: #262932;
+  --terminal-text: #D6D9DE;
 }
 
 [data-theme="light"] {
   /* Surface & Background */
-  --bg-primary: #f0f4f8;
-  --bg-secondary: #e2e8f0;
-  --bg-tertiary: #cbd5e1;
+  --bg-primary: #f4f5f7;
+  --bg-secondary: #eceef1;
+  --bg-tertiary: #e3e6ea;
   --surface: #ffffff;
-  --surface-elevated: #f8fafc;
-  --surface-hover: #eef3f8;
-  --surface-active: #e2e8f0;
+  --surface-elevated: #f8f9fa;
+  --surface-hover: #eff1f4;
+  --surface-active: #e4e7eb;
 
   /* Typography */
-  --text-primary: #0a0f1d;
-  --text-secondary: #1e293b;
-  --text-tertiary: #475569;
-  --text-muted: #64748b;
+  --text-primary: #17181B;
+  --text-secondary: #4A4F58;
+  --text-tertiary: #6B7079;
+  --text-muted: #8A8F99;
   --text-inverse: #ffffff;
 
   /* Borders & Dividers */
-  --border: #cbd5e1;
-  --border-subtle: #e2e8f0;
-  --border-strong: #94a3b8;
+  --border: #d9dce1;
+  --border-subtle: #e6e8ec;
+  --border-strong: #c2c6cd;
 
-  /* Accent (Tactical Deep Blue/Cyan) */
-  --accent: #0284c7;
-  --accent-hover: #0369a1;
-  --accent-surface: rgba(2, 132, 199, 0.1);
-  --accent-border: rgba(2, 132, 199, 0.35);
-  --accent-text: #0369a1;
-  --accent-glow: 0 0 16px rgba(2, 132, 199, 0.18);
+  /* Single accent */
+  --accent: #2563EB;
+  --accent-hover: #1D4ED8;
+  --accent-surface: rgba(37, 99, 235, 0.08);
+  --accent-border: rgba(37, 99, 235, 0.35);
+  --accent-text: #1D4ED8;
 
-  /* Status Tokens (WCAG High Contrast in Light Mode) */
+  /* Status tokens (light mode) */
   --success: #059669;
-  --success-surface: rgba(5, 150, 105, 0.12);
-  --success-border: rgba(5, 150, 105, 0.35);
+  --success-surface: rgba(5, 150, 105, 0.08);
+  --success-border: rgba(5, 150, 105, 0.3);
   --success-text: #047857;
-  --success-glow: 0 0 12px rgba(5, 150, 105, 0.15);
 
-  --warning: #d97706;
-  --warning-surface: rgba(217, 119, 6, 0.12);
-  --warning-border: rgba(217, 119, 6, 0.35);
-  --warning-text: #b45309;
-  --warning-glow: 0 0 12px rgba(217, 119, 6, 0.15);
+  --warning: #D97706;
+  --warning-surface: rgba(217, 119, 6, 0.08);
+  --warning-border: rgba(217, 119, 6, 0.3);
+  --warning-text: #B45309;
 
-  --danger: #e11d48;
-  --danger-surface: rgba(225, 29, 72, 0.1);
-  --danger-border: rgba(225, 29, 72, 0.35);
-  --danger-text: #be123c;
-  --danger-glow: 0 0 12px rgba(225, 29, 72, 0.15);
+  --danger: #DC2626;
+  --danger-surface: rgba(220, 38, 38, 0.08);
+  --danger-border: rgba(220, 38, 38, 0.3);
+  --danger-text: #B91C1C;
 
-  --critical: #dc2626;
-  --critical-surface: rgba(220, 38, 38, 0.12);
-  --critical-border: rgba(220, 38, 38, 0.4);
-  --critical-text: #991b1b;
-  --critical-glow: 0 0 16px rgba(220, 38, 38, 0.2);
+  --critical: #DC2626;
+  --critical-surface: rgba(220, 38, 38, 0.08);
+  --critical-border: rgba(220, 38, 38, 0.35);
+  --critical-text: #B91C1C;
 
-  --info: #2563eb;
-  --info-surface: rgba(37, 99, 235, 0.1);
-  --info-border: rgba(37, 99, 235, 0.35);
-  --info-text: #1d4ed8;
+  --info: #2563EB;
+  --info-surface: rgba(37, 99, 235, 0.08);
+  --info-border: rgba(37, 99, 235, 0.3);
+  --info-text: #1D4ED8;
 
-  /* Tactical Elements */
-  --card-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
-  --card-shadow-hover: 0 8px 30px rgba(15, 23, 42, 0.12);
-  --grid-line: rgba(15, 23, 42, 0.04);
-  --terminal-bg: #091122;
-  --terminal-border: #cbd5e1;
-  --terminal-text: #f1f5f9;
+  /* Elevation */
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --terminal-bg: #17181B;
+  --terminal-border: #d9dce1;
+  --terminal-text: #e6e8eb;
 }

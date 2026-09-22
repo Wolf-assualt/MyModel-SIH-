@@ -38,25 +38,24 @@ export const Button: React.FC<ButtonProps> = ({
 
     switch (variant) {
       case 'primary':
+        // Solid single accent. No gradient, no glow.
         return {
           backgroundColor: isHovered ? 'var(--accent-hover)' : 'var(--accent)',
           borderColor: isHovered ? 'var(--accent-hover)' : 'var(--accent)',
           color: 'var(--text-inverse)',
-          boxShadow: isHovered ? 'var(--accent-glow)' : 'none',
-          fontWeight: 600,
+          fontWeight: 500,
         };
       case 'outline':
         return {
           backgroundColor: isHovered ? 'var(--surface-hover)' : 'transparent',
-          borderColor: isHovered ? 'var(--accent)' : 'var(--border)',
-          color: isHovered ? 'var(--accent-text)' : 'var(--text-primary)',
+          borderColor: isHovered ? 'var(--border-strong)' : 'var(--border)',
+          color: 'var(--text-primary)',
         };
       case 'danger':
         return {
-          backgroundColor: isHovered ? 'var(--critical)' : 'var(--critical-surface)',
-          borderColor: 'var(--critical-border)',
-          color: isHovered ? '#ffffff' : 'var(--critical-text)',
-          boxShadow: isHovered ? 'var(--critical-glow)' : 'none',
+          backgroundColor: isHovered ? 'var(--danger)' : 'transparent',
+          borderColor: isHovered ? 'var(--danger)' : 'var(--danger-border)',
+          color: isHovered ? '#ffffff' : 'var(--danger-text)',
         };
       case 'ghost':
         return {
@@ -65,16 +64,18 @@ export const Button: React.FC<ButtonProps> = ({
           color: isHovered ? 'var(--text-primary)' : 'var(--text-secondary)',
         };
       case 'gradient':
-        // Visuals handled by .btn-gradient class (cyan → violet gradient + glow).
+        // Legacy visual variant kept for API compatibility — renders as the
+        // solid primary button (single accent, no gradient, no glow).
         return {
-          borderColor: 'transparent',
-          color: '#05060a',
-          fontWeight: 600,
+          backgroundColor: isHovered ? 'var(--accent-hover)' : 'var(--accent)',
+          borderColor: isHovered ? 'var(--accent-hover)' : 'var(--accent)',
+          color: 'var(--text-inverse)',
+          fontWeight: 500,
         };
       case 'secondary':
       default:
         return {
-          backgroundColor: isHovered ? 'var(--surface-active)' : 'var(--surface-elevated)',
+          backgroundColor: isHovered ? 'var(--surface-hover)' : 'var(--surface-elevated)',
           borderColor: isHovered ? 'var(--border-strong)' : 'var(--border)',
           color: 'var(--text-primary)',
         };
@@ -92,11 +93,10 @@ export const Button: React.FC<ButtonProps> = ({
         };
       case 'lg':
         return {
-          padding: '0.75rem 1.5rem',
-          fontSize: '1rem',
+          padding: '0.625rem 1.25rem',
+          fontSize: '0.9375rem',
           borderRadius: '0.5rem',
-          gap: '0.625rem',
-          letterSpacing: '0.04em',
+          gap: '0.5rem',
         };
       case 'md':
       default:
@@ -126,21 +126,15 @@ export const Button: React.FC<ButtonProps> = ({
         borderWidth: '1px',
         borderStyle: 'solid',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        transition: 'all 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
-        transform: disabled
-          ? 'none'
-          : isActive
-          ? 'scale(0.98)'
-          : isHovered && variant !== 'gradient'
-          ? 'translateY(-1px)'
-          : 'none',
+        transition: 'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease',
+        transform: disabled ? 'none' : isActive ? 'scale(0.99)' : 'none',
         userSelect: 'none',
         whiteSpace: 'nowrap',
         ...getSizeStyles(),
         ...getVariantStyles(),
         ...style,
       }}
-      className={`font-mono font-medium ${variant === 'gradient' ? 'btn-gradient' : ''} ${className}`}
+      className={`font-medium ${className}`}
       {...props}
     >
       {isLoading ? (

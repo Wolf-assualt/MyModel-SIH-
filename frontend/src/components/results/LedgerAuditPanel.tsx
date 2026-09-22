@@ -62,10 +62,9 @@ export const LedgerAuditPanel: React.FC = () => {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Link2 size={18} style={{ color: 'var(--accent-text)' }} />
+          <Link2 size={16} strokeWidth={1.5} style={{ color: 'var(--text-muted)' }} />
           <h3
-            style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.04em', textTransform: 'uppercase', margin: 0 }}
-            className="font-display"
+            style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.01em', margin: 0 }}
           >
             Tamper-Evident Assurance Ledger
           </h3>
@@ -86,18 +85,19 @@ export const LedgerAuditPanel: React.FC = () => {
             size="sm"
             onClick={handleRefresh}
             disabled={busy}
-            icon={busy ? <Loader2 size={13} /> : <RefreshCw size={13} />}
+            icon={busy ? <Loader2 size={13} strokeWidth={1.5} /> : <RefreshCw size={13} strokeWidth={1.5} />}
           >
             {busy ? 'VERIFYING…' : 'RE-VERIFY CHAIN'}
           </Button>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }} className="font-mono">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {rows.map(([label, value]) => (
-          <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', fontSize: '0.75rem' }}>
-            <span style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.6875rem' }}>{label}</span>
+          <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', fontSize: '12px' }}>
+            <span style={{ color: 'var(--text-muted)' }}>{label}</span>
             <span
+              className="font-mono"
               style={{
                 color: value.includes('UNAVAILABLE')
                   ? 'var(--warning-text)'

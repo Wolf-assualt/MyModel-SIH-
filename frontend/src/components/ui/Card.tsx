@@ -1,45 +1,18 @@
 import React from 'react';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Accepted for API compatibility; cards are flat, no glow. */
   glow?: 'accent' | 'critical' | 'warning' | 'success' | 'none';
   interactive?: boolean;
 }
 
 export const Card: React.FC<CardProps> = ({
   children,
-  glow = 'none',
   interactive = false,
   className = '',
   style,
   ...props
 }) => {
-  const getGlowStyles = (): React.CSSProperties => {
-    switch (glow) {
-      case 'accent':
-        return {
-          boxShadow: 'var(--accent-glow)',
-          borderColor: 'var(--accent)',
-        };
-      case 'critical':
-        return {
-          boxShadow: 'var(--critical-glow)',
-          borderColor: 'var(--critical)',
-        };
-      case 'warning':
-        return {
-          boxShadow: 'var(--warning-glow)',
-          borderColor: 'var(--warning)',
-        };
-      case 'success':
-        return {
-          boxShadow: 'var(--success-glow)',
-          borderColor: 'var(--success)',
-        };
-      default:
-        return {};
-    }
-  };
-
   return (
     <div
       style={{
@@ -47,14 +20,12 @@ export const Card: React.FC<CardProps> = ({
         borderColor: 'var(--border)',
         borderWidth: '1px',
         borderStyle: 'solid',
-        borderRadius: '0.625rem',
-        boxShadow: 'var(--card-shadow)',
-        transition: 'border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease',
+        borderRadius: '12px',
+        transition: 'border-color 0.15s ease',
         cursor: interactive ? 'pointer' : 'default',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        ...getGlowStyles(),
         ...style,
       }}
       className={`surface-card ${className}`}
@@ -73,12 +44,12 @@ export const CardHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
 }) => (
   <div
     style={{
-      padding: '1.25rem 1.5rem',
+      padding: '20px',
       borderBottom: '1px solid var(--border-subtle)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      gap: '1rem',
+      gap: '16px',
       ...style,
     }}
     className={className}
@@ -96,15 +67,14 @@ export const CardTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({
 }) => (
   <h3
     style={{
-      fontSize: '1rem',
+      fontSize: '14px',
       fontWeight: 600,
       color: 'var(--text-primary)',
-      letterSpacing: '0.03em',
-      textTransform: 'uppercase',
+      letterSpacing: 0,
       margin: 0,
       ...style,
     }}
-    className={`font-display ${className}`}
+    className={className}
     {...props}
   >
     {children}
@@ -119,9 +89,9 @@ export const CardDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement
 }) => (
   <p
     style={{
-      fontSize: '0.8125rem',
+      fontSize: '13px',
       color: 'var(--text-muted)',
-      marginTop: '0.25rem',
+      marginTop: '4px',
       margin: 0,
       ...style,
     }}
@@ -140,7 +110,7 @@ export const CardContent: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
 }) => (
   <div
     style={{
-      padding: '1.25rem 1.5rem',
+      padding: '20px',
       flex: 1,
       ...style,
     }}
@@ -159,7 +129,7 @@ export const CardFooter: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
 }) => (
   <div
     style={{
-      padding: '1rem 1.5rem',
+      padding: '16px 20px',
       borderTop: '1px solid var(--border-subtle)',
       backgroundColor: 'var(--surface-elevated)',
       display: 'flex',

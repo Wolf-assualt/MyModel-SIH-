@@ -36,12 +36,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
         position: 'fixed',
         inset: 0,
         zIndex: 10001,
-        backgroundColor: 'rgba(5, 6, 10, 0.7)',
-        backdropFilter: 'blur(6px)',
+        backgroundColor: 'rgba(5, 6, 8, 0.6)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '1.5rem',
+        padding: '24px',
       }}
     >
       <motion.div
@@ -56,7 +55,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
         style={{
           width: '100%',
           maxWidth: '480px',
-          borderRadius: '0.75rem',
+          borderRadius: '12px',
           overflow: 'hidden',
           borderColor: 'var(--border-strong)',
         }}
@@ -66,15 +65,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '1rem 1.25rem',
+            padding: '16px 20px',
             borderBottom: '1px solid var(--border)',
           }}
         >
-          <h2
-            className="font-display"
-            style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.04em', color: 'var(--text-primary)', margin: 0 }}
-          >
-            SETTINGS
+          <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+            Settings
           </h2>
           <button
             onClick={onClose}
@@ -89,18 +85,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
               display: 'flex',
             }}
           >
-            <X size={16} />
+            <X size={16} strokeWidth={1.5} />
           </button>
         </div>
 
-        <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {rows.map(([label, value]) => (
             <div
               key={label}
-              style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', fontSize: '0.8125rem' }}
+              style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', fontSize: '13px' }}
             >
               <span style={{ color: 'var(--text-muted)' }}>{label}</span>
-              <span className="font-mono" style={{ color: 'var(--text-primary)', wordBreak: 'break-all' }}>
+              <span
+                className={label === 'Session ID' ? 'font-mono' : undefined}
+                style={{ color: 'var(--text-primary)', wordBreak: 'break-all' }}
+              >
                 {value}
               </span>
             </div>
@@ -110,44 +109,43 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.75rem',
+              gap: '8px',
+              padding: '12px',
               backgroundColor: 'var(--surface-elevated)',
               border: '1px solid var(--border)',
               borderRadius: '0.375rem',
-              fontSize: '0.75rem',
+              fontSize: '12px',
               color: 'var(--text-secondary)',
             }}
           >
-            <Keyboard size={14} style={{ color: 'var(--accent-text)', flexShrink: 0 }} />
+            <Keyboard size={14} strokeWidth={1.5} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             <span>
               Press <kbd className="font-mono">⌘K</kbd> / <kbd className="font-mono">Ctrl+K</kbd> anywhere to open the
               command palette.
             </span>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+          <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
             <button
               onClick={toggleTheme}
-              className="font-mono"
               style={{
                 flex: 1,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '0.375rem',
+                gap: '6px',
                 padding: '0.5rem',
                 background: 'var(--surface-elevated)',
                 border: '1px solid var(--border)',
                 borderRadius: '0.375rem',
                 color: 'var(--text-primary)',
                 cursor: 'pointer',
-                fontSize: '0.75rem',
-                fontWeight: 600,
+                fontSize: '12px',
+                fontWeight: 500,
               }}
             >
-              <SunMoon size={13} />
-              TOGGLE {theme === 'dark' ? 'LIGHT' : 'DARK'} MODE
+              <SunMoon size={13} strokeWidth={1.5} />
+              Toggle {theme === 'dark' ? 'light' : 'dark'} mode
             </button>
           </div>
 
@@ -155,15 +153,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.375rem',
-              fontSize: '0.6875rem',
+              gap: '6px',
+              fontSize: '12px',
               color: 'var(--text-muted)',
             }}
           >
             {backendOnline ? (
-              <Server size={12} style={{ color: 'var(--success-text)' }} />
+              <Server size={12} strokeWidth={1.5} style={{ color: 'var(--success-text)' }} />
             ) : (
-              <ShieldCheck size={12} style={{ color: 'var(--warning-text)' }} />
+              <ShieldCheck size={12} strokeWidth={1.5} style={{ color: 'var(--warning-text)' }} />
             )}
             All verdicts are produced by the backend assurance pipeline — this dialog displays session metadata only.
           </div>

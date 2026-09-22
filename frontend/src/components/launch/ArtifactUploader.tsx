@@ -32,13 +32,13 @@ export const ArtifactUploader: React.FC = () => {
   const getArtifactIcon = (type: ArtifactType) => {
     switch (type) {
       case 'dataset':
-        return <Database size={22} style={{ color: 'var(--accent-text)' }} />;
+        return <Database size={18} strokeWidth={1.5} style={{ color: 'var(--text-secondary)' }} />;
       case 'model':
-        return <Cpu size={22} style={{ color: 'var(--success-text)' }} />;
+        return <Cpu size={18} strokeWidth={1.5} style={{ color: 'var(--text-secondary)' }} />;
       case 'inference':
-        return <Binary size={22} style={{ color: 'var(--warning-text)' }} />;
+        return <Binary size={18} strokeWidth={1.5} style={{ color: 'var(--text-secondary)' }} />;
       case 'manifest':
-        return <ShieldCheck size={22} style={{ color: 'var(--info-text)' }} />;
+        return <ShieldCheck size={18} strokeWidth={1.5} style={{ color: 'var(--text-secondary)' }} />;
     }
   };
 
@@ -74,7 +74,7 @@ export const ArtifactUploader: React.FC = () => {
   const allVerified = artifacts.every(a => a.status === 'verified');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       {/* Quick Action Top Bar */}
       <div
         style={{
@@ -82,41 +82,41 @@ export const ArtifactUploader: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
-          gap: '0.75rem',
+          gap: '12px',
           backgroundColor: 'var(--surface)',
           border: '1px solid var(--border)',
-          borderRadius: '0.5rem',
-          padding: '0.75rem 1.25rem',
+          borderRadius: '12px',
+          padding: '12px 20px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }} className="font-mono">
-            INGESTION STATUS:
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+            Ingestion status:
           </span>
           {allVerified ? (
-            <Badge variant="success" size="sm" icon={<Check size={12} />}>
-              ALL 4 ARTIFACTS VALIDATED
+            <Badge variant="success" size="sm" icon={<Check size={12} strokeWidth={1.5} />}>
+              All 4 artifacts validated
             </Badge>
           ) : (
             <Badge variant="warning" size="sm">
-              {artifacts.filter(a => a.status === 'verified').length} OF 4 READY
+              {artifacts.filter(a => a.status === 'verified').length} of 4 ready
             </Badge>
           )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Button
             variant="ghost"
             size="sm"
             onClick={clearArtifacts}
-            icon={<RotateCcw size={14} />}
+            icon={<RotateCcw size={14} strokeWidth={1.5} />}
           >
             Reset
           </Button>
         </div>
       </div>
 
-      {/* 4 Cards Grid — staggered mount animation */}
+      {/* 4 Cards Grid */}
       <motion.div
         initial="hidden"
         animate="visible"
@@ -124,7 +124,7 @@ export const ArtifactUploader: React.FC = () => {
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: '1.25rem',
+          gap: '24px',
         }}
       >
         {artifacts.map(art => {
@@ -140,25 +140,17 @@ export const ArtifactUploader: React.FC = () => {
                 hidden: { opacity: 0, y: 10 },
                 visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' } },
               }}
-              className="glass-card"
               style={{
+                backgroundColor: 'var(--surface)',
                 borderWidth: '1px',
                 borderStyle: 'solid',
-                borderColor: isDragOver
-                  ? 'var(--accent)'
-                  : isVerified
-                  ? 'var(--accent-border)'
-                  : 'var(--border)',
-                borderRadius: '0.625rem',
-                padding: '1.25rem',
-                boxShadow:
-                  isDragOver || isVerified
-                    ? 'var(--accent-glow), var(--glass-inner-glow)'
-                    : 'var(--glass-inner-glow), var(--card-shadow)',
+                borderColor: isDragOver ? 'var(--accent)' : 'var(--border)',
+                borderRadius: '12px',
+                padding: '20px',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                transition: 'all 0.2s ease',
+                transition: 'border-color 0.15s ease',
               }}
             >
               {/* Hidden File Input */}
@@ -179,14 +171,14 @@ export const ArtifactUploader: React.FC = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    marginBottom: '1rem',
+                    marginBottom: '16px',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div
                       style={{
-                        width: '38px',
-                        height: '38px',
+                        width: '36px',
+                        height: '36px',
                         borderRadius: '0.375rem',
                         backgroundColor: 'var(--surface-elevated)',
                         border: '1px solid var(--border)',
@@ -201,38 +193,30 @@ export const ArtifactUploader: React.FC = () => {
                       <h3
                         style={{
                           fontSize: '0.875rem',
-                          fontWeight: 700,
+                          fontWeight: 600,
                           color: 'var(--text-primary)',
-                          textTransform: 'uppercase',
                           margin: 0,
                         }}
-                        className="font-display"
                       >
                         {art.title}
                       </h3>
-                      <span
-                        style={{
-                          fontSize: '0.6875rem',
-                          color: 'var(--text-muted)',
-                        }}
-                        className="font-mono"
-                      >
-                        {art.type.toUpperCase()} ARTIFACT
+                      <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                        {art.type} artifact
                       </span>
                     </div>
                   </div>
 
                   {isUploading ? (
-                    <Badge variant="accent" size="sm" pulse>
-                      INGESTING
+                    <Badge variant="accent" size="sm">
+                      Ingesting
                     </Badge>
                   ) : isVerified ? (
-                    <Badge variant="success" size="sm" icon={<CheckCircle2 size={12} />}>
-                      READY
+                    <Badge variant="success" size="sm" icon={<CheckCircle2 size={12} strokeWidth={1.5} />}>
+                      Ready
                     </Badge>
                   ) : (
                     <Badge variant="default" size="sm">
-                      AWAITING
+                      Awaiting
                     </Badge>
                   )}
                 </div>
@@ -241,10 +225,10 @@ export const ArtifactUploader: React.FC = () => {
                 <div
                   style={{
                     backgroundColor: 'var(--surface-elevated)',
-                    border: '1px solid var(--border-subtle)',
+                    border: '1px solid var(--border)',
                     borderRadius: '0.375rem',
-                    padding: '0.75rem 1rem',
-                    marginBottom: '1rem',
+                    padding: '12px 16px',
+                    marginBottom: '16px',
                   }}
                 >
                   <div
@@ -252,27 +236,26 @@ export const ArtifactUploader: React.FC = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      marginBottom: '0.375rem',
+                      marginBottom: '6px',
                     }}
                   >
                     <span
                       style={{
                         fontSize: '0.8125rem',
-                        fontWeight: art.filename ? 600 : 400,
+                        fontWeight: art.filename ? 500 : 400,
                         color: art.filename ? 'var(--text-primary)' : 'var(--text-muted)',
                         fontStyle: art.filename ? 'normal' : 'italic',
                       }}
-                      className="font-mono"
                     >
                       {art.filename || 'Awaiting file ingestion...'}
                     </span>
                     <span
+                      className="font-mono"
                       style={{
-                        fontSize: '0.75rem',
-                        color: 'var(--text-tertiary)',
+                        fontSize: '12px',
+                        color: 'var(--text-muted)',
                         fontWeight: 500,
                       }}
-                      className="font-mono"
                     >
                       {art.size !== '0 B' ? art.size : '—'}
                     </span>
@@ -281,26 +264,26 @@ export const ArtifactUploader: React.FC = () => {
                   {/* SHA-256 display */}
                   <div
                     style={{
-                      fontSize: '0.6875rem',
+                      fontSize: '11px',
                       color: 'var(--text-muted)',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.375rem',
+                      gap: '6px',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
                     }}
                     className="font-mono"
                   >
-                    <span style={{ color: 'var(--text-tertiary)', fontWeight: 600 }}>SHA-256:</span>
+                    <span>SHA-256:</span>
                     {isUploading ? (
                       <span className="skeleton" style={{ display: 'inline-block', width: '160px', height: '0.75rem' }} />
                     ) : art.hash ? (
-                      <span style={{ color: 'var(--accent-text)' }}>
+                      <span style={{ color: 'var(--text-secondary)' }}>
                         {art.hash.substring(0, 16)}...{art.hash.substring(art.hash.length - 8)}
                       </span>
                     ) : (
-                      <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                      <span style={{ fontStyle: 'italic' }}>
                         Pending ingestion hash
                       </span>
                     )}
@@ -312,11 +295,10 @@ export const ArtifactUploader: React.FC = () => {
                   {Boolean(art.metadata?.samplesCount) && (
                     <div
                       style={{
-                        marginTop: '0.375rem',
-                        fontSize: '0.6875rem',
+                        marginTop: '6px',
+                        fontSize: '12px',
                         color: 'var(--text-secondary)',
                       }}
-                      className="font-mono"
                     >
                       Payload: {art.metadata?.samplesCount?.toLocaleString()} visual frame(s)
                     </div>
@@ -324,23 +306,21 @@ export const ArtifactUploader: React.FC = () => {
                   {Boolean(art.metadata?.layersCount) && (
                     <div
                       style={{
-                        marginTop: '0.375rem',
-                        fontSize: '0.6875rem',
+                        marginTop: '6px',
+                        fontSize: '12px',
                         color: 'var(--text-secondary)',
                       }}
-                      className="font-mono"
                     >
-                      Architecture: {art.metadata?.layersCount} Neural Layers ({art.metadata?.format})
+                      Architecture: {art.metadata?.layersCount} neural layers ({art.metadata?.format})
                     </div>
                   )}
                   {Boolean(art.metadata?.recordsCount) && (
                     <div
                       style={{
-                        marginTop: '0.375rem',
-                        fontSize: '0.6875rem',
+                        marginTop: '6px',
+                        fontSize: '12px',
                         color: 'var(--text-secondary)',
                       }}
-                      className="font-mono"
                     >
                       Telemetry: {art.metadata?.recordsCount?.toLocaleString()} ground-truth records
                     </div>
@@ -348,11 +328,10 @@ export const ArtifactUploader: React.FC = () => {
                   {!art.metadata?.samplesCount && !art.metadata?.layersCount && !art.metadata?.recordsCount && art.metadata?.format && (
                     <div
                       style={{
-                        marginTop: '0.375rem',
-                        fontSize: '0.6875rem',
+                        marginTop: '6px',
+                        fontSize: '12px',
                         color: 'var(--text-muted)',
                       }}
-                      className="font-mono"
                     >
                       Accepted: {art.metadata.format}
                     </div>
@@ -373,54 +352,46 @@ export const ArtifactUploader: React.FC = () => {
                   border: `1px dashed ${
                     isDragOver
                       ? 'var(--accent)'
-                      : isVerified
-                      ? 'var(--success-border)'
                       : 'var(--border-strong)'
                   }`,
                   borderRadius: '0.375rem',
-                  padding: '0.75rem',
+                  padding: '12px',
                   textAlign: 'center',
-                  backgroundColor: isDragOver
-                    ? 'var(--accent-surface)'
-                    : isVerified
-                    ? 'var(--success-surface)'
-                    : 'var(--surface-elevated)',
+                  backgroundColor: isDragOver ? 'var(--accent-surface)' : 'var(--surface-elevated)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '0.5rem',
+                  gap: '8px',
                   cursor: 'pointer',
-                  transition: 'all 0.15s ease',
+                  transition: 'border-color 0.15s ease, background-color 0.15s ease',
                   userSelect: 'none',
                 }}
                 title="Click to browse files or drag & drop"
               >
                 {isVerified ? (
                   <>
-                    <CheckCircle2 size={16} style={{ color: 'var(--success-text)' }} />
+                    <CheckCircle2 size={16} strokeWidth={1.5} style={{ color: 'var(--success-text)' }} />
                     <span
                       style={{
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        color: 'var(--success-text)',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        color: 'var(--text-secondary)',
                       }}
-                      className="font-mono"
                     >
-                      INTEGRITY HASH VALIDATED (Click to replace)
+                      Integrity hash validated (click to replace)
                     </span>
                   </>
                 ) : (
                   <>
-                    <UploadCloud size={16} style={{ color: 'var(--accent-text)' }} />
+                    <UploadCloud size={16} strokeWidth={1.5} style={{ color: 'var(--text-secondary)' }} />
                     <span
                       style={{
-                        fontSize: '0.75rem',
-                        color: 'var(--accent-text)',
-                        fontWeight: 600,
+                        fontSize: '12px',
+                        color: 'var(--text-secondary)',
+                        fontWeight: 500,
                       }}
-                      className="font-mono"
                     >
-                      CLICK TO UPLOAD OR DRAG & DROP
+                      Click to upload or drag & drop
                     </span>
                   </>
                 )}
@@ -431,8 +402,8 @@ export const ArtifactUploader: React.FC = () => {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.5rem',
-                  marginTop: '0.75rem',
+                  gap: '8px',
+                  marginTop: '12px',
                 }}
               >
                 <Button
@@ -440,7 +411,7 @@ export const ArtifactUploader: React.FC = () => {
                   size="sm"
                   style={{ flex: 1 }}
                   onClick={() => fileInputRefs.current[art.id]?.click()}
-                  icon={<FolderOpen size={13} />}
+                  icon={<FolderOpen size={13} strokeWidth={1.5} />}
                   className="choose-file-btn"
                 >
                   Choose File
@@ -448,11 +419,11 @@ export const ArtifactUploader: React.FC = () => {
 
                 {!isVerified ? (
                   <Button
-                    variant="gradient"
+                    variant="primary"
                     size="sm"
                     style={{ flex: 1 }}
                     onClick={() => verifyArtifact(art.id)}
-                    icon={<Zap size={13} />}
+                    icon={<Zap size={13} strokeWidth={1.5} />}
                   >
                     Quick Verify
                   </Button>
@@ -462,7 +433,7 @@ export const ArtifactUploader: React.FC = () => {
                     size="sm"
                     style={{ flex: 1 }}
                     onClick={() => verifyArtifact(art.id)}
-                    icon={<CheckCircle2 size={13} style={{ color: 'var(--success-text)' }} />}
+                    icon={<CheckCircle2 size={13} strokeWidth={1.5} style={{ color: 'var(--success-text)' }} />}
                   >
                     Verified ✓
                   </Button>

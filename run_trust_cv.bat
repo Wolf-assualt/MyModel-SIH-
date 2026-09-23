@@ -166,6 +166,7 @@ for %%D in (
     "%BLOCK_DIR%\data\quarantine\models"
     "%BLOCK_DIR%\data\redteam\sandbox"
     "%BLOCK_DIR%\data\redteam\results"
+    "%BLOCK_DIR%\data\keys"
 ) do (
     if not exist "%%~D" mkdir "%%~D" >nul 2>&1
 )

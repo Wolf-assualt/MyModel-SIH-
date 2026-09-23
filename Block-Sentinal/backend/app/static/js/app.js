@@ -1108,7 +1108,7 @@ if (backendStage === 'EVIDENCE_FUSION' || backendStage.match(/^REPORT|COMPLETED$
     let graphEdges = [];
     const GraphClass = window.TrustCVGraph || (typeof TrustCVGraph !== 'undefined' ? TrustCVGraph : null);
     if (!AppState.graphRenderer && GraphClass) {
-      AppState.graphRenderer = new GraphClass('graph-canvas', { width: 760, height: 360 });
+      AppState.graphRenderer = new GraphClass('graph-canvas', { width: 800, height: 600, debug: true });
     }
 
     const drawGraph = (nodes, edges, opts) => {

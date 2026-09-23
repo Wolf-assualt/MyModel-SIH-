@@ -465,7 +465,7 @@ async def _run_scan_pipeline(scan_id: str, batch_id: str):
                     default_graph_engine.build_lineage(
                         contributor_id=manifest.contributor_id,
                         batch_id=batch_id,
-                        sample_ids=[s.sample_id for s in manifest.samples],
+                        sample_ids=[s.sha256_hash or s.sample_id for s in manifest.samples],
                         fusion_assessment_id=fused_assessment.assessment_id
                     )
                     

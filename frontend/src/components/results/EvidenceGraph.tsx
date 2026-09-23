@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Network,
   Users,
@@ -13,6 +13,121 @@ import type { GraphNode, NodeType } from '../../types/graph';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 
+const GRAPH_W = 1140;
+const GRAPH_H = 400;
+
+function edgeWeight(edgeType: string): number {
+  const t = String(edgeType || '').toUpperCase();
+  if (t.includes('TRAINED') || t.includes('GENERATED') || t.includes('SIGNED') || t.includes('SEAL')) return 1.45;
+  if (t.includes('CONTAIN') || t.includes('AUTHORED') || t.includes('PROVIDED')) return 1.15;
+  if (t.includes('FLAG') || t.includes('QUARANTINE') || t.includes('VETO')) return 0.55;
+  return 0.9;
+}
+
+function typeColumn(nodeType: string): number {
+  const t = String(nodeType || '').toUpperCase();
+  if (t.includes('CONTRIBUTOR')) return GRAPH_W * 0.08;
+  if (t.includes('DATASET') || t.includes('SAMPLE') || t.includes('BATCH')) return GRAPH_W * 0.26;
+  if (t.includes('MODEL') || t.includes('WEIGHT')) return GRAPH_W * 0.46;
+  if (t.includes('INFER')) return GRAPH_W * 0.66;
+  if (t.includes('FINDING') || t.includes('EVIDENCE') || t.includes('FUSION')) return GRAPH_W * 0.86;
+  return GRAPH_W * 0.5;
+}
+
+/** Force-directed layout so nodes never share a single origin or type slot. */
+function layoutGraph(rawNodes: GraphNode[], edges: { sourceId: string; targetId: string; edgeType?: string }[]): GraphNode[] {
+  const seen = new Set<string>();
+  const nodes = rawNodes.filter(n => {
+    if (!n?.id || seen.has(n.id)) return false;
+    seen.add(n.id);
+    return true;
+  }).map((n, i) => {
+    const angle = (2 * Math.PI * i) / Math.max(1, rawNodes.length);
+    const r = 120;
+    return {
+      ...n,
+      x: n.x && n.y ? n.x : GRAPH_W / 2 + r * Math.cos(angle),
+      y: n.x && n.y ? n.y : GRAPH_H / 2 + r * Math.sin(angle),
+      vx: 0,
+      vy: 0,
+    };
+  });
+
+  const byCol: Record<number, typeof nodes> = {};
+  nodes.forEach(n => {
+    const col = Math.round(typeColumn(n.nodeType));
+    (byCol[col] || (byCol[col] = [])).push(n);
+  });
+  Object.entries(byCol).forEach(([col, list]) => {
+    const spacing = Math.min(80, (GRAPH_H - 80) / Math.max(1, list.length));
+    const startY = (GRAPH_H - (list.length - 1) * spacing) / 2;
+    list.forEach((n, i) => {
+      n.x = Number(col);
+      n.y = startY + i * spacing;
+    });
+  });
+
+  const byId = Object.fromEntries(nodes.map(n => [n.id, n]));
+  const links = edges
+    .map(e => ({ source: byId[e.sourceId], target: byId[e.targetId], weight: edgeWeight(e.edgeType || '') }))
+    .filter(l => l.source && l.target && l.source !== l.target);
+
+  let alpha = 1;
+  for (let tick = 0; tick < 300; tick++) {
+    alpha *= 0.98;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        let dx = nodes[i].x - nodes[j].x;
+        let dy = nodes[i].y - nodes[j].y;
+        let dist2 = dx * dx + dy * dy;
+        if (dist2 < 1) { dist2 = 1; dx = 0.5; dy = 0.5; }
+        const dist = Math.sqrt(dist2);
+        const force = (-180 * alpha) / dist2;
+        nodes[i].vx += (dx / dist) * force;
+        nodes[i].vy += (dy / dist) * force;
+        nodes[j].vx -= (dx / dist) * force;
+        nodes[j].vy -= (dy / dist) * force;
+        if (dist < 48) {
+          const push = (48 - dist) * 0.08 * alpha;
+          nodes[i].vx += (dx / dist) * push;
+          nodes[i].vy += (dy / dist) * push;
+          nodes[j].vx -= (dx / dist) * push;
+          nodes[j].vy -= (dy / dist) * push;
+        }
+      }
+    }
+    links.forEach(l => {
+      const dx = l.target.x - l.source.x;
+      const dy = l.target.y - l.source.y;
+      const dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+      const desired = 110 / l.weight;
+      const k = ((dist - desired) / dist) * 0.06 * alpha * l.weight;
+      l.source.vx += dx * k;
+      l.source.vy += dy * k;
+      l.target.vx -= dx * k;
+      l.target.vy -= dy * k;
+    });
+    nodes.forEach(n => {
+      n.vx += (GRAPH_W / 2 - n.x) * 0.004 * alpha;
+      n.vy += (GRAPH_H / 2 - n.y) * 0.008 * alpha;
+      n.vx *= 0.85;
+      n.vy *= 0.85;
+      n.x = Math.max(40, Math.min(GRAPH_W - 40, n.x + n.vx));
+      n.y = Math.max(40, Math.min(GRAPH_H - 40, n.y + n.vy));
+    });
+  }
+
+  if (typeof console !== 'undefined' && console.debug) {
+    console.debug('[TRUST-CV graph]', {
+      nodes: nodes.length,
+      edges: edges.length,
+      positions: nodes.map(n => ({ id: n.id, x: Math.round(n.x), y: Math.round(n.y) })),
+    });
+  }
+
+  return nodes.map(({ vx: _vx, vy: _vy, ...n }) => n as GraphNode);
+}
+
 export const EvidenceGraph: React.FC = () => {
   const {
     graphNodes,
@@ -24,8 +139,13 @@ export const EvidenceGraph: React.FC = () => {
 
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'ASSETS' | 'FINDINGS'>('ALL');
 
+  const laidOutNodes = useMemo(
+    () => layoutGraph(graphNodes as GraphNode[], graphEdges),
+    [graphNodes, graphEdges],
+  );
+
   // Filter nodes
-  const filteredNodes = graphNodes.filter(node => {
+  const filteredNodes = laidOutNodes.filter(node => {
     if (activeFilter === 'ALL') return true;
     if (activeFilter === 'FINDINGS') return node.nodeType === 'FINDING';
     if (activeFilter === 'ASSETS') return node.nodeType !== 'FINDING';
@@ -199,8 +319,8 @@ export const EvidenceGraph: React.FC = () => {
             )}
 
             {graphEdges.map(edge => {
-              const source = graphNodes.find(n => n.id === edge.sourceId);
-              const target = graphNodes.find(n => n.id === edge.targetId);
+              const source = laidOutNodes.find(n => n.id === edge.sourceId);
+              const target = laidOutNodes.find(n => n.id === edge.targetId);
               if (!source || !target) return null;
 
               const isConnected =

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * TRUST-CV — Presentation-only initial state.
  *
  * NOTE (Phase 8, backend-authoritative refactor):

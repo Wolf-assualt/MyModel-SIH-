@@ -7,11 +7,21 @@
 
 class TrustCVGraph {
   constructor(containerId, options = {}) {
-    this.container = typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
+    const resolved = typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
+    this.canvas = null;
+    this.container = resolved;
+    if (resolved && resolved.tagName === 'CANVAS') {
+      this.canvas = resolved;
+      this.container = resolved.parentElement || resolved;
+    } else if (resolved && typeof resolved.querySelector === 'function') {
+      this.canvas = resolved.querySelector('canvas#graph-canvas') || resolved.querySelector('canvas');
+    }
+
     this.options = {
-      width: options.width || 760,
-      height: options.height || 360,
+      width: options.width || 800,
+      height: options.height || 600,
       onNodeClick: options.onNodeClick || null,
+      debug: options.debug !== undefined ? options.debug : Boolean(window.TRUSTCV_GRAPH_DEBUG),
       ...options,
     };
 
@@ -29,12 +39,28 @@ class TrustCVGraph {
     this.initObservers();
   }
 
+  sizeCanvas() {
+    const w = this.options.width || 800;
+    const h = this.options.height || 600;
+    if (this.canvas) {
+      this.canvas.width = w;
+      this.canvas.height = h;
+      this.canvas.style.width = '100%';
+      this.canvas.style.height = '100%';
+    }
+    return { width: w, height: h };
+  }
+
   initDOM() {
     if (!this.container) return;
 
+    this.sizeCanvas();
+
     // Preserve any existing hidden legacy canvas for backward compatibility tests
-    const existingCanvas = this.container.querySelector('canvas#graph-canvas');
+    const existingCanvas = this.canvas || this.container.querySelector('canvas#graph-canvas');
     if (existingCanvas) {
+      this.canvas = existingCanvas;
+      this.sizeCanvas();
       existingCanvas.style.display = 'none';
     }
 
@@ -154,15 +180,201 @@ class TrustCVGraph {
   }
 
   setData(nodes = [], edges = [], meta = {}) {
-    this.nodes = nodes;
-    this.edges = edges;
+    this.nodes = this.dedupeNodes(nodes);
+    this.edges = this.filterEdges(this.nodes, edges);
     this.meta = meta;
     this.render();
+  }
+
+  dedupeNodes(nodes) {
+    const seen = new Set();
+    const unique = [];
+    (nodes || []).forEach((node, idx) => {
+      if (!node) return;
+      let id = node.id != null && String(node.id).length ? String(node.id) : '';
+      if (!id) {
+        id = node.digest || node.canonical_identity || `node_${idx}`;
+        node = { ...node, id };
+      }
+      if (seen.has(id)) return;
+      seen.add(id);
+      unique.push(node);
+    });
+    return unique;
+  }
+
+  filterEdges(nodes, edges) {
+    const ids = new Set(nodes.map(n => n.id));
+    return (edges || []).filter(e => {
+      const src = e.source_id || e.source;
+      const tgt = e.target_id || e.target;
+      return ids.has(src) && ids.has(tgt);
+    });
+  }
+
+  edgeWeight(edge) {
+    if (typeof edge.weight === 'number' && edge.weight > 0) return edge.weight;
+    const t = String(edge.type || edge.edge_type || '').toUpperCase();
+    if (t.includes('TRAINED') || t.includes('GENERATED') || t.includes('SIGNED') || t.includes('SEAL') || t.includes('DNA')) return 1.45;
+    if (t.includes('CONTAIN') || t.includes('AUTHORED') || t.includes('PROVIDED') || t.includes('VERSION')) return 1.15;
+    if (t.includes('FLAG') || t.includes('QUARANTINE') || t.includes('VETO') || t.includes('ABOUT')) return 0.55;
+    return 0.9;
+  }
+
+  typeColumn(type, width) {
+    const t = String(type || '').toUpperCase();
+    if (t.includes('CONTRIBUTOR') || t === 'ACTOR') return width * 0.10;
+    if (t.includes('DATASET') || t.includes('SAMPLE') || t.includes('BATCH') || t.includes('INGEST')) return width * 0.28;
+    if (t.includes('MODEL') || t.includes('WEIGHT') || t.includes('FINGERPRINT')) return width * 0.46;
+    if (t.includes('INFER') || t.includes('PREDICT') || t.includes('DNA')) return width * 0.64;
+    if (t.includes('QUARANTINE') || t.includes('VETO') || t.includes('INCIDENT')) return width * 0.46;
+    if (t.includes('EVIDENCE') || t.includes('FUSION') || t.includes('ASSESS') || t.includes('FINDING') || t.includes('REPORT')) return width * 0.84;
+    return width * 0.50;
+  }
+
+  /**
+   * Force-directed layout: unique circle/column seeds, then many-body +
+   * weighted links + centering. Never seed every node at (0,0) or a shared slot.
+   */
+  computeLayout(nodes, edges, width, height) {
+    const n = nodes.length;
+    const simNodes = nodes.map((node, i) => {
+      const angle = (2 * Math.PI * i) / Math.max(1, n);
+      const radius = Math.min(width, height) * 0.32;
+      const jitter = ((i * 17) % 13) - 6;
+      return {
+        id: node.id,
+        type: node.node_type || node.nodeType || '',
+        x: width / 2 + radius * Math.cos(angle) + jitter,
+        y: height / 2 + radius * Math.sin(angle) + (((i * 31) % 11) - 5),
+        vx: 0,
+        vy: 0,
+      };
+    });
+
+    // Bias initial x toward lineage columns, and spread y within a column.
+    const byCol = {};
+    simNodes.forEach(sn => {
+      const col = Math.round(this.typeColumn(sn.type, width));
+      sn.col = col;
+      (byCol[col] || (byCol[col] = [])).push(sn);
+    });
+    Object.keys(byCol).forEach(col => {
+      const list = byCol[col];
+      const spacing = Math.min(88, (height - 90) / Math.max(1, list.length));
+      const startY = (height - (list.length - 1) * spacing) / 2;
+      list.forEach((sn, i) => {
+        sn.x = Number(col) + ((i % 2 === 0) ? -8 : 8);
+        sn.y = startY + i * spacing;
+      });
+    });
+
+    const byId = {};
+    simNodes.forEach(sn => { byId[sn.id] = sn; });
+    const links = [];
+    (edges || []).forEach(edge => {
+      const src = byId[edge.source_id || edge.source];
+      const tgt = byId[edge.target_id || edge.target];
+      if (src && tgt && src !== tgt) {
+        links.push({ source: src, target: tgt, weight: this.edgeWeight(edge) });
+      }
+    });
+
+    const charge = -220;
+    const linkDistance = 110;
+    const ticks = 300;
+    const alphaDecay = 0.02;
+    let alpha = 1;
+
+    for (let tick = 0; tick < ticks; tick++) {
+      alpha *= (1 - alphaDecay);
+
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+          let dx = simNodes[i].x - simNodes[j].x;
+          let dy = simNodes[i].y - simNodes[j].y;
+          let dist2 = dx * dx + dy * dy;
+          if (dist2 < 1) {
+            dist2 = 1;
+            dx = 0.5;
+            dy = 0.5;
+          }
+          const dist = Math.sqrt(dist2);
+          const force = (charge * alpha) / dist2;
+          const fx = (dx / dist) * force;
+          const fy = (dy / dist) * force;
+          simNodes[i].vx += fx;
+          simNodes[i].vy += fy;
+          simNodes[j].vx -= fx;
+          simNodes[j].vy -= fy;
+          // Collision: keep node radii from stacking
+          const minDist = 46;
+          if (dist < minDist) {
+            const push = (minDist - dist) * 0.08 * alpha;
+            simNodes[i].vx += (dx / dist) * push;
+            simNodes[i].vy += (dy / dist) * push;
+            simNodes[j].vx -= (dx / dist) * push;
+            simNodes[j].vy -= (dy / dist) * push;
+          }
+        }
+      }
+
+      links.forEach(link => {
+        let dx = link.target.x - link.source.x;
+        let dy = link.target.y - link.source.y;
+        const dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+        const desired = linkDistance / link.weight;
+        const k = ((dist - desired) / dist) * 0.06 * alpha * link.weight;
+        const fx = dx * k;
+        const fy = dy * k;
+        link.source.vx += fx;
+        link.source.vy += fy;
+        link.target.vx -= fx;
+        link.target.vy -= fy;
+      });
+
+      const cx = width / 2;
+      const cy = height / 2;
+      simNodes.forEach(sn => {
+        sn.vx += (sn.col - sn.x) * 0.02 * alpha;
+        sn.vx += (cx - sn.x) * 0.004 * alpha;
+        sn.vy += (cy - sn.y) * 0.008 * alpha;
+        sn.vx *= 0.85;
+        sn.vy *= 0.85;
+        sn.x += sn.vx;
+        sn.y += sn.vy;
+        sn.x = Math.max(36, Math.min(width - 36, sn.x));
+        sn.y = Math.max(40, Math.min(height - 40, sn.y));
+      });
+    }
+
+    const positions = {};
+    simNodes.forEach(sn => {
+      positions[sn.id] = { x: sn.x, y: sn.y };
+    });
+    return positions;
+  }
+
+  logLayoutDebug(positions) {
+    if (!this.options.debug && !window.TRUSTCV_GRAPH_DEBUG) return;
+    const coords = Object.keys(positions).map(id => ({
+      id,
+      x: Number(positions[id].x.toFixed(1)),
+      y: Number(positions[id].y.toFixed(1)),
+    }));
+    const uniqueSlots = new Set(coords.map(c => `${Math.round(c.x / 4)}:${Math.round(c.y / 4)}`));
+    console.debug('[TRUST-CV graph]', {
+      nodes: this.nodes.length,
+      edges: this.edges.length,
+      uniquePositionSlots: uniqueSlots.size,
+      positions: coords,
+    });
   }
 
   render() {
     if (!this.container || !this.svg) return;
 
+    this.sizeCanvas();
     this.stopParticleLoop();
     this.edgesGroup.innerHTML = '';
     this.particlesGroup.innerHTML = '';
@@ -171,6 +383,7 @@ class TrustCVGraph {
 
     const width = this.options.width;
     const height = this.options.height;
+    this.svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
     const svgNS = 'http://www.w3.org/2000/svg';
 
     if (!this.nodes || this.nodes.length === 0) {
@@ -189,47 +402,8 @@ class TrustCVGraph {
     const isTamper = this.meta.isTamper || this.nodes.some(n => n.node_type === 'QUARANTINE' || n.status === 'FAILED' || n.status === 'TAMPERED');
     const isDrift = this.meta.isDrift || this.nodes.some(n => n.status === 'REVIEW' || n.status === 'DRIFT');
 
-    // Layout Calculation: Optimized 5-Stage Defense DAG
-    // Stage 1: Contributor (x: 80, y: 180)
-    // Stage 2: Dataset (x: 230, y: 180)
-    // Stage 3: Model (x: 390, y: 180)
-    // Stage 4: Inference (x: 550, y: 180)
-    // Stage 5: Evidence / Decision (x: 690, y: 180)
-    // Quarantine Branch (x: 390, y: 300)
-
-    const positions = {};
-    const nodeCount = this.nodes.length;
-
-    this.nodes.forEach((node, idx) => {
-      let x, y;
-      const type = (node.node_type || '').toUpperCase();
-
-      if (type === 'CONTRIBUTOR') {
-        x = 80;
-        y = 160;
-      } else if (type === 'DATASET') {
-        x = 230;
-        y = 160;
-      } else if (type === 'MODEL') {
-        x = 390;
-        y = 160;
-      } else if (type === 'INFERENCE') {
-        x = 550;
-        y = 160;
-      } else if (type === 'EVIDENCE') {
-        x = 680;
-        y = 160;
-      } else if (type === 'QUARANTINE') {
-        x = 310;
-        y = 280;
-      } else {
-        // Fallback grid distribution
-        const padX = 70;
-        x = padX + ((width - padX * 2) / Math.max(1, nodeCount - 1)) * idx;
-        y = height / 2 + ((idx % 2 === 0) ? -20 : 20);
-      }
-      positions[node.id] = { x, y };
-    });
+    const positions = this.computeLayout(this.nodes, this.edges, width, height);
+    this.logLayoutDebug(positions);
 
     // Draw Edges & Prepare Paths for Particle Simulation
     this.edges.forEach((edge, edgeIdx) => {

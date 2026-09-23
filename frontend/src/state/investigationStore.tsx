@@ -372,12 +372,13 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const exportData = await apiService.fetchGraphExport();
       if (exportData && Array.isArray(exportData.nodes) && Array.isArray(exportData.edges)) {
-        setGraphNodes(exportData.nodes.map(n => ({
-          id: n.id,
+        setGraphNodes(exportData.nodes.map((n: any) => ({
+          id: n.id || n.canonical_identity || n.digest,
           label: n.label || n.node_type,
           nodeType: String(n.node_type || 'ENTITY').toUpperCase(),
           properties: n.properties || {},
           status: (n.properties && n.properties.status) ? n.properties.status : 'UNKNOWN',
+          digest: n.digest || n.canonical_identity || '',
         })));
         setGraphEdges(exportData.edges.map(e => ({
           id: `${e.source_id}->${e.target_id}:${e.edge_type}`,
@@ -673,21 +674,38 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
               summary: `Analyzed ${assessment.totalSamples ?? 0} samples — backend status: ${session.status}`,
             });
             setImageResults(assessment.imageResults || []);
-            setFindings((session.findings || []).map((f: any) => ({
-              id: f.finding_id,
-              title: f.check_type,
-              category: 'DATA POISONING',
-              severity: f.severity,
-              affectedArtifact: f.sample_ids?.[0] ? String(f.sample_ids[0]) : 'Uploaded dataset',
-              evidenceSummary: f.description,
-              confidence: Math.round((f.metric_score ?? 0) * 100),
-              status: rawDisposition === 'QUARANTINED' ? 'Quarantined' : 'Confirmed',
-              detectionMethod: 'Backend assurance engine',
-              expectedValue: 'Clean',
-              observedValue: f.description,
-              sha256Proof: f.details?.sha256_hash ?? 'N/A',
-              recommendedAction: f.details?.recommended_action ?? 'Analyst review required',
-            })));
+            setFindings((session.findings || []).map((f: any) => {
+              const checkType = String(f.check_type || '').toUpperCase();
+              let category: any = 'DATA POISONING';
+              if (checkType.includes('DRIFT') || checkType.includes('DISTRIBUTION') || checkType.includes('SHIFT')) {
+                category = 'OOD';
+              } else if (checkType.includes('MODEL') || checkType.includes('WEIGHT')) {
+                category = 'MODEL INTEGRITY';
+              } else if (checkType.includes('BACKDOOR') || checkType.includes('TRIGGER')) {
+                category = 'BACKDOOR';
+              } else if (checkType.includes('INFERENCE') || checkType.includes('OUTPUT')) {
+                category = 'INFERENCE';
+              } else if (checkType.includes('DUPLICATE')) {
+                category = 'DUPLICATES';
+              } else if (checkType.includes('LABEL')) {
+                category = 'MISLABELING';
+              }
+              return {
+                id: f.finding_id,
+                title: f.check_type,
+                category,
+                severity: f.severity,
+                affectedArtifact: f.sample_ids?.[0] ? String(f.sample_ids[0]) : 'Uploaded dataset',
+                evidenceSummary: f.description,
+                confidence: Math.round((f.metric_score ?? 0) * 100),
+                status: rawDisposition === 'QUARANTINED' ? 'Quarantined' : 'Confirmed',
+                detectionMethod: 'Backend assurance engine',
+                expectedValue: 'Clean',
+                observedValue: f.description,
+                sha256Proof: f.details?.sha256_hash ?? 'N/A',
+                recommendedAction: f.details?.recommended_action ?? 'Analyst review required',
+              };
+            }));
           } else if (session.status === 'FAILED') {
             // FAILED with no assessment — do NOT synthesise a happy-path score.
             setTrustScore(null);

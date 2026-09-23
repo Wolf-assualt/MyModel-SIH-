@@ -33,6 +33,7 @@ class Settings(BaseSettings):
             "reports/assurance",
             "quarantine/attacks",
             "fusion/assessments",
+            "keys",
         ]
 
     def ensure_directories(self) -> list:

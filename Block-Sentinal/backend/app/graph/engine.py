@@ -262,7 +262,9 @@ class EvidenceGraphEngine:
                         GraphNode(
                             id=s_id,
                             node_type=NodeType.SAMPLE,
-                            label=f"Sample {s_id}",
+                            label=f"Sample {s_id[:16]}",
+                            digest=s_id if len(str(s_id)) >= 32 else None,
+                            canonical_identity=s_id,
                             properties={"dataset_id": actual_dataset_id},
                         )
                     )

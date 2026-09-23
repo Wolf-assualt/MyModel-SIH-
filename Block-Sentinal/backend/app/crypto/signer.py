@@ -56,8 +56,36 @@ class KeyManager:
             return False
 
 
-# Singleton instance for system-level signature generation
-default_key_manager = KeyManager()
+def get_or_create_persistent_key_manager() -> KeyManager:
+    """Load or generate a persistent system KeyManager so signatures survive process restarts."""
+    import os
+    from pathlib import Path
+    try:
+        from app.core.config import settings
+        keys_dir = Path(settings.DATA_DIR) / "keys"
+    except Exception:
+        keys_dir = Path("./data/keys")
+    
+    keys_dir.mkdir(parents=True, exist_ok=True)
+    priv_key_file = keys_dir / "system_private_key.pem"
+
+    if priv_key_file.exists():
+        try:
+            pem_bytes = priv_key_file.read_bytes()
+            return KeyManager(private_key_pem=pem_bytes)
+        except Exception:
+            pass
+
+    km = KeyManager()
+    try:
+        priv_key_file.write_bytes(km.export_private_key_pem())
+    except Exception:
+        pass
+    return km
+
+
+# Singleton instance for system-level signature generation (persisted across restarts)
+default_key_manager = get_or_create_persistent_key_manager()
 default_signer = default_key_manager
 Signer = KeyManager
 

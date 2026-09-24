@@ -12,6 +12,7 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@rolldown/binding-linux-x64-gnu": "^1.2.8",
     "framer-motion": "^13.4.1",
     "lucide-react": "^1.44.0",
     "react": "^19.2.8",

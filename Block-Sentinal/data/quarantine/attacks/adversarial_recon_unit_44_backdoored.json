@@ -10,7 +10,7 @@
   "samples": [
     {
       "sample_id": "samp_adversarial_recon_unit_44_0",
-      "file_path": "data\\quarantine\\attacks\\backdoor_sample_0_adversarial_recon_unit_44_sample_0.png",
+      "file_path": "data/quarantine/attacks/backdoor_sample_0_adversarial_recon_unit_44_sample_0.png",
       "sha256_hash": "0865bff326e71f29ec073c78048c7db0f8e59a47afc6feb2d392f194b233efd0",
       "width": 64,
       "height": 64,
@@ -27,7 +27,7 @@
     },
     {
       "sample_id": "samp_adversarial_recon_unit_44_1",
-      "file_path": "data\\quarantine\\attacks\\backdoor_sample_1_adversarial_recon_unit_44_sample_0.png",
+      "file_path": "data/quarantine/attacks/backdoor_sample_1_adversarial_recon_unit_44_sample_0.png",
       "sha256_hash": "8669221a344f39a86393191c17c4c734c32e4f22ec516d007e81b89ffe81c4d4",
       "width": 64,
       "height": 64,
@@ -44,7 +44,7 @@
     },
     {
       "sample_id": "samp_adversarial_recon_unit_44_2",
-      "file_path": "data\\quarantine\\attacks\\synthetic_samples\\adversarial_recon_unit_44_sample_1.png",
+      "file_path": "data/quarantine/attacks/synthetic_samples/adversarial_recon_unit_44_sample_1.png",
       "sha256_hash": "cfcd80d4f024e55d9c593a2d89769f761cb52372576c6e961571f3ef99ab2b67",
       "width": 64,
       "height": 64,
@@ -60,7 +60,7 @@
     },
     {
       "sample_id": "samp_adversarial_recon_unit_44_3",
-      "file_path": "data\\quarantine\\attacks\\synthetic_samples\\adversarial_recon_unit_44_sample_1.png",
+      "file_path": "data/quarantine/attacks/synthetic_samples/adversarial_recon_unit_44_sample_1.png",
       "sha256_hash": "b6af08c29852e484047fb7be73032b42547cc70f21a8fa4c9a21bd909b74b051",
       "width": 64,
       "height": 64,
@@ -77,5 +77,5 @@
   ],
   "signature": null,
   "public_key_pem": null,
-  "created_at": "2026-09-22T16:02:38.440718Z"
+  "created_at": "2026-09-24T13:51:21.429758Z"
 }

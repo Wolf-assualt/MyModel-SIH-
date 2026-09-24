@@ -1,4 +1,6 @@
 venv/
+.venv/
+.pytest_cache/
 venv_new/
 .env
 .env.*

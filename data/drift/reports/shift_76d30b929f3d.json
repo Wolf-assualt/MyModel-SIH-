@@ -1,0 +1,74 @@
+{
+  "report_id": "shift_76d30b929f3d",
+  "baseline_id": "base_0d770ab2-c10c-418c-87f0-844db8dcbbee",
+  "target_batch_id": "beec7c0b-a036-4be1-9c34-31f21d79c97b",
+  "sample_count": 1,
+  "overall_drift_score": 1.0,
+  "detected_drift_type": "ADVERSARIAL_ANOMALY",
+  "severity": "CRITICAL_SHIFT",
+  "feature_metrics": [
+    {
+      "feature_name": "brightness",
+      "baseline_mean": 0.5,
+      "target_mean": 128.0,
+      "drift_score": 1.0,
+      "ks_distance": 1.0,
+      "ks_statistic": 1.0,
+      "ks_p_value": 0.1077,
+      "psi": 21.4064,
+      "psi_score": 21.4064,
+      "wasserstein": 127.5,
+      "wasserstein_distance": 127.5,
+      "energy_distance": 255.0,
+      "is_drifted": true,
+      "explanation": "brightness: KS=1.0000 (p=0.1077), PSI=21.4064, Wasserstein=127.5000, Energy=255.0000"
+    },
+    {
+      "feature_name": "contrast",
+      "baseline_mean": 0.4,
+      "target_mean": 0.0,
+      "drift_score": 1.0,
+      "ks_distance": 1.0,
+      "ks_statistic": 1.0,
+      "ks_p_value": 0.1077,
+      "psi": 21.4064,
+      "psi_score": 21.4064,
+      "wasserstein": 0.4,
+      "wasserstein_distance": 0.4,
+      "energy_distance": 0.8,
+      "is_drifted": true,
+      "explanation": "contrast: KS=1.0000 (p=0.1077), PSI=21.4064, Wasserstein=0.4000, Energy=0.8000"
+    }
+  ],
+  "affected_features": [
+    "brightness",
+    "contrast"
+  ],
+  "evidence_records": [
+    {
+      "evidence_id": "ev_drift_468007a5246d",
+      "source": "DRIFT_ENGINE",
+      "baseline_id": "base_0d770ab2-c10c-418c-87f0-844db8dcbbee",
+      "baseline_digest": "52431edae664ceede7efe2beae6f7f3212df7f66b17a5bf33c7054ebda42b29b",
+      "feature_name": "brightness",
+      "severity": "CRITICAL",
+      "ks_distance": 1.0,
+      "psi": 21.4064,
+      "description": "Distribution drift detected in 'brightness': brightness: KS=1.0000 (p=0.1077), PSI=21.4064, Wasserstein=127.5000, Energy=255.0000"
+    },
+    {
+      "evidence_id": "ev_drift_45cdcf365528",
+      "source": "DRIFT_ENGINE",
+      "baseline_id": "base_0d770ab2-c10c-418c-87f0-844db8dcbbee",
+      "baseline_digest": "52431edae664ceede7efe2beae6f7f3212df7f66b17a5bf33c7054ebda42b29b",
+      "feature_name": "contrast",
+      "severity": "CRITICAL",
+      "ks_distance": 1.0,
+      "psi": 21.4064,
+      "description": "Distribution drift detected in 'contrast': contrast: KS=1.0000 (p=0.1077), PSI=21.4064, Wasserstein=0.4000, Energy=0.8000"
+    }
+  ],
+  "status": "QUARANTINED",
+  "report_digest": "00c89b22e9b8a539bf7ec0e8dab0054f054dc5fe9bf808bcbea94f8af412dac8",
+  "created_at": "2026-09-26T13:38:54.207552Z"
+}

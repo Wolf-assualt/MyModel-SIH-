@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_272a5afe9d8a",
+  "subject_id": "model_exec_34a",
+  "subject_type": "ASSET",
+  "reason": "Risk score 0.9000 exceeded threshold 0.70",
+  "evidence_ids": [
+    "ev_sys_tamper_22412a7c"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-26T13:39:03.829815Z",
+  "created_at": "2026-09-26T13:39:03.829815Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

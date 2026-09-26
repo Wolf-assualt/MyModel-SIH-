@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_70ea6c124469",
+  "subject_id": "model_exec_36a",
+  "subject_type": "ASSET",
+  "reason": "Inference provenance chain broken or replay attack detected.",
+  "evidence_ids": [
+    "ev_inf_tamper_314287bb"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-26T13:39:03.590438Z",
+  "created_at": "2026-09-26T13:39:03.590438Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

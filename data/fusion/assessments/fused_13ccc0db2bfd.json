@@ -1,0 +1,130 @@
+{
+  "assessment_id": "fused_13ccc0db2bfd",
+  "target_entity_id": "aaaded44-3066-4ece-8edd-8979ebab9644",
+  "overall_status": "UNDER_REVIEW",
+  "verdict": "UNDER_REVIEW",
+  "risk_level": "HIGH",
+  "risk_score": 0.5,
+  "confidence": 0.36,
+  "confidence_score": 0.36,
+  "action": "REVIEW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY",
+      "DISTRIBUTION_SHIFT"
+    ],
+    "coverage_ratio": 0.4,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "FLAG for security officer and ML engineer secondary review."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 40%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA."
+  ],
+  "explanation": "All 4 evidence items verified without critical security violations.",
+  "raw_evidence": [
+    {
+      "evidence_id": "integrity_955714b5-96e7-4ba2-be29-7cd19b7f8415",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.5,
+      "description": "Perceptual near-duplicate cluster of 2 images detected (avg Hamming distance 0.0, threshold 4).",
+      "subject_id": "aaaded44-3066-4ece-8edd-8979ebab9644",
+      "related_model_id": null,
+      "related_dataset_id": "aaaded44-3066-4ece-8edd-8979ebab9644",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "NEAR_DUPLICATE",
+        "sample_ids": [
+          "img_0.png",
+          "img_1.png"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_88397c5d-0c00-4ae8-a648-d9b26452e985",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Zero-variance flat image detected (variance: 0.0000). Image appears to be solid color or sensor blackout.",
+      "subject_id": "aaaded44-3066-4ece-8edd-8979ebab9644",
+      "related_model_id": null,
+      "related_dataset_id": "aaaded44-3066-4ece-8edd-8979ebab9644",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "img_0.png"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_5e0b15c5-addd-4f32-8085-0adcbe84fe70",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Zero-variance flat image detected (variance: 0.0000). Image appears to be solid color or sensor blackout.",
+      "subject_id": "aaaded44-3066-4ece-8edd-8979ebab9644",
+      "related_model_id": null,
+      "related_dataset_id": "aaaded44-3066-4ece-8edd-8979ebab9644",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "img_1.png"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "drift_shift_9287ab408988",
+      "source": "DISTRIBUTION_SHIFT",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "Distribution shift: ADVERSARIAL_ANOMALY",
+      "subject_id": "aaaded44-3066-4ece-8edd-8979ebab9644",
+      "related_model_id": null,
+      "related_dataset_id": "aaaded44-3066-4ece-8edd-8979ebab9644",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "drift_type": "ADVERSARIAL_ANOMALY",
+        "affected_features": [
+          "brightness",
+          "contrast"
+        ]
+      }
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "3046022100f48a2ba2a6ed48bef58658c44d3915d23263e8e7f908e16212b5069b19d5b4c0022100ee2672636874888011a83d6145f5d1d377d7d548fb9e188b834709e2817801a3",
+  "assessment_digest": "74dd99e632e1b5dead67b238995a29d372b4de49f21bf93d2860791aba04fea5",
+  "created_at": "2026-09-26T13:38:37.000996Z"
+}

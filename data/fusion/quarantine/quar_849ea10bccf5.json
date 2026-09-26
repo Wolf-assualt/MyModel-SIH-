@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_849ea10bccf5",
+  "subject_id": "d85f98d3-fe95-4e42-9dbb-0f3b37010cc8",
+  "subject_type": "ASSET",
+  "reason": "Hard veto triggered via evidence policy.",
+  "evidence_ids": [
+    "ev_tamper_alert_01"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-26T13:38:29.541549Z",
+  "created_at": "2026-09-26T13:38:29.541549Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

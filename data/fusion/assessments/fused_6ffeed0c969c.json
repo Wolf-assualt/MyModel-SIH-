@@ -1,0 +1,67 @@
+{
+  "assessment_id": "fused_6ffeed0c969c",
+  "target_entity_id": "283872ce-366b-4b3b-83da-070d2df8573b",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "MODEL_IDENTITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+    "Investigate Hard veto triggered via evidence policy."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "HARD VETO: Hard veto triggered via evidence policy.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_weight_tamper_01",
+      "source": "MODEL_IDENTITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "283872ce-366b-4b3b-83da-070d2df8573b",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": 1.0,
+      "evidence_type": "WEIGHT_TAMPERING",
+      "metadata": {
+        "hard_veto": true
+      }
+    }
+  ],
+  "decisive_evidence": [
+    "ev_weight_tamper_01"
+  ],
+  "hard_veto_triggered": true,
+  "veto_reasons": [
+    "Hard veto triggered via evidence policy."
+  ],
+  "signature": "3044022076f879798258f61eef14e3fcd7dd44dd64ea2e42b600e202fdcf94fd4e2946f9022010c470812e0ec8b58c14df200c07945c2d2d65e6e23f2e918a1994e18855afce",
+  "assessment_digest": "14855a81cde9f604a9644da8403cb26b4eb73e953b271d46435da8121d66cdbe",
+  "created_at": "2026-09-26T13:38:30.251611Z"
+}

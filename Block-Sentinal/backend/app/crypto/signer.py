@@ -1,18 +1,21 @@
-"""ECDSA (SECP256R1) Key Management, Digital Signatures, and Verification."""
-from typing import Optional
+"""Ed25519 Key Management, Digital Signatures, and Verification."""
+from typing import Optional, Union
 from cryptography.exceptions import InvalidSignature
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ed25519
 
 
 class KeyManager:
-    """Manages ECDSA SECP256R1 asymmetric keypairs for signing digests and evidence records."""
+    """Manages Ed25519 asymmetric keypairs for signing digests and evidence records."""
 
     def __init__(self, private_key_pem: Optional[bytes] = None):
         if private_key_pem:
-            self.private_key = serialization.load_pem_private_key(private_key_pem, password=None)
+            loaded_key = serialization.load_pem_private_key(private_key_pem, password=None)
+            if not isinstance(loaded_key, ed25519.Ed25519PrivateKey):
+                raise ValueError("Provided key is not an Ed25519 private key")
+            self.private_key = loaded_key
         else:
-            self.private_key = ec.generate_private_key(ec.SECP256R1())
+            self.private_key = ed25519.Ed25519PrivateKey.generate()
         self.public_key = self.private_key.public_key()
 
     def export_private_key_pem(self) -> bytes:
@@ -30,29 +33,36 @@ class KeyManager:
             format=serialization.PublicFormat.SubjectPublicKeyInfo,
         )
 
-    def sign_hash(self, digest_hex: str) -> str:
-        """Sign a digest using ECDSA with SHA-256 and return the hex-encoded signature."""
-        signature_bytes = self.private_key.sign(
-            digest_hex.encode("utf-8"),
-            ec.ECDSA(hashes.SHA256()),
-        )
+    def sign_hash(self, digest_hex: Union[str, bytes]) -> str:
+        """Sign a digest using Ed25519 and return the hex-encoded signature."""
+        if isinstance(digest_hex, str):
+            data = digest_hex.encode("utf-8")
+        else:
+            data = digest_hex
+        signature_bytes = self.private_key.sign(data)
         return signature_bytes.hex()
 
     @staticmethod
-    def verify_signature(public_key_pem: bytes, digest_hex: str, signature_hex: str) -> bool:
-        """Verify an ECDSA signature against the provided public key PEM."""
+    def verify_signature(
+        public_key_pem: Union[bytes, str],
+        digest_hex: Union[str, bytes],
+        signature_hex: str,
+    ) -> bool:
+        """Verify an Ed25519 signature against the provided public key PEM."""
         try:
             if isinstance(public_key_pem, str):
                 public_key_pem = public_key_pem.encode("utf-8")
             pubkey = serialization.load_pem_public_key(public_key_pem)
+            if not isinstance(pubkey, ed25519.Ed25519PublicKey):
+                return False
             sig_bytes = bytes.fromhex(signature_hex)
-            pubkey.verify(
-                sig_bytes,
-                digest_hex.encode("utf-8"),
-                ec.ECDSA(hashes.SHA256()),
-            )
+            if isinstance(digest_hex, str):
+                data = digest_hex.encode("utf-8")
+            else:
+                data = digest_hex
+            pubkey.verify(sig_bytes, data)
             return True
-        except (InvalidSignature, ValueError, TypeError):
+        except (InvalidSignature, ValueError, TypeError, Exception):
             return False
 
 
@@ -72,7 +82,8 @@ def get_or_create_persistent_key_manager() -> KeyManager:
     if priv_key_file.exists():
         try:
             pem_bytes = priv_key_file.read_bytes()
-            return KeyManager(private_key_pem=pem_bytes)
+            km = KeyManager(private_key_pem=pem_bytes)
+            return km
         except Exception:
             pass
 
@@ -88,4 +99,5 @@ def get_or_create_persistent_key_manager() -> KeyManager:
 default_key_manager = get_or_create_persistent_key_manager()
 default_signer = default_key_manager
 Signer = KeyManager
+
 

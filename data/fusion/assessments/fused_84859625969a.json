@@ -1,0 +1,83 @@
+{
+  "assessment_id": "fused_84859625969a",
+  "target_entity_id": "d85f98d3-fe95-4e42-9dbb-0f3b37010cc8",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.28,
+  "confidence_score": 0.28,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "BEHAVIOURAL_FINGERPRINT",
+      "DATA_INTEGRITY"
+    ],
+    "coverage_ratio": 0.4,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+    "Investigate Hard veto triggered via evidence policy."
+  ],
+  "limitations": [
+    "Audit coverage ratio: 40%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "HARD VETO: Hard veto triggered via evidence policy.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_tamper_alert_01",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "d85f98d3-fe95-4e42-9dbb-0f3b37010cc8",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": 1.0,
+      "evidence_type": "BYTE_LEVEL_TAMPERING",
+      "metadata": {
+        "hard_veto": true,
+        "tampered_sample": "S2A_Patch_Alpha"
+      }
+    },
+    {
+      "evidence_id": "ev_benign_sensor_01",
+      "source": "BEHAVIOURAL_FINGERPRINT",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "d85f98d3-fe95-4e42-9dbb-0f3b37010cc8",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": 0.95,
+      "evidence_type": "NOMINAL_SENSOR_METRICS",
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [
+    "ev_tamper_alert_01"
+  ],
+  "hard_veto_triggered": true,
+  "veto_reasons": [
+    "Hard veto triggered via evidence policy."
+  ],
+  "signature": "3046022100802c78510b656cd73848ce051e68a9906ebcff01b7231fccf80901840867ed13022100bb9b2d00b761f2610631a393176ed56b47a02ed0080a5208cd2ea1bd71cb493e",
+  "assessment_digest": "9d092b4071321bb657093bc996dfd72db6398e720ef45e8316cb765fe38c0092",
+  "created_at": "2026-09-26T13:38:29.541807Z"
+}

@@ -1,0 +1,63 @@
+{
+  "assessment_id": "fused_da85bbe3c145",
+  "target_entity_id": "ds_exec_1f5",
+  "overall_status": "UNDER_REVIEW",
+  "verdict": "UNDER_REVIEW",
+  "risk_level": "MEDIUM",
+  "risk_score": 0.35,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "REVIEW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "FLAG for security officer and ML engineer secondary review."
+  ],
+  "limitations": [
+    "Limited verification scope (MINIMAL): 1/5 evidence sources checked.",
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "Partial verification (MINIMAL) \u2014 evaluated 1/5 sources",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_dup_7150bcca",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "MEDIUM",
+      "metric_value": 0.4,
+      "description": "Near-duplicate anomaly: 4 pairs of highly redundant frames detected.",
+      "subject_id": "synthetic_dataset_batch",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "fb608dba407665b517e58aa635ad5cb310d11fd9582763588d94e2db5ed9d15d21fa748b561483bbac0e59a6a695429d8c2dcdc718a6c461c8ac06e4fd65090e",
+  "assessment_digest": "df71757cbb484fa5759430ec87418a15f00a6ed4af065b938ff7401e9ba89f27",
+  "scope": "MINIMAL",
+  "evidence_completeness": "MINIMAL",
+  "created_at": "2026-09-26T18:52:55.418538Z"
+}

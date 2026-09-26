@@ -1,0 +1,63 @@
+{
+  "report_id": "rep_a8f3d5df2a38",
+  "target_asset_id": "adversarial_recon_unit_44_backdoored",
+  "target_asset_type": "DATASET_BATCH",
+  "assessment_id": "fused_cf82039c1b80",
+  "overall_verdict": "QUARANTINED",
+  "risk_score": 0.9,
+  "confidence_score": 0.12,
+  "coverage_ratio": 0.2,
+  "findings_summary": {
+    "CRITICAL": 1,
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 0
+  },
+  "threat_narratives": [
+    "Data Poisoning Indicator: Backdoor trigger patterns detected in training partition."
+  ],
+  "limitations_and_disclaimers": [
+    "Uninspected assurance layers: [MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT]. Risk scores represent partial assurance.",
+    "Integrity and drift metrics are bounded by operational camera sensor dynamics and calibration.",
+    "Zero-trust provenance assurance assumes asymmetric root signing key confidentiality.",
+    "Assurance coverage is limited to evidence sources registered in the current fusion session; uninspected layers may conceal latent threats."
+  ],
+  "report_digest": "ba9636962d89fc8e24f99f33918b517b21daa6a9331c353592d5ee10a5cc33e1",
+  "signature": "9455cda55a8ebad4082be029940b7693322755925414c6e7f99278d8a486bd8a94cfabe94312496cf97c45cdfe8437302011398cfb9b24898db0c3b3e5235f04",
+  "signer_public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAb9rH6t0eEBm0eVXBflMaIkOUbNLf/Xdt8IHXOajPSrs=\n-----END PUBLIC KEY-----\n",
+  "created_at": "2026-09-26T17:15:01.736643Z",
+  "gatekeeper_action": "BLOCK",
+  "risk_level": "CRITICAL",
+  "hard_veto_triggered": true,
+  "section_overviews": [
+    {
+      "layer_name": "Dataset & Training Data Integrity",
+      "status": "QUARANTINED",
+      "risk_contribution": 0.9
+    }
+  ],
+  "upstream_lineage": [],
+  "downstream_blast_radius": {},
+  "dataset_findings": [
+    {
+      "evidence_id": "ev_backdoor_crit_01",
+      "description": "Trigger backdoor checkerboard patch confirmed across target samples.",
+      "severity": "CRITICAL",
+      "metric_value": 0.98
+    }
+  ],
+  "model_findings": [],
+  "behavioral_findings": [],
+  "inference_findings": [],
+  "drift_findings": [],
+  "quarantine_records": [
+    {
+      "subject_id": "adversarial_recon_unit_44_backdoored",
+      "reason": "Critical layer weight discrepancy and runtime replay detection."
+    }
+  ],
+  "cryptographic_proofs": {
+    "canonical_report_digest": "ba9636962d89fc8e24f99f33918b517b21daa6a9331c353592d5ee10a5cc33e1",
+    "ecdsa_signature": "9455cda55a8ebad4082be029940b7693322755925414c6e7f99278d8a486bd8a94cfabe94312496cf97c45cdfe8437302011398cfb9b24898db0c3b3e5235f04"
+  }
+}

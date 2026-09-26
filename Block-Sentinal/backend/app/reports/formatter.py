@@ -71,7 +71,7 @@ class ReportFormatter:
             "",
             "## Cryptographic Provenance Seal",
             f"- **Canonical Report Digest (SHA-256)**: `{report.report_digest}`",
-            f"- **ECDSA SECP256R1 Digital Signature**: `{report.signature}`",
+            f"- **Ed25519 Digital Signature**: `{report.signature}`",
             "- **Signing Authority Public Key (SubjectPublicKeyInfo)**:",
             "```pem",
             pem_clean,
@@ -195,7 +195,7 @@ class ReportFormatter:
     <h2>Cryptographic Provenance Seal</h2>
     <div class="seal">
         <strong>Canonical Report Digest (SHA-256):</strong> <code>{report.report_digest}</code><br>
-        <strong>ECDSA SECP256R1 Digital Signature:</strong> <code>{report.signature}</code><br>
+        <strong>Ed25519 Digital Signature:</strong> <code>{report.signature}</code><br>
         <strong>Signing Authority Public Key (SPKI):</strong>
         <pre>{pem_clean}</pre>
     </div>

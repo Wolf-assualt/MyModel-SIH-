@@ -1,0 +1,63 @@
+{
+  "assessment_id": "fused_1fefde9e8ab1",
+  "target_entity_id": "ebada0cf-5752-4dca-bf3b-a5bfa7982785",
+  "overall_status": "ACCEPTED",
+  "verdict": "ACCEPTED",
+  "risk_level": "LOW",
+  "risk_score": 0.015,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "ALLOW",
+  "coverage": {
+    "sources_checked": [
+      "DISTRIBUTION_SHIFT"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "ALLOW asset promotion to operational pipeline."
+  ],
+  "limitations": [
+    "Limited verification scope (MINIMAL): 1/5 evidence sources checked.",
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA."
+  ],
+  "explanation": "Partial verification (MINIMAL) \u2014 evaluated 1/5 sources",
+  "raw_evidence": [
+    {
+      "evidence_id": "e2e_drift",
+      "source": "DISTRIBUTION_SHIFT",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "Drift=NO_DRIFT",
+      "subject_id": "ebada0cf-5752-4dca-bf3b-a5bfa7982785",
+      "related_model_id": null,
+      "related_dataset_id": "ebada0cf-5752-4dca-bf3b-a5bfa7982785",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "32fc55849713e6dcf0025c6b01bd2621a69ad549b7032c967e1a64da648ceed0857092de4c998cbae874f909e78a4860a2a235f740f3964d67fdfc564ad87b0b",
+  "assessment_digest": "8e9d9f183c047726b1746955773d69ba2fb1e1eee8e375d3755b9ee1698be44b",
+  "scope": "MINIMAL",
+  "evidence_completeness": "MINIMAL",
+  "created_at": "2026-09-26T18:52:57.201753Z"
+}

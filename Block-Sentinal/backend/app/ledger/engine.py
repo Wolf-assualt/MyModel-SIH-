@@ -101,8 +101,10 @@ class LedgerEngine:
         )
         
         signature = None
+        signing_key_fingerprint = None
         if sign:
             signature = self.key_manager.sign_hash(current_hash)
+            signing_key_fingerprint = self.key_manager.get_public_key_fingerprint()
         
         event = LedgerEvent(
             sequence=sequence,
@@ -115,6 +117,7 @@ class LedgerEngine:
             previous_hash=previous_hash,
             current_hash=current_hash,
             signature=signature,
+            signing_key_fingerprint=signing_key_fingerprint,
         )
         
         self.db.add(event)
@@ -133,6 +136,7 @@ class LedgerEngine:
             - last_verified_sequence: int - Last sequence number verified
             - first_invalid_sequence: Optional[int] - First invalid sequence if failed
             - failure_reason: Optional[str] - Reason for failure
+            - likely_cause: Optional[str] - "KEY_ROTATION" | "TAMPER" | None
         """
         result = self.db.execute(select(LedgerEvent).order_by(LedgerEvent.sequence.asc()))
         events = result.scalars().all()
@@ -144,6 +148,7 @@ class LedgerEngine:
                 "last_verified_sequence": -1,
                 "first_invalid_sequence": None,
                 "failure_reason": None,
+                "likely_cause": None,
             }
         
         events_checked = 0
@@ -158,6 +163,7 @@ class LedgerEngine:
                     "last_verified_sequence": last_verified_sequence,
                     "first_invalid_sequence": event.sequence,
                     "failure_reason": f"Sequence gap at index {i}: expected {i}, got {event.sequence}",
+                    "likely_cause": "TAMPER",
                 }
             
             # 2. Verify previous hash pointer
@@ -169,6 +175,7 @@ class LedgerEngine:
                     "last_verified_sequence": last_verified_sequence,
                     "first_invalid_sequence": event.sequence,
                     "failure_reason": f"Previous hash mismatch at sequence {event.sequence}",
+                    "likely_cause": "TAMPER",
                 }
             
             # 3. Recompute and verify current hash
@@ -200,19 +207,40 @@ class LedgerEngine:
                     "last_verified_sequence": last_verified_sequence,
                     "first_invalid_sequence": event.sequence,
                     "failure_reason": f"Current hash recomputation failed at sequence {event.sequence}",
+                    "likely_cause": "TAMPER",
                 }
             
             # 4. Verify signature if present
             if event.signature:
                 public_key_pem = self.key_manager.export_public_key_pem()
+                current_fp = self.key_manager.get_public_key_fingerprint()
                 if not KeyManager.verify_signature(public_key_pem, expected_current, event.signature):
-                    return {
-                        "valid": False,
-                        "events_checked": events_checked,
-                        "last_verified_sequence": last_verified_sequence,
-                        "first_invalid_sequence": event.sequence,
-                        "failure_reason": f"Invalid signature at sequence {event.sequence}",
-                    }
+                    event_fp = getattr(event, "signing_key_fingerprint", None)
+                    is_key_rotation = (event_fp is not None and event_fp != current_fp) or (event_fp is None)
+                    if is_key_rotation:
+                        old_fp_desc = event_fp if event_fp else "unknown/legacy"
+                        return {
+                            "valid": False,
+                            "events_checked": events_checked,
+                            "last_verified_sequence": last_verified_sequence,
+                            "first_invalid_sequence": event.sequence,
+                            "failure_reason": (
+                                f"Signature verification failed: event was signed under a different key generation "
+                                f"(fingerprint {old_fp_desc}), current active key is {current_fp}. "
+                                f"This indicates key rotation, not necessarily tampering — "
+                                f"investigate key history before treating as a security incident."
+                            ),
+                            "likely_cause": "KEY_ROTATION",
+                        }
+                    else:
+                        return {
+                            "valid": False,
+                            "events_checked": events_checked,
+                            "last_verified_sequence": last_verified_sequence,
+                            "first_invalid_sequence": event.sequence,
+                            "failure_reason": f"Invalid signature at sequence {event.sequence}",
+                            "likely_cause": "TAMPER",
+                        }
             
             events_checked += 1
             last_verified_sequence = event.sequence
@@ -223,6 +251,7 @@ class LedgerEngine:
             "last_verified_sequence": last_verified_sequence,
             "first_invalid_sequence": None,
             "failure_reason": None,
+            "likely_cause": None,
         }
     
     def get_events_by_scan(self, scan_id: str) -> List[LedgerEvent]:

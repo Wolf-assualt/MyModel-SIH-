@@ -1,0 +1,104 @@
+{
+  "assessment_id": "fused_c54c40d38f89",
+  "target_entity_id": "ds_exec_09d",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.48,
+  "confidence_score": 0.48,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "BEHAVIOURAL_FINGERPRINT",
+      "DATA_INTEGRITY",
+      "DISTRIBUTION_SHIFT"
+    ],
+    "coverage_ratio": 0.6,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "INFERENCE_DNA"
+    ]
+  },
+  "findings": [
+    "Correlated Targeted Backdoor Poisoning Campaign detected: Training data contains synthetic trigger artifacts that directly correlate with model behavioural divergence.",
+    "Coordinated Evasion / Adversarial Perturbation Attack detected: Severe distribution anomaly correlates with model output divergence across perturbation batteries."
+  ],
+  "correlated_findings": [
+    "Correlated Targeted Backdoor Poisoning Campaign detected: Training data contains synthetic trigger artifacts that directly correlate with model behavioural divergence.",
+    "Coordinated Evasion / Adversarial Perturbation Attack detected: Severe distribution anomaly correlates with model output divergence across perturbation batteries."
+  ],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+    "Investigate Critical training data tampering or backdoor trigger pattern detected."
+  ],
+  "limitations": [
+    "Limited verification scope (PARTIAL): 3/5 evidence sources checked.",
+    "Audit coverage ratio: 60%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, INFERENCE_DNA."
+  ],
+  "explanation": "Partial verification (PARTIAL) \u2014 evaluated 3/5 sources | HARD VETO: Critical training data tampering or backdoor trigger pattern detected. | CORRELATED FINDINGS: Correlated Targeted Backdoor Poisoning Campaign detected: Training data contains synthetic trigger artifacts that directly correlate with model behavioural divergence.; Coordinated Evasion / Adversarial Perturbation Attack detected: Severe distribution anomaly correlates with model output divergence across perturbation batteries.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_m_data_14563739",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 0.98,
+      "description": "Stage 1: Training dataset backdoor trigger pattern detected.",
+      "subject_id": "full_pipeline_chain",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    },
+    {
+      "evidence_id": "ev_m_model_42f3a1f5",
+      "source": "BEHAVIOURAL_FINGERPRINT",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.78,
+      "description": "Stage 2: Model behavioral divergence observed on occlusion probes.",
+      "subject_id": "full_pipeline_chain",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    },
+    {
+      "evidence_id": "ev_m_drift_99edfebd",
+      "source": "DISTRIBUTION_SHIFT",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.65,
+      "description": "Stage 3: Corroborating distribution shift in runtime telemetry.",
+      "subject_id": "full_pipeline_chain",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [
+    "ev_m_data_14563739"
+  ],
+  "hard_veto_triggered": true,
+  "veto_reasons": [
+    "Critical training data tampering or backdoor trigger pattern detected."
+  ],
+  "signature": "22b4767429168457732ac2cd0202119807ef65dafeffcbf7b9fb36f0be7b1b2f60870e48770c2fdc2545eb6a04f3c581185f53d497e38e470aa8cbbd3b8a4b0b",
+  "assessment_digest": "883d687d93b92598566b55a609558337a291a36dc3eec2d61906f746bae263f6",
+  "scope": "PARTIAL",
+  "evidence_completeness": "PARTIAL",
+  "created_at": "2026-09-26T18:52:55.597414Z"
+}

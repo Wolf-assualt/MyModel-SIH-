@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_c5fb12959aa5",
+  "subject_id": "model_exec_e28",
+  "subject_type": "REDTEAM_SANDBOX_ASSET",
+  "reason": "Defensive Red-Team Detection: Reference Distribution Baseline Tampering. Partial verification (MINIMAL) \u2014 evaluated 1/5 sources | HARD VETO: Invalid or forged cryptographic signature detected.",
+  "evidence_ids": [
+    "ev_drift_base_502f848c"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-26T18:52:55.517869Z",
+  "created_at": "2026-09-26T18:52:55.517869Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

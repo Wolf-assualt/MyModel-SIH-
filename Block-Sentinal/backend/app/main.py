@@ -51,6 +51,8 @@ logger = logging.getLogger("trust_cv")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
+    from app.crypto.signer import verify_startup_key_consistency
+    verify_startup_key_consistency()
     yield
 
 

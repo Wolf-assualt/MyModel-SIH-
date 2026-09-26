@@ -168,6 +168,7 @@ export interface LedgerVerification {
   last_verified_sequence: number;
   first_invalid_sequence: number | null;
   failure_reason: string | null;
+  likely_cause?: 'KEY_ROTATION' | 'TAMPER' | null;
 }
 
 export interface LedgerEventRecord {
@@ -190,14 +191,40 @@ export type AnalystDecision = 'ACCEPT' | 'REVIEW' | 'QUARANTINE';
 class ApiService {
   private baseUrl = '/api/v1';
 
-  async uploadAndScanDataset(file: File): Promise<ScanSession> {
+  async uploadAndScanDataset(
+    file: File,
+    baselineFile?: File,
+    baselineId?: string,
+  ): Promise<ScanSession> {
     const body = new FormData();
     body.append('file', file);
     body.append('dataset_name', file.name);
+    if (baselineFile) {
+      body.append('baseline_file', baselineFile);
+    }
+    if (baselineId) {
+      body.append('baseline_id', baselineId);
+    }
     const response = await fetch(`${this.baseUrl}/datasets/upload`, { method: 'POST', body });
     const envelope: ApiResponse<ScanSession> = await response.json();
     if (!response.ok || !envelope.data) {
       throw new Error(envelope.error || `Upload failed with HTTP ${response.status}`);
+    }
+    return envelope.data;
+  }
+
+  async uploadBaseline(
+    file: File,
+    opts: { baselineId?: string; name?: string } = {},
+  ): Promise<any> {
+    const body = new FormData();
+    body.append('file', file);
+    if (opts.baselineId) body.append('baseline_id', opts.baselineId);
+    if (opts.name) body.append('name', opts.name);
+    const response = await fetch(`${this.baseUrl}/drift/baselines/upload`, { method: 'POST', body });
+    const envelope = await response.json();
+    if (!response.ok || !envelope.data) {
+      throw new Error(envelope.error || `Baseline upload failed with HTTP ${response.status}`);
     }
     return envelope.data;
   }

@@ -589,7 +589,7 @@ if (backendStage === 'EVIDENCE_FUSION' || backendStage.match(/^REPORT|COMPLETED$
             emitOnce('s2a', 'DATA.INGESTION', `Samples staged from secure upload sandbox into analysis path.`, 'pass');
           }
           if (stageResults.HASH_VERIFICATION && stageResults.HASH_VERIFICATION.status === 'PASSED') {
-            emitOnce('s2b', 'CRYPTO.MERKLE_TREE', `All sample digests sealed with ECDSA SECP256R1. Merkle Root computed.`, 'pass');
+            emitOnce('s2b', 'CRYPTO.MERKLE_TREE', `All sample digests sealed with Ed25519. Merkle Root computed.`, 'pass');
           }
           if (stageResults.DATASET_ANALYSIS) {
             const sr = stageResults.DATASET_ANALYSIS;
@@ -689,7 +689,7 @@ if (backendStage === 'EVIDENCE_FUSION' || backendStage.match(/^REPORT|COMPLETED$
       { id: 1, op: 'READ_ONLY.INSPECT', msg: `Scanning 12 demo band files. Non-destructive inspection lock active.`, status: 'passed' },
       { id: 2, op: 'CRYPTO.MERKLE_TREE', msg: isTamper
           ? 'Merkle root divergence detected! Spectral band byte modification flagged.'
-          : `All sample digests sealed with ECDSA SECP256R1. Merkle Root: 3cafad429f83...`,
+          : `All sample digests sealed with Ed25519. Merkle Root: 3cafad429f83...`,
         status: isTamper ? 'blocked' : 'passed' },
       { id: 3, op: 'DATA.INTEGRITY', msg: isTamper ? 'Bit-level mutation flagged in spectral payload.' : 'Duplicate detection & 16-bit dHash perceptual audit clean.', status: isTamper ? 'blocked' : 'passed' },
       { id: 4, op: 'MODEL.IDENTITY', msg: (AppState.currentScenario === 'model_tamper')
@@ -718,7 +718,7 @@ if (backendStage === 'EVIDENCE_FUSION' || backendStage.match(/^REPORT|COMPLETED$
           ? 'BFS Impact Traversal: 2 downstream assets flagged as POTENTIALLY AFFECTED / REQUIRES REVIEW.'
           : 'No downstream assets compromised.',
         status: isTamper ? 'blocked' : 'passed' },
-      { id: 12, op: 'FORENSIC.REPORT', msg: 'RFC 8785 Canonical JSON generated and cryptographically sealed with SECP256R1 digital signature.', status: 'passed' },
+      { id: 12, op: 'FORENSIC.REPORT', msg: 'RFC 8785 Canonical JSON generated and cryptographically sealed with Ed25519 digital signature.', status: 'passed' },
     ];
 
     let currentStep = 0;
@@ -1265,7 +1265,7 @@ if (backendStage === 'EVIDENCE_FUSION' || backendStage.match(/^REPORT|COMPLETED$
             const el = document.getElementById('report-sig-status');
             if (!el) return;
             if (led && typeof led === 'object' && led.valid === true) {
-              el.textContent = `LEDGER VALID (SECP256R1) | Events: ${led.events_checked || 'N/A'} | Last seq: ${led.last_verified_sequence}`;
+              el.textContent = `LEDGER VALID (Ed25519) | Events: ${led.events_checked || 'N/A'} | Last seq: ${led.last_verified_sequence}`;
               el.className = 'badge-tag badge-health-ok';
             } else if (led && typeof led === 'object' && led.valid === false) {
               el.textContent = `LEDGER INVALID! seq ${led.first_invalid_sequence}: ${led.failure_reason || 'unknown'}`;
@@ -1579,7 +1579,7 @@ if (backendStage === 'EVIDENCE_FUSION' || backendStage.match(/^REPORT|COMPLETED$
       return;
     }
     if (result.is_valid) {
-      setReportSigStatus('VALID (SECP256R1, BACKEND-VERIFIED)', 'badge-health-ok');
+      setReportSigStatus('VALID (Ed25519, BACKEND-VERIFIED)', 'badge-health-ok');
     } else {
       setReportSigStatus('INVALID // TAMPER DETECTED (BACKEND)', 'badge-health-crit');
     }

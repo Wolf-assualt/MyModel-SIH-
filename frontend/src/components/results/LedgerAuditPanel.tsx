@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, ShieldX, Loader2, RefreshCw, Link2 } from 'lucide-react';
+import { ShieldCheck, ShieldX, Loader2, RefreshCw, Link2, KeyRound } from 'lucide-react';
 import { useInvestigation } from '../../state/investigationStore';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
@@ -29,11 +29,14 @@ export const LedgerAuditPanel: React.FC = () => {
       : ledgerVerification?.valid === false ? 'INVALID'
       : 'UNAVAILABLE';
 
+  const likelyCause = ledgerVerification?.likely_cause;
+
   const rows: Array<[string, string]> = [
     ['Verification status', state],
     ['Events checked', ledgerVerification ? String(ledgerVerification.events_checked) : 'UNAVAILABLE'],
     ['Last verified sequence', ledgerVerification ? String(ledgerVerification.last_verified_sequence) : 'UNAVAILABLE'],
     ['First invalid sequence', ledgerVerification?.first_invalid_sequence != null ? String(ledgerVerification.first_invalid_sequence) : 'NONE / UNAVAILABLE'],
+    ['Likely cause', likelyCause ?? (state === 'VALID' ? 'NONE (CHAIN INTACT)' : 'UNAVAILABLE')],
     ['Failure reason', ledgerVerification?.failure_reason ?? 'NONE / UNAVAILABLE'],
   ];
 
@@ -74,8 +77,11 @@ export const LedgerAuditPanel: React.FC = () => {
           {state === 'VALID' && (
             <Badge variant="success" size="sm" icon={<ShieldCheck size={12} />}>BACKEND: VALID</Badge>
           )}
-          {state === 'INVALID' && (
-            <Badge variant="critical" size="sm" icon={<ShieldX size={12} />}>BACKEND: INVALID</Badge>
+          {state === 'INVALID' && likelyCause === 'KEY_ROTATION' && (
+            <Badge variant="warning" size="sm" icon={<KeyRound size={12} />}>KEY ROTATION MISMATCH</Badge>
+          )}
+          {state === 'INVALID' && likelyCause !== 'KEY_ROTATION' && (
+            <Badge variant="critical" size="sm" icon={<ShieldX size={12} />}>BACKEND: TAMPER DETECTED</Badge>
           )}
           {state === 'UNAVAILABLE' && (
             <Badge variant="warning" size="sm">UNAVAILABLE</Badge>
@@ -93,25 +99,34 @@ export const LedgerAuditPanel: React.FC = () => {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {rows.map(([label, value]) => (
-          <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', fontSize: '12px' }}>
-            <span style={{ color: 'var(--text-muted)' }}>{label}</span>
-            <span
-              className="font-mono"
-              style={{
-                color: value.includes('UNAVAILABLE')
-                  ? 'var(--warning-text)'
-                  : state === 'INVALID'
-                  ? 'var(--critical-text)'
-                  : 'var(--text-primary)',
-                wordBreak: 'break-all',
-                textAlign: 'right',
-              }}
-            >
-              {value}
-            </span>
-          </div>
-        ))}
+        {rows.map(([label, value]) => {
+          const isKeyRotationRow = label === 'Likely cause' && value === 'KEY_ROTATION';
+          const isTamperRow = label === 'Likely cause' && value === 'TAMPER';
+
+          return (
+            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', fontSize: '12px' }}>
+              <span style={{ color: 'var(--text-muted)' }}>{label}</span>
+              <span
+                className="font-mono"
+                style={{
+                  color: isKeyRotationRow
+                    ? 'var(--warning-text)'
+                    : isTamperRow
+                    ? 'var(--critical-text)'
+                    : value.includes('UNAVAILABLE')
+                    ? 'var(--warning-text)'
+                    : state === 'INVALID'
+                    ? 'var(--critical-text)'
+                    : 'var(--text-primary)',
+                  wordBreak: 'break-all',
+                  textAlign: 'right',
+                }}
+              >
+                {value}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
       <div
@@ -129,7 +144,11 @@ export const LedgerAuditPanel: React.FC = () => {
           ? backendOnline
             ? 'The backend ledger has not been verified for this investigation. No validity claim is made by this client.'
             : 'Ledger verification UNAVAILABLE — the backend is unreachable. No validity claim is made by this client.'
-          : 'Verification performed by the backend hash-chain auditor (ECDSA SECP256R1 / SHA-256). The frontend reproduces none of this logic.'}
+          : likelyCause === 'KEY_ROTATION'
+          ? 'KEY ROTATION NOTICE: Hash chain sequence and digest pointers are valid, but this event was signed under an earlier key generation. This indicates key rotation or server restart with a new keypair, not intentional tampering.'
+          : state === 'INVALID'
+          ? 'CRITICAL TAMPER ALERT: Cryptographic chain or signature verification failed on the backend auditor (Ed25519 / SHA-256). Sequence integrity or payload hash has been modified.'
+          : 'Verification performed by backend hash-chain auditor (Ed25519 / SHA-256). Monotonic sequence, previous hash pointers, and signatures verified successfully.'}
       </div>
     </section>
   );

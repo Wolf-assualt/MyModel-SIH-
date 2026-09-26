@@ -1,5 +1,6 @@
 """Dataset ingestion, upload, and manifest verification endpoints."""
 import hashlib
+import json
 import shutil
 import uuid
 import zipfile
@@ -27,6 +28,8 @@ from app.schemas.dataset import (
 )
 from app.schemas.integrity import AuditEvent, DatasetIntegrityReport, ImageAssessment
 
+VIDEO_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".webm"}
+
 router = APIRouter(prefix="/datasets", tags=["Dataset Ingestion"])
 
 
@@ -52,6 +55,8 @@ async def upload_and_scan_dataset(
     files: Optional[List[UploadFile]] = File(default=None),
     file: Optional[UploadFile] = File(default=None),
     dataset_name: str = Form("uploaded-dataset"),
+    baseline_file: Optional[UploadFile] = File(default=None),
+    baseline_id: Optional[str] = Form(default=None),
 ) -> ResponseEnvelope[ScanSession]:
     """Persist and immediately start a background scan session for an uploaded dataset.
 
@@ -107,6 +112,26 @@ async def upload_and_scan_dataset(
                 with target.open("wb") as destination:
                     shutil.copyfileobj(uf.file, destination)
 
+        # Extract frames from any uploaded video files
+        video_files = [f for f in source_dir.iterdir() if f.is_file() and f.suffix.lower() in VIDEO_EXTENSIONS]
+        if video_files:
+            try:
+                import cv2
+                for vf in video_files:
+                    cap = cv2.VideoCapture(str(vf))
+                    extracted = 0
+                    max_frames = 60
+                    while cap.isOpened() and extracted < max_frames:
+                        ret, frame = cap.read()
+                        if not ret:
+                            break
+                        frame_path = source_dir / f"{vf.stem}_frame_{extracted:04d}.jpg"
+                        cv2.imwrite(str(frame_path), frame)
+                        extracted += 1
+                    cap.release()
+            except Exception:
+                pass
+
         # Phase 3: Auto-detect format from directory structure
         detected_format, annotation_path = detect_format(source_dir)
 
@@ -121,6 +146,35 @@ async def upload_and_scan_dataset(
             source_path=str(source_dir),
             annotation_path=str(annotation_path) if annotation_path else None,
         )
+
+        # Attach baseline if provided via file or id for one-off/drift checks
+        assigned_baseline_id = baseline_id
+        if baseline_file:
+            from app.drift.engine import default_drift_engine
+            try:
+                b_bytes = await baseline_file.read()
+                b_data = json.loads(b_bytes.decode("utf-8"))
+                b_id = assigned_baseline_id or b_data.get("baseline_id") or f"baseline_{uuid.uuid4().hex[:12]}"
+                features = b_data.get("features")
+                if not features and "feature_summaries" in b_data:
+                    features = {k: [v.get("mean", 0.0)] * 5 for k, v in b_data["feature_summaries"].items()}
+                if features and isinstance(features, dict):
+                    default_drift_engine.register_baseline(
+                        baseline_id=b_id,
+                        name=b_data.get("name") or baseline_file.filename or "Reference Baseline",
+                        features=features,
+                        metadata=b_data.get("metadata", {}),
+                        sign_baseline=True,
+                    )
+                    assigned_baseline_id = b_id
+            except Exception:
+                pass
+
+        if assigned_baseline_id:
+            manifest.metadata["baseline_id"] = assigned_baseline_id
+            manifest_file = default_ingestion_engine.manifests_dir / f"{manifest.batch_id}.json"
+            with open(manifest_file, "w", encoding="utf-8") as f:
+                f.write(canonical_json_dumps(manifest.model_dump(mode="json")))
 
         from app.api.scan import _run_scan_pipeline, _scan_sessions
         scan_id = str(uuid.uuid4())

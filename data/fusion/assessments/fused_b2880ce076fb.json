@@ -1,0 +1,300 @@
+{
+  "assessment_id": "fused_b2880ce076fb",
+  "target_entity_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+  "overall_status": "UNDER_REVIEW",
+  "verdict": "UNDER_REVIEW",
+  "risk_level": "HIGH",
+  "risk_score": 0.5,
+  "confidence": 0.2,
+  "confidence_score": 0.2,
+  "action": "REVIEW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "FLAG for security officer and ML engineer secondary review."
+  ],
+  "limitations": [
+    "Limited verification scope (MINIMAL): 1/5 evidence sources checked.",
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "Partial verification (MINIMAL) \u2014 evaluated 1/5 sources",
+  "raw_evidence": [
+    {
+      "evidence_id": "integrity_fd5cebb8-7027-4d94-bd57-06e00cc14683",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file '/home/yuva/Downloads/Trust-CV/data/uploads/fa155328-0311-467f-a1f0-dc75d537f8a9/samples/patch_sample_B01.tif'",
+      "subject_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "related_model_id": null,
+      "related_dataset_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B01.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_b3e28e61-7788-444a-871f-bf8ec32ff498",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file '/home/yuva/Downloads/Trust-CV/data/uploads/fa155328-0311-467f-a1f0-dc75d537f8a9/samples/patch_sample_B02.tif'",
+      "subject_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "related_model_id": null,
+      "related_dataset_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B02.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_a98385d4-9ddc-4262-a540-ee249449cdd6",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file '/home/yuva/Downloads/Trust-CV/data/uploads/fa155328-0311-467f-a1f0-dc75d537f8a9/samples/patch_sample_B03.tif'",
+      "subject_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "related_model_id": null,
+      "related_dataset_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B03.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_5dc247cc-b40c-4bc4-a5a6-a19022359de1",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file '/home/yuva/Downloads/Trust-CV/data/uploads/fa155328-0311-467f-a1f0-dc75d537f8a9/samples/patch_sample_B04.tif'",
+      "subject_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "related_model_id": null,
+      "related_dataset_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B04.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_c8bd8aca-ef39-428c-903e-7ed3f974b4dd",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file '/home/yuva/Downloads/Trust-CV/data/uploads/fa155328-0311-467f-a1f0-dc75d537f8a9/samples/patch_sample_B05.tif'",
+      "subject_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "related_model_id": null,
+      "related_dataset_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B05.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_6f25920d-9538-47bf-a615-25d190661b21",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file '/home/yuva/Downloads/Trust-CV/data/uploads/fa155328-0311-467f-a1f0-dc75d537f8a9/samples/patch_sample_B06.tif'",
+      "subject_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "related_model_id": null,
+      "related_dataset_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B06.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_b553851a-26ac-48bd-a354-8c38f360ae08",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file '/home/yuva/Downloads/Trust-CV/data/uploads/fa155328-0311-467f-a1f0-dc75d537f8a9/samples/patch_sample_B07.tif'",
+      "subject_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "related_model_id": null,
+      "related_dataset_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B07.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_7e760d08-9998-4c9e-ae24-dd6c6cf03847",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file '/home/yuva/Downloads/Trust-CV/data/uploads/fa155328-0311-467f-a1f0-dc75d537f8a9/samples/patch_sample_B08.tif'",
+      "subject_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "related_model_id": null,
+      "related_dataset_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B08.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_8d9e0c16-25a4-44fe-b7e2-2eaa9f27a3ae",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file '/home/yuva/Downloads/Trust-CV/data/uploads/fa155328-0311-467f-a1f0-dc75d537f8a9/samples/patch_sample_B09.tif'",
+      "subject_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "related_model_id": null,
+      "related_dataset_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B09.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_8711b452-229c-4d3a-badc-1e9c2fe9c62f",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file '/home/yuva/Downloads/Trust-CV/data/uploads/fa155328-0311-467f-a1f0-dc75d537f8a9/samples/patch_sample_B11.tif'",
+      "subject_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "related_model_id": null,
+      "related_dataset_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B11.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_3798a3ef-4b04-4132-b199-365f50814d3b",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file '/home/yuva/Downloads/Trust-CV/data/uploads/fa155328-0311-467f-a1f0-dc75d537f8a9/samples/patch_sample_B12.tif'",
+      "subject_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "related_model_id": null,
+      "related_dataset_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B12.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_e16432d6-4cdd-48c5-bb0d-75ee21b13a6c",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Corrupt or invalid image payload: cannot identify image file '/home/yuva/Downloads/Trust-CV/data/uploads/fa155328-0311-467f-a1f0-dc75d537f8a9/samples/patch_sample_B8A.tif'",
+      "subject_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "related_model_id": null,
+      "related_dataset_id": "4d23ecfd-f55d-41f7-9307-7220ccfdf575",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "patch_sample_B8A.tif"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "10007bede9edcfc3d1c9da21837b50ecb9290dd47da5b274d03aea2e213b9307eeb9c74d409fb1422765fe4481d9509a4cae280932882990d639af6082eb7008",
+  "assessment_digest": "094e18254d379e87d8e9c6de5fe05773f7038bb66ef40c425556c39a433ccadd",
+  "scope": "MINIMAL",
+  "evidence_completeness": "MINIMAL",
+  "created_at": "2026-09-26T18:53:10.004011Z"
+}

@@ -1,7 +1,7 @@
 """Defense-Grade Security Assurance Reports API Endpoints."""
 from typing import Any, List
 # pyrefly: ignore [missing-import]
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Response
 
 from app.fusion.engine import default_fusion_engine
 from app.reports.engine import default_report_engine
@@ -68,6 +68,13 @@ def get_assurance_report(
         return ResponseEnvelope(
             data={"report_id": report_id, "format": "HTML", "content": rendered}
         )
+    elif format == ReportFormat.PDF:
+        pdf_bytes = default_report_engine.render_pdf(report)
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'inline; filename="report_{report_id[:8]}.pdf"'}
+        )
 
     return ResponseEnvelope(data=report)
 
@@ -78,6 +85,39 @@ def list_assurance_reports() -> ResponseEnvelope[List[AssuranceReport]]:
     reports = default_report_engine.list_reports()
     return ResponseEnvelope(data=reports)
 
+
+
+@router.get("/{report_id}/export")
+def get_export_report(
+    report_id: str,
+    format: ReportFormat = Query(ReportFormat.PDF, description="Desired export format (PDF, HTML, MARKDOWN, JSON_MANIFEST)"),
+):
+    """Stream an exported report directly (PDF binary or formatted text)."""
+    report = default_report_engine.get_report(report_id)
+    if not report:
+        raise HTTPException(status_code=404, detail=f"Assurance report '{report_id}' not found.")
+
+    if format == ReportFormat.PDF:
+        pdf_bytes = default_report_engine.render_pdf(report)
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="TRUST-CV-Report-{report_id[:8]}.pdf"'}
+        )
+    elif format == ReportFormat.HTML:
+        rendered = ReportFormatter.format_html(report)
+        return Response(content=rendered, media_type="text/html")
+    elif format == ReportFormat.MARKDOWN:
+        rendered = ReportFormatter.format_markdown(report)
+        return Response(content=rendered, media_type="text/markdown")
+    else:
+        import json
+        content = json.dumps(report.model_dump(mode="json"), indent=2)
+        return Response(
+            content=content,
+            media_type="application/json",
+            headers={"Content-Disposition": f'attachment; filename="report_{report_id[:8]}.json"'}
+        )
 
 @router.post("/{report_id}/export", response_model=ResponseEnvelope[Any])
 def export_assurance_report(

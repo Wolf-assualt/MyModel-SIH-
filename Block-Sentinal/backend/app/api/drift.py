@@ -1,7 +1,9 @@
 """Distribution-Shift and Out-of-Distribution (OOD) Analysis API Endpoints."""
-from typing import Any, Dict, List
+import json
+import uuid
+from typing import Any, Dict, List, Optional
 # pyrefly: ignore [missing-import]
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
 
 from app.drift.engine import default_drift_engine
 from app.schemas.base import ResponseEnvelope
@@ -13,6 +15,50 @@ from app.schemas.drift import (
 )
 
 router = APIRouter(prefix="/drift", tags=["Distribution-Shift Engine"])
+
+
+
+@router.post("/baselines/upload", response_model=ResponseEnvelope[BaselineProfile])
+async def upload_baseline_profile(
+    file: UploadFile = File(...),
+    baseline_id: Optional[str] = Form(default=None),
+    name: Optional[str] = Form(default=None),
+) -> ResponseEnvelope[BaselineProfile]:
+    """Upload a reference baseline profile (JSON or features) for one-off and drift assurance checks."""
+    try:
+        content = await file.read()
+        raw_text = content.decode("utf-8")
+        data = json.loads(raw_text)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid baseline file format: {exc}")
+
+    b_id = baseline_id or data.get("baseline_id") or f"baseline_{uuid.uuid4().hex[:12]}"
+    b_name = name or data.get("name") or file.filename or "Reference Baseline"
+    features = data.get("features")
+
+    # Check if nested in feature_summaries or profile schema
+    if not features and "feature_summaries" in data:
+        # Generate dummy points or reconstruction if only summaries provided
+        features = {k: [v.get("mean", 0.0)] * 5 for k, v in data["feature_summaries"].items()}
+    elif isinstance(features, list):
+        # Convert list of rows to feature dict
+        features = {"f0": [row[0] for row in features if row]}
+
+    if not features or not isinstance(features, dict):
+        raise HTTPException(status_code=400, detail="Baseline JSON must contain a valid 'features' dictionary.")
+
+    try:
+        profile = default_drift_engine.register_baseline(
+            baseline_id=b_id,
+            name=b_name,
+            features=features,
+            metadata=data.get("metadata", {}),
+            sign_baseline=True,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    return ResponseEnvelope(data=profile)
 
 
 @router.post("/baselines/register", response_model=ResponseEnvelope[BaselineProfile])

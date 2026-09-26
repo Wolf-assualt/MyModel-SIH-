@@ -167,7 +167,7 @@ class AssuranceReportEngine:
         }
         report_digest = canonical_json_hash(digest_payload)
 
-        # 8. Asymmetric ECDSA SECP256R1 digital signature
+        # 8. Asymmetric Ed25519 digital signature
         km = key_manager or default_key_manager
         signature = km.sign_hash(report_digest)
         signer_public_key_pem = km.export_public_key_pem().decode("utf-8")
@@ -288,7 +288,7 @@ class AssuranceReportEngine:
                 f"Report digest mismatch: recomputed '{recomputed_digest}' does not match record '{report.report_digest}'."
             )
 
-        # 2. Verify ECDSA SECP256R1 digital signature
+        # 2. Verify Ed25519 digital signature
         signature_valid = KeyManager.verify_signature(
             public_key_pem=report.signer_public_key_pem,
             digest_hex=report.report_digest,
@@ -296,7 +296,7 @@ class AssuranceReportEngine:
         )
         if not signature_valid:
             discrepancies.append(
-                "ECDSA SECP256R1 digital signature verification failed against provided signer public key."
+                "Ed25519 digital signature verification failed against provided signer public key."
             )
 
         is_valid = digest_match and signature_valid
@@ -316,6 +316,35 @@ class AssuranceReportEngine:
         with open(report_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         return AssuranceReport.model_validate(data)
+
+
+    def render_pdf(self, report: AssuranceReport) -> bytes:
+        """Render a defense-grade PDF assurance report using Jinja2 and WeasyPrint."""
+        import jinja2
+        import weasyprint
+
+        template_dir = Path(__file__).resolve().parent.parent / "templates" / "reports"
+        env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(str(template_dir)),
+            autoescape=jinja2.select_autoescape(["html", "xml"])
+        )
+        template = env.get_template("assurance_report.html")
+
+        crit_count = report.findings_summary.get("CRITICAL", 0)
+        high_count = report.findings_summary.get("HIGH", 0)
+        med_count = report.findings_summary.get("MEDIUM", 0)
+        low_count = report.findings_summary.get("LOW", 0)
+
+        html_content = template.render(
+            report=report,
+            crit_count=crit_count,
+            high_count=high_count,
+            med_count=med_count,
+            low_count=low_count,
+            pem_clean=report.signer_public_key_pem.strip(),
+        )
+
+        return weasyprint.HTML(string=html_content).write_pdf()
 
     def list_reports(self) -> List[AssuranceReport]:
         """List all stored assurance reports, sorted by creation time descending."""
@@ -352,6 +381,21 @@ class AssuranceReportEngine:
             content = ReportFormatter.format_executive_summary(report)
         elif export_format == ReportFormat.HTML:
             content = ReportFormatter.format_html(report)
+        elif export_format == ReportFormat.PDF:
+            pdf_bytes = self.render_pdf(report)
+            if output_path is None:
+                output_path = self.storage_dir / f"{report_id}.pdf"
+            else:
+                output_path = Path(output_path)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_bytes(pdf_bytes)
+            return ExportResult(
+                report_id=report_id,
+                format=ReportFormat.PDF,
+                export_path=str(output_path),
+                file_size_bytes=len(pdf_bytes),
+                export_digest=hash_bytes(pdf_bytes),
+            )
         else:
             content = json.dumps(report.model_dump(mode="json"), indent=2)
 

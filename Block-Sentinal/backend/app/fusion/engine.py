@@ -297,12 +297,61 @@ class EvidenceFusionEngine:
 
         if hard_veto_triggered or non_drift_critical:
             raw_weighted_risk = max(raw_weighted_risk, 0.90)
-        elif any(e.severity == IntegritySeverity.CRITICAL for e in evidence):
-            raw_weighted_risk = max(raw_weighted_risk, 0.50)
-        elif any(e.severity == IntegritySeverity.HIGH for e in evidence):
-            raw_weighted_risk = max(raw_weighted_risk, 0.50)
-        elif any(e.severity == IntegritySeverity.MEDIUM for e in evidence):
-            raw_weighted_risk = max(raw_weighted_risk, 0.35)
+        else:
+            # Graduated risk calculation for HIGH and CRITICAL evidence items
+            # Scales with:
+            # - the NUMBER of HIGH/CRITICAL items
+            # - the EvidenceSource weight (SOURCE_WEIGHTS) of each one
+            # - cross-layer corroboration across independent sources
+            high_crit_items = [
+                e for e in evidence
+                if e.severity in (IntegritySeverity.HIGH, IntegritySeverity.CRITICAL)
+            ]
+            medium_items = [
+                e for e in evidence
+                if e.severity == IntegritySeverity.MEDIUM
+            ]
+
+            high_crit_sources = set(e.source for e in high_crit_items)
+            anomalous_sources = set(e.source for e in (high_crit_items + medium_items))
+
+            if high_crit_items:
+                total_high_impact = 0.0
+                for src in high_crit_sources:
+                    src_items = [e for e in high_crit_items if e.source == src]
+                    src_weight = SOURCE_WEIGHTS.get(src, 0.10)
+                    max_sev_mult = max(SEVERITY_MULTIPLIERS[e.severity] for e in src_items)
+                    max_metric = max((getattr(e, "metric_value", 0.5) or 0.5) for e in src_items)
+                    volume_factor = 1.0 + 0.10 * min(len(src_items) - 1, 3)
+                    metric_boost = 1.0 + max(0.0, max_metric - 0.5) * 1.5
+                    total_high_impact += src_weight * max_sev_mult * volume_factor * metric_boost
+
+                if len(high_crit_sources) >= 2 or (high_crit_items and len(anomalous_sources) >= 2):
+                    # Multi-source corroboration with high/critical finding elevates to UNDER_REVIEW
+                    corroborated_risk = max(0.50, min(0.85, 0.35 + total_high_impact))
+                    raw_weighted_risk = max(raw_weighted_risk, corroborated_risk)
+                else:
+                    single_src = next(iter(high_crit_sources))
+                    max_metric = max((getattr(e, "metric_value", 0.0) or 0.0) for e in high_crit_items)
+                    if single_src == EvidenceSource.DISTRIBUTION_SHIFT:
+                        if max_metric >= 0.70:
+                            # Severe statistical shift triggers operational review (UNDER_REVIEW)
+                            raw_weighted_risk = max(raw_weighted_risk, 0.35)
+                        else:
+                            # Single low-weight distribution shift without extreme metric scales proportionally
+                            raw_weighted_risk = max(raw_weighted_risk, min(0.25, total_high_impact))
+                    else:
+                        # Non-drift high/critical finding (e.g. BEHAVIOURAL_FINGERPRINT, MODEL_IDENTITY, DATA_INTEGRITY)
+                        raw_weighted_risk = max(raw_weighted_risk, 0.50)
+
+            elif medium_items:
+                raw_weighted_risk = max(raw_weighted_risk, 0.35)
+
+        # 4. Correlate threat narratives
+        correlated_findings = ThreatCorrelator.correlate(evidence)
+        if any("Benign Operational Environmental Drift" in f for f in correlated_findings):
+            if any(e.source == EvidenceSource.DISTRIBUTION_SHIFT and e.severity != IntegritySeverity.LOW for e in evidence):
+                raw_weighted_risk = max(raw_weighted_risk, 0.30)
 
         # Ensure drift alone caps at 0.65 (UNDER_REVIEW) unless corroborated
         only_drift = evidence and all(e.source == EvidenceSource.DISTRIBUTION_SHIFT for e in evidence)
@@ -321,12 +370,22 @@ class EvidenceFusionEngine:
 
         risk_score = round(float(max(0.0, min(1.0, raw_weighted_risk))), 4)
 
-        # 4. Confidence calculation
+        # 5. Scope, Completeness, and Confidence calculation
+        if coverage_ratio >= 0.75:
+            scope = "FULL"
+        elif coverage_ratio > 0.20:
+            scope = "PARTIAL"
+        elif coverage_ratio > 0.0:
+            scope = "MINIMAL"
+        else:
+            scope = "INSUFFICIENT"
+
+        is_insufficient_evidence = (
+            coverage_ratio == 0.0 or len(evidence) == 0
+        )
+
         volume_factor = min(len(evidence) / 5.0, 1.0)
         confidence_score = round(coverage_ratio * (0.5 + 0.5 * volume_factor), 4)
-
-        # 5. Correlate threat narratives
-        correlated_findings = ThreatCorrelator.correlate(evidence)
 
         # 6. Authoritative Gatekeeper Decision & Status
         if hard_veto_triggered:
@@ -385,11 +444,30 @@ class EvidenceFusionEngine:
             f"Audit coverage ratio: {coverage.coverage_ratio * 100:.0f}%.",
             "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
         ]
+        if scope in ("MINIMAL", "PARTIAL"):
+            limitations.insert(0, f"Limited verification scope ({scope}): {len(coverage.sources_checked)}/{len(all_sources)} evidence sources checked.")
+        elif is_insufficient_evidence:
+            insufficient_msg = (
+                f"Assurance score not computable — insufficient evidence "
+                f"(coverage: {coverage.coverage_ratio * 100:.0f}%, "
+                f"{len(coverage.missing_sources)}/{len(all_sources)} verification sources unavailable)."
+            )
+            limitations.insert(0, insufficient_msg)
         if coverage.missing_sources:
             missing_names = ", ".join([s.value for s in coverage.missing_sources])
             limitations.append(f"Unchecked evidence sources: {missing_names}.")
 
         explanation_parts = []
+        if is_insufficient_evidence and not veto_reasons:
+            explanation_parts.append(
+                f"Assurance score not computable — insufficient evidence "
+                f"(coverage: {coverage.coverage_ratio * 100:.0f}%, "
+                f"{len(coverage.missing_sources)}/{len(all_sources)} verification sources unavailable)"
+            )
+        elif scope in ("MINIMAL", "PARTIAL"):
+            explanation_parts.append(
+                f"Partial verification ({scope}) — evaluated {len(coverage.sources_checked)}/{len(all_sources)} sources"
+            )
         if veto_reasons:
             explanation_parts.append("HARD VETO: " + "; ".join(veto_reasons))
         if correlated_findings:
@@ -408,6 +486,7 @@ class EvidenceFusionEngine:
             "risk_level": risk_level.value,
             "risk_score": risk_score,
             "confidence": confidence_score,
+            "scope": scope,
             "action": action.value,
             "coverage": coverage.model_dump(),
             "findings": correlated_findings,
@@ -437,6 +516,8 @@ class EvidenceFusionEngine:
             risk_score=risk_score,
             confidence=confidence_score,
             confidence_score=confidence_score,
+            scope=scope,
+            evidence_completeness=scope,
             action=action,
             coverage=coverage,
             findings=correlated_findings,

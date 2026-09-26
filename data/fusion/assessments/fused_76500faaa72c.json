@@ -1,0 +1,69 @@
+{
+  "assessment_id": "fused_76500faaa72c",
+  "target_entity_id": "model_exec_4bc",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "CRYPTO_VERIFICATION"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+    "Investigate Invalid or forged cryptographic signature detected."
+  ],
+  "limitations": [
+    "Limited verification scope (MINIMAL): 1/5 evidence sources checked.",
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "Partial verification (MINIMAL) \u2014 evaluated 1/5 sources | HARD VETO: Invalid or forged cryptographic signature detected.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_sig_2dc9ff89",
+      "source": "CRYPTO_VERIFICATION",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "ECDSA signature verification failure: Model manifest signature is forged or invalid.",
+      "subject_id": "approved_reference_model",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [
+    "ev_sig_2dc9ff89"
+  ],
+  "hard_veto_triggered": true,
+  "veto_reasons": [
+    "Invalid or forged cryptographic signature detected."
+  ],
+  "signature": "bf1d36bb42e68f13226abfd4f1731685551d3586ff427898e7ca0c1ba67dad4f29f2ced2de2a644c0aa56f16e645cf27f5756a84265cde8d1ba8805edb9fac0b",
+  "assessment_digest": "2d2c9f45240b8c2f0e2bcebada0cdfb8b930abe746822fff43737bc32d1f1f1b",
+  "scope": "MINIMAL",
+  "evidence_completeness": "MINIMAL",
+  "created_at": "2026-09-26T18:52:55.858810Z"
+}

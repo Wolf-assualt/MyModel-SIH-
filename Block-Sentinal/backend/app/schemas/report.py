@@ -15,6 +15,7 @@ class ReportFormat(str, Enum):
     MARKDOWN = "MARKDOWN"
     EXECUTIVE_SUMMARY = "EXECUTIVE_SUMMARY"
     HTML = "HTML"
+    PDF = "PDF"
 
 
 class CryptographicProofs(BaseModel):

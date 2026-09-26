@@ -1,0 +1,80 @@
+{
+  "assessment_id": "fused_2da059ce99e4",
+  "target_entity_id": "batch_autumn_mission_01",
+  "overall_status": "ACCEPTED",
+  "verdict": "ACCEPTED",
+  "risk_level": "LOW",
+  "risk_score": 0.0375,
+  "confidence": 0.28,
+  "confidence_score": 0.28,
+  "action": "ALLOW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY",
+      "DISTRIBUTION_SHIFT"
+    ],
+    "coverage_ratio": 0.4,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "ALLOW asset promotion to operational pipeline."
+  ],
+  "limitations": [
+    "Limited verification scope (PARTIAL): 2/5 evidence sources checked.",
+    "Audit coverage ratio: 40%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA."
+  ],
+  "explanation": "Partial verification (PARTIAL) \u2014 evaluated 2/5 sources",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_drift_seasonal_01",
+      "source": "DISTRIBUTION_SHIFT",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "batch_autumn_mission_01",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": 0.85,
+      "evidence_type": "SPECTRAL_DISTRIBUTION_SHIFT",
+      "metadata": {
+        "nature": "SEASONAL_ATMOSPHERIC_VARIATION"
+      }
+    },
+    {
+      "evidence_id": "ev_data_integrity_clean",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "batch_autumn_mission_01",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": 1.0,
+      "evidence_type": "BYTE_INTEGRITY_CHECK",
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "a6124e932c3e08d0b1e51decc21de7093490254de896a972db383b518f301bd70a9e36135c1d64778c82faeff53f56b70132ecd67eb2b6569a34f52fca787407",
+  "assessment_digest": "9ddea89f663e281df1f20003b5b56d55b77d4a4da3acce61a893664e0cc45012",
+  "scope": "PARTIAL",
+  "evidence_completeness": "PARTIAL",
+  "created_at": "2026-09-26T18:52:21.757740Z"
+}

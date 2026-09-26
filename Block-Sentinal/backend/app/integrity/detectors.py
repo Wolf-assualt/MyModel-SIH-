@@ -697,6 +697,136 @@ class TriggerCandidateDetector:
         return findings
 
 
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Cleanlab Confident Learning Detector
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class CleanlabLabelQualityDetector:
+    """Uses Cleanlab confident learning to score label quality and flag noisy/anomalous samples."""
+
+    DETECTOR_ID = "CLEANLAB_LABEL_QUALITY_DETECTOR"
+    DETECTOR_VERSION = "2.0.0"
+
+    def detect(self, samples: List[SampleRecord]) -> List[IntegrityFinding]:
+        findings: List[IntegrityFinding] = []
+        if len(samples) < 6:
+            return findings
+
+        # 1. Resolve primary labels and extract features
+        sample_entries = []
+        label_set = set()
+        for s in samples:
+            label_val = None
+            if s.labels:
+                first = s.labels[0]
+                if isinstance(first, dict):
+                    for k in ("class", "category", "class_id", "spectral_band"):
+                        if k in first and first[k] is not None:
+                            label_val = str(first[k])
+                            break
+            if not label_val and s.metadata and "class" in s.metadata:
+                label_val = str(s.metadata["class"])
+            if not label_val:
+                p = Path(s.file_path)
+                if p.parent.name and p.parent.name not in (".", "images", "data", "uploads"):
+                    label_val = p.parent.name
+
+            if label_val:
+                label_set.add(label_val)
+                sample_entries.append((s, label_val))
+
+        if len(label_set) < 2 or len(sample_entries) < 6:
+            return findings
+
+        # 2. Extract visual features for confident learning
+        label_to_idx = {lbl: i for i, lbl in enumerate(sorted(label_set))}
+        valid_samples = []
+        features_list = []
+        labels_list = []
+
+        for s, lbl in sample_entries:
+            img_path = Path(s.file_path)
+            if not img_path.is_file():
+                continue
+            try:
+                with Image.open(img_path) as img:
+                    thumb = img.convert("L").resize((16, 16))
+                    arr = np.array(thumb, dtype=np.float32).flatten() / 255.0
+                    features_list.append(arr)
+                    labels_list.append(label_to_idx[lbl])
+                    valid_samples.append((s, lbl))
+            except Exception:
+                continue
+
+        if len(valid_samples) < 6 or len(set(labels_list)) < 2:
+            return findings
+
+        try:
+            from sklearn.neighbors import KNeighborsClassifier
+            import cleanlab
+            from cleanlab.filter import find_label_issues
+            from cleanlab.rank import get_label_quality_scores
+
+            X = np.array(features_list)
+            y = np.array(labels_list)
+            
+            # Check class distribution
+            class_counts = np.bincount(y)
+            min_count = int(np.min(class_counts[class_counts > 0]))
+            k = max(1, min(3, min_count))
+            
+            clf = KNeighborsClassifier(n_neighbors=k)
+            clf.fit(X, y)
+            probs = clf.predict_proba(X)
+            probs = np.clip(probs, 1e-4, 1.0 - 1e-4)
+            probs = probs / probs.sum(axis=1, keepdims=True)
+
+            label_issues = find_label_issues(labels=y, pred_probs=probs)
+            quality_scores = get_label_quality_scores(labels=y, pred_probs=probs)
+
+            idx_to_label = {i: lbl for lbl, i in label_to_idx.items()}
+
+            for i, (is_issue, score) in enumerate(zip(label_issues, quality_scores)):
+                if is_issue or score < 0.40:
+                    sample, given_lbl = valid_samples[i]
+                    pred_class_idx = int(np.argmax(probs[i]))
+                    suggested_lbl = idx_to_label.get(pred_class_idx, "Unknown")
+                    sev = IntegritySeverity.HIGH if (is_issue and score < 0.25) else IntegritySeverity.MEDIUM
+                    
+                    findings.append(
+                        IntegrityFinding(
+                            finding_id=str(uuid.uuid4()),
+                            check_type=IntegrityCheckType.LABEL_INCONSISTENCY,
+                            severity=sev,
+                            sample_ids=[sample.sample_id],
+                            description=(
+                                f"Cleanlab confident learning flagged potential label noise (Quality Score: {float(score):.3f}). "
+                                f"Annotated as '{given_lbl}', visual features correlate more closely with '{suggested_lbl}'."
+                            ),
+                            metric_score=float(score),
+                            details={
+                                "cleanlab_quality_score": float(score),
+                                "given_label": given_lbl,
+                                "suggested_label": suggested_lbl,
+                                "detector": "CLEANLAB_CONFIDENT_LEARNING",
+                            },
+                            detector_id=self.DETECTOR_ID,
+                            detector_version=self.DETECTOR_VERSION,
+                            detector_parameters={"n_neighbors": k, "label_count": len(label_set)},
+                            created_at=_now(),
+                            confidence=float(max(0.5, 1.0 - score)),
+                            confidence_basis="Cleanlab confident learning out-of-sample label quality estimation",
+                            recommended_action="Triage flagged sample in Cleanlab studio or verify ground-truth annotation",
+                        )
+                    )
+        except Exception:
+            pass
+
+        return findings
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Backwards compatibility aliases & wrappers
 # ═══════════════════════════════════════════════════════════════════════════════

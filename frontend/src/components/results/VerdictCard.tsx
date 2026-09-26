@@ -211,7 +211,9 @@ export const VerdictCard: React.FC = () => {
                 {ledgerVerification?.valid === true
                   ? `Ledger valid (${ledgerVerification.events_checked} events)`
                   : ledgerVerification?.valid === false
-                  ? 'Ledger verification failed'
+                  ? ledgerVerification.likely_cause === 'KEY_ROTATION'
+                    ? 'Ledger: Key rotation mismatch'
+                    : 'Ledger: Verification failed'
                   : 'Ledger verification unavailable'}
               </span>
             </div>

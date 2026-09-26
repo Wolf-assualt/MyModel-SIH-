@@ -250,7 +250,7 @@
             </div>
             <div class="preflight-item">
               <span class="item-label"><span class="status-dot green" id="pf-dot-crypto"></span> Cryptographic Identity Signer</span>
-              <span class="item-status" id="pf-status-crypto">SECP256R1</span>
+              <span class="item-status" id="pf-status-crypto">Ed25519</span>
             </div>
             <div class="preflight-item">
               <span class="item-label"><span class="status-dot green" id="pf-dot-veto"></span> Hard-Veto Gatekeeper</span>
@@ -337,7 +337,7 @@
           <div class="telemetry-box">
             <div class="telemetry-box-title">Cryptographic Seals</div>
             <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-secondary); line-height:1.6;">
-              <div>Signer: <span style="color:var(--accent-cyan);">ECDSA SECP256R1</span></div>
+              <div>Signer: <span style="color:var(--accent-cyan);">Ed25519</span></div>
               <div>Digest: <span style="color:var(--text-muted);">RFC 8785 SHA-256</span></div>
               <div>Chain: <span style="color:var(--status-success);">MONOTONIC PASS</span></div>
             </div>
@@ -488,7 +488,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 Signed Forensic Report
               </span>
-              <span id="report-sig-status" class="badge-tag badge-health-ok">VALID (SECP256R1)</span>
+              <span id="report-sig-status" class="badge-tag badge-health-ok">VALID (Ed25519)</span>
             </div>
 
             <div class="report-prop" style="margin-bottom:0.75rem;">
@@ -536,7 +536,7 @@
         <div class="telemetry-box-title">System Health Telemetry</div>
         <div style="font-family:var(--font-mono); font-size:12px; line-height:1.6; color:var(--text-secondary);">
           <div>Database Engine: <span style="color:var(--status-success);">SQLite (WAL Mode)</span></div>
-          <div>Signer Algorithm: <span style="color:var(--accent-cyan);">ECDSA SECP256R1</span></div>
+          <div>Signer Algorithm: <span style="color:var(--accent-cyan);">Ed25519</span></div>
           <div>Air-Gapped Status: <span style="color:var(--accent-cyan);">Zero External Calls</span></div>
           <div>Offline Storage: <span style="color:var(--text-primary);">./data</span></div>
         </div>

@@ -30,7 +30,7 @@ export const ImageAssessments: React.FC = () => {
       <div>
         <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '16px', fontWeight: 600, letterSpacing: '-0.01em' }}>Per-Image Trust Assessments</h3>
         <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '12px' }}>
-          Individual integrity results from the backend evidence pipeline.
+          Individual sample integrity verdicts (independent of the multi-layer system assurance score above).
         </p>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TRUST-CV Forensic Report - {{ report.report_id }}</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 20mm 15mm 20mm 15mm;
+            @bottom-right {
+                content: "Page " counter(page) " of " counter(pages);
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 8pt;
+                color: #666;
+            }
+        }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #fff; color: #1a1a1a; font-size: 10pt; line-height: 1.4; }
+        .header-banner { border-bottom: 2.5pt solid #8b0000; padding-bottom: 8pt; margin-bottom: 15pt; }
+        .classification { font-size: 13pt; font-weight: bold; color: #8b0000; letter-spacing: 0.5pt; }
+        .subheading { font-size: 9pt; color: #444; margin-top: 3pt; font-style: italic; }
+        h2 { color: #111; font-size: 11pt; border-bottom: 1pt solid #ccc; padding-bottom: 3pt; margin-top: 14pt; margin-bottom: 6pt; }
+        table { width: 100%; border-collapse: collapse; margin: 8pt 0; font-size: 9pt; }
+        th, td { border: 1pt solid #ddd; padding: 5pt 7pt; text-align: left; }
+        th { background: #f4f4f4; font-weight: 600; color: #222; }
+        .verdict-box { padding: 8pt 12pt; border-radius: 4pt; font-weight: bold; font-size: 12pt; margin: 10pt 0; text-align: center; }
+        .verdict-verified { background: #e6f4ea; color: #137333; border: 1.5pt solid #137333; }
+        .verdict-compromised { background: #fce8e6; color: #c5221f; border: 1.5pt solid #c5221f; }
+        .verdict-review { background: #fef7e0; color: #b06000; border: 1.5pt solid #b06000; }
+        .seal { background: #f9f9f9; padding: 8pt 10pt; border: 1pt solid #ccc; font-family: 'Courier New', monospace; font-size: 7.5pt; word-break: break-all; margin-top: 10pt; border-left: 3pt solid #8b0000; }
+        .footer { margin-top: 20pt; padding-top: 8pt; border-top: 1pt solid #ccc; color: #777; font-size: 8pt; text-align: center; }
+        ul { padding-left: 15pt; margin: 4pt 0; }
+        li { margin-bottom: 2pt; font-size: 8.5pt; }
+    </style>
+</head>
+<body>
+    <div class="header-banner">
+        <div class="classification">[RESTRICTED // TRUST-CV SECURITY ASSURANCE REPORT]</div>
+        <div class="subheading">SIH26228 — Ministry of Defence (MoD) | Zero-Trust Computer Vision Integrity Assurance</div>
+    </div>
+
+    <h2>Report Metadata</h2>
+    <table>
+        <tr><td style="width: 30%;"><strong>Report ID</strong></td><td><code>{{ report.report_id }}</code></td></tr>
+        <tr><td><strong>Target Asset ID</strong></td><td><code>{{ report.target_asset_id }}</code> ({{ report.target_asset_type }})</td></tr>
+        <tr><td><strong>Assessment Reference</strong></td><td><code>{{ report.assessment_id }}</code></td></tr>
+        <tr><td><strong>Generated At</strong></td><td>{{ report.created_at.isoformat() }}</td></tr>
+    </table>
+
+    {% if 'VERIFIED' in report.overall_verdict.value or 'ASSURED' in report.overall_verdict.value %}
+        <div class="verdict-box verdict-verified">OPERATIONAL DISPOSITION: {{ report.overall_verdict.value }}</div>
+    {% elif 'COMPROMISED' in report.overall_verdict.value or 'REJECTED' in report.overall_verdict.value %}
+        <div class="verdict-box verdict-compromised">OPERATIONAL DISPOSITION: {{ report.overall_verdict.value }}</div>
+    {% else %}
+        <div class="verdict-box verdict-review">OPERATIONAL DISPOSITION: {{ report.overall_verdict.value }}</div>
+    {% endif %}
+
+    <h2>Threat &amp; Integrity Metrics Matrix</h2>
+    <table>
+        <tr><th>Metric</th><th>Score</th><th>Operational Significance</th></tr>
+        <tr><td><strong>Composite Risk Score</strong></td><td><code>{{ '%.4f'|format(report.risk_score) }}</code></td><td>0.0 = Verified Secure; 1.0 = Severely Compromised</td></tr>
+        <tr><td><strong>Assurance Confidence</strong></td><td><code>{{ '%.4f'|format(report.confidence_score) }}</code></td><td>Statistical confidence derived from verified evidence breadth</td></tr>
+        <tr><td><strong>Layer Coverage Ratio</strong></td><td><code>{{ '%.1f'|format(report.coverage_ratio * 100) }}%</code></td><td>Percentage of foundational assurance layers inspected</td></tr>
+    </table>
+
+    <h2>Verified Findings Breakdown</h2>
+    <table>
+        <tr><th>Severity Tier</th><th>Count</th><th>Actionable Response</th></tr>
+        <tr><td><strong style="color:#c5221f;">CRITICAL</strong></td><td><strong>{{ crit_count }}</strong></td><td>Immediate Pipeline Halt &amp; Quarantine Mandated</td></tr>
+        <tr><td><strong style="color:#e37400;">HIGH</strong></td><td><strong>{{ high_count }}</strong></td><td>Secondary Verification &amp; Policy Review Required</td></tr>
+        <tr><td><strong style="color:#b06000;">MEDIUM</strong></td><td><strong>{{ med_count }}</strong></td><td>Operational Monitoring &amp; Discrepancy Logging</td></tr>
+        <tr><td><strong style="color:#137333;">LOW</strong></td><td><strong>{{ low_count }}</strong></td><td>Informational Baseline Recording</td></tr>
+    </table>
+
+    <h2>Correlated Threat Narratives</h2>
+    <ul>
+    {% if report.threat_narratives %}
+        {% for threat in report.threat_narratives %}
+            <li>{{ threat }}</li>
+        {% endfor %}
+    {% else %}
+        <li><em>No cross-layer threats identified. Verified within acceptable baseline thresholds.</em></li>
+    {% endif %}
+    </ul>
+
+    <h2>Audit Limitations &amp; Operational Disclaimers</h2>
+    <ul>
+    {% if report.limitations_and_disclaimers %}
+        {% for limit in report.limitations_and_disclaimers %}
+            <li>{{ limit }}</li>
+        {% endfor %}
+    {% else %}
+        <li><em>Standard zero-trust air-gapped assumptions apply.</em></li>
+    {% endif %}
+    </ul>
+
+    <h2>Cryptographic Provenance Seal</h2>
+    <div class="seal">
+        <strong>Canonical Report Digest (SHA-256):</strong> <code>{{ report.report_digest }}</code><br>
+        <strong>Ed25519 Digital Signature:</strong> <code>{{ report.signature }}</code><br>
+        <strong>Signing Authority Public Key (Ed25519 SPKI):</strong>
+        <pre style="margin: 4pt 0; font-size: 7pt;">{{ pem_clean }}</pre>
+    </div>
+
+    <div class="footer">
+        RESTRICTED DEFENSE DOCUMENT // AI INTEGRITY EVIDENCE GRAPH // DISCLOSURE CONTROLLED UNDER DEFENSE DIRECTIVE
+    </div>
+</body>
+</html>

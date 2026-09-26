@@ -1,0 +1,67 @@
+{
+  "assessment_id": "fused_b83b8d0ae2cc",
+  "target_entity_id": "5b44b2f3-dae6-4e9a-8711-93661f884669",
+  "overall_status": "ACCEPTED",
+  "verdict": "ACCEPTED",
+  "risk_level": "LOW",
+  "risk_score": 0.0225,
+  "confidence": 0.1,
+  "confidence_score": 0.1,
+  "action": "ALLOW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "ALLOW asset promotion to operational pipeline."
+  ],
+  "limitations": [
+    "Assurance score not computable \u2014 insufficient evidence (coverage: 20%, 4/5 verification sources unavailable).",
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "Assurance score not computable \u2014 insufficient evidence (coverage: 20%, 4/5 verification sources unavailable)",
+  "raw_evidence": [
+    {
+      "evidence_id": "integrity_clean_5b44b2f3",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "Training data integrity verified clean across 1 samples.",
+      "subject_id": "5b44b2f3-dae6-4e9a-8711-93661f884669",
+      "related_model_id": null,
+      "related_dataset_id": "5b44b2f3-dae6-4e9a-8711-93661f884669",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "DATA_INTEGRITY_CLEAN",
+        "sample_ids": [
+          "clean_sample_1790442895475.png"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "3dafc3bd29a79ed5fabd2d1dd12454424121bf5b171f3101221657e044191253e02a6e33a417a9d1717a3d86b896bd362b4d529e50fae81c602a89c74196130f",
+  "assessment_digest": "18c603404c8402dde2bc9c6951d3898c30380a4011fb40cf9c268f41c409c6b1",
+  "created_at": "2026-09-26T17:14:58.332204Z"
+}

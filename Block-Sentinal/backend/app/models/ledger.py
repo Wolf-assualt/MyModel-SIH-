@@ -32,6 +32,7 @@ class LedgerEvent(LedgerBase):
     previous_hash = Column(String(64), nullable=False)
     current_hash = Column(String(64), nullable=False, unique=True)
     signature = Column(Text, nullable=True)  # Optional for unsigned events
+    signing_key_fingerprint = Column(String(64), nullable=True)
     
     __table_args__ = (
         Index('idx_scan_entity', 'scan_id', 'entity_id'),
@@ -51,4 +52,5 @@ class LedgerEvent(LedgerBase):
             "previous_hash": self.previous_hash,
             "current_hash": self.current_hash,
             "signature": self.signature,
+            "signing_key_fingerprint": self.signing_key_fingerprint,
         }

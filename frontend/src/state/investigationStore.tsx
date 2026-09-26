@@ -125,6 +125,7 @@ interface InvestigationContextType {
   resetInvestigation: () => void;
   exportReport: () => void;
   exportEvidencePackage: () => void;
+  uploadOneOffCheck: (targetFile: File, baselineFile?: File) => Promise<void>;
 }
 
 const InvestigationContext = createContext<InvestigationContextType | null>(null);
@@ -281,6 +282,68 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
   const verifyArtifact = (_artifactId?: string) => {
     // Artifact acceptance is decided by the backend assurance pipeline on upload.
     // No client-side verification verdict is produced here.
+  };
+
+  const uploadOneOffCheck = async (targetFile: File, baselineFile?: File) => {
+    setArtifacts(prev => prev.map(art => art.type === 'dataset' ? {
+      ...art,
+      filename: targetFile.name,
+      size: formatFileSize(targetFile.size),
+      hash: '',
+      status: 'uploading',
+      progress: 50,
+      metadata: { ...art.metadata, format: 'Uploading one-off target + reference baseline…' },
+    } : art));
+
+    try {
+      const session = await apiService.uploadAndScanDataset(targetFile, baselineFile);
+      setCurrentScanId(session.scan_id);
+      setScanSession(session);
+
+      setArtifacts(prev => prev.map(art => {
+        if (art.type === 'dataset') {
+          return {
+            ...art,
+            filename: targetFile.name,
+            size: formatFileSize(targetFile.size),
+            hash: '',
+            status: 'verified',
+            progress: 100,
+            metadata: {
+              ...art.metadata,
+              format: `One-off assurance scan active — ID: ${session.scan_id.substring(0, 8)}…`,
+              samplesCount: session.input_artifacts?.length ?? 1,
+            },
+          };
+        }
+        if (art.type === 'manifest' && baselineFile) {
+          return {
+            ...art,
+            filename: baselineFile.name,
+            size: formatFileSize(baselineFile.size),
+            hash: '',
+            status: 'verified',
+            progress: 100,
+            metadata: {
+              ...art.metadata,
+              format: 'Reference baseline profile registered',
+            },
+          };
+        }
+        return art;
+      }));
+      setBackendError(null);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'One-off upload failed';
+      setBackendError(msg);
+      setArtifacts(prev => prev.map(art => art.type === 'dataset' ? {
+        ...art,
+        filename: targetFile.name,
+        status: 'error',
+        progress: 0,
+        metadata: { ...art.metadata, format: `Upload failed: ${msg}` },
+      } : art));
+    }
   };
 
   const clearArtifacts = () => {
@@ -661,12 +724,12 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
             const rawDisposition = String(assessment.disposition ?? session.status).toUpperCase();
 
             setTrustScore({
-              overall: assuranceScore === null ? 0 : Math.round(assuranceScore * 100),
+              overall: assuranceScore === null ? -1 : Math.round(assuranceScore * 100),
               dataIntegrity: dataRiskScore === null ? 0 : Math.round(dataRiskScore * 100),
               // -1 is the backend's explicit "module UNAVAILABLE" sentinel.
               modelIntegrity: modelRiskScore < 0 ? -1 : Math.round(modelRiskScore * 100),
               inferenceIntegrity: inferenceRiskScore < 0 ? -1 : Math.round(inferenceRiskScore * 100),
-              pipelineIntegrity: assuranceScore === null ? 0 : Math.round(assuranceScore * 100),
+              pipelineIntegrity: assuranceScore === null ? -1 : Math.round(assuranceScore * 100),
               verdict: (rawDisposition === 'REVIEW' || rawDisposition === 'ALLOW_WITH_MONITORING')
                 ? 'UNDER_REVIEW'
                 : (rawDisposition as any),
@@ -771,7 +834,7 @@ export const InvestigationProvider: React.FC<{ children: React.ReactNode }> = ({
       graphNodes, graphEdges, graphDigest, selectedGraphNode, setSelectedGraphNode,
       focusNodeInGraph, ledgerVerification, analystDecisions, backendError,
       refreshLedgerVerification, loadEvidenceGraph, refreshAnalystDecisions,
-      submitAnalystDecision, resetInvestigation, exportReport, exportEvidencePackage,
+      submitAnalystDecision, resetInvestigation, exportReport, exportEvidencePackage, uploadOneOffCheck,
     }}>
       {children}
     </InvestigationContext.Provider>

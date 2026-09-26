@@ -1,0 +1,72 @@
+{
+  "assessment_id": "fused_db0b07837512",
+  "target_entity_id": "model_exec_2f8",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "MODEL_IDENTITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [
+    "Model Identity Compromise: Active model weights mismatch reference baseline manifest."
+  ],
+  "correlated_findings": [
+    "Model Identity Compromise: Active model weights mismatch reference baseline manifest."
+  ],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+    "Investigate Model identity hash mismatch: unauthorized model substitution or weight modification detected."
+  ],
+  "limitations": [
+    "Limited verification scope (MINIMAL): 1/5 evidence sources checked.",
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "Partial verification (MINIMAL) \u2014 evaluated 1/5 sources | HARD VETO: Model identity hash mismatch: unauthorized model substitution or weight modification detected. | CORRELATED FINDINGS: Model Identity Compromise: Active model weights mismatch reference baseline manifest.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_weight_549c4fc7",
+      "source": "MODEL_IDENTITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "Binary SHA-256 weight hash discrepancy: Single layer weights modified.",
+      "subject_id": "approved_reference_model",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [
+    "ev_weight_549c4fc7"
+  ],
+  "hard_veto_triggered": true,
+  "veto_reasons": [
+    "Model identity hash mismatch: unauthorized model substitution or weight modification detected."
+  ],
+  "signature": "51865bc961144587f5047a89c41177d268ef5d6eee99b4077dac1899489240f5f6525fd257eafe696928626b2b967e7e3806f6ecdfd4bf32321061a0ad6f910e",
+  "assessment_digest": "235ecf8e36f444056d3f50446458d5fef0120a372e7dd0b865ea00c096d48cbc",
+  "scope": "MINIMAL",
+  "evidence_completeness": "MINIMAL",
+  "created_at": "2026-09-26T18:52:55.440242Z"
+}

@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_b476695194dc",
+  "subject_id": "pipeline_run_api_01",
+  "subject_type": "ASSET",
+  "reason": "Inference provenance chain broken or replay attack detected.",
+  "evidence_ids": [
+    "ev_api_dna_fail"
+  ],
+  "is_active": false,
+  "quarantined_at": "2026-09-26T16:36:11.433038Z",
+  "created_at": "2026-09-26T16:36:11.433038Z",
+  "resolved_at": "2026-09-26T16:36:11.478650Z",
+  "resolved_by": "Commander_SOC",
+  "resolution_notes": "Forensic hash chain audit cleared by human operator."
+}

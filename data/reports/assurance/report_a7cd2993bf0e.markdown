@@ -41,7 +41,7 @@
 
 ## Cryptographic Provenance Seal
 - **Canonical Report Digest (SHA-256)**: `b8eda7ee937615bb2b6f15f803bf28480c9be9c4fde18701254ca3b29bf778b5`
-- **ECDSA SECP256R1 Digital Signature**: `30440220517ebac9048d4cee1a0aadf32e00607b3e490b202cb39f2bd3e3ba0160479d97022014587c76285ad60496df8990f6de6a6c8b0895328f696eccd066a3ee9b3a7ddd`
+- **Ed25519 Digital Signature**: `30440220517ebac9048d4cee1a0aadf32e00607b3e490b202cb39f2bd3e3ba0160479d97022014587c76285ad60496df8990f6de6a6c8b0895328f696eccd066a3ee9b3a7ddd`
 - **Signing Authority Public Key (SubjectPublicKeyInfo)**:
 ```pem
 -----BEGIN PUBLIC KEY-----

@@ -113,7 +113,22 @@ async def _run_scan_pipeline(scan_id: str, batch_id: str):
             except Exception as ledger_exc:
                 session.warnings.append(f"Ledger recording failed: {str(ledger_exc)}")
         session.stage_results["DUPLICATE_DETECTION"] = ComponentState(status=ComponentStatus.PASSED)
-        session.stage_results["LABEL_INTEGRITY"] = ComponentState(status=ComponentStatus.PASSED)
+        label_findings = [f for f in report.findings if f.check_type.value == "LABEL_INCONSISTENCY"]
+        if any(f.severity.value in ("CRITICAL", "HIGH") for f in label_findings):
+            session.stage_results["LABEL_INTEGRITY"] = ComponentState(
+                status=ComponentStatus.FAILED,
+                explanation=f"Cleanlab and label consistency audit detected {len(label_findings)} critical/high label anomalies."
+            )
+        elif label_findings:
+            session.stage_results["LABEL_INTEGRITY"] = ComponentState(
+                status=ComponentStatus.WARNING,
+                explanation=f"Cleanlab label audit flagged {len(label_findings)} samples with potential label noise."
+            )
+        else:
+            session.stage_results["LABEL_INTEGRITY"] = ComponentState(
+                status=ComponentStatus.PASSED,
+                explanation="Cleanlab confident learning verified label consistency with no anomalous label noise."
+            )
         session.stage_results["QUALITY_ANALYSIS"] = ComponentState(status=ComponentStatus.PASSED)
         session.stage_results["TRIGGER_CANDIDATE_ANALYSIS"] = ComponentState(status=ComponentStatus.PASSED)
         session.stage_results["OOD_DETECTION"] = ComponentState(
@@ -261,12 +276,30 @@ async def _run_scan_pipeline(scan_id: str, batch_id: str):
         
         # Try to perform distribution shift analysis if baseline exists
         try:
-            # Check if we have a baseline reference
-            baselines = default_drift_engine.list_baselines()
-            if baselines:
-                # Use the first available baseline for comparison
-                baseline_id = baselines[0]["baseline_id"]
-                
+            # Check if we have a baseline reference for this specific dataset
+            baseline_id = None
+            if manifest.metadata and manifest.metadata.get("baseline_id"):
+                baseline_id = manifest.metadata.get("baseline_id")
+            else:
+                baselines = default_drift_engine.list_baselines()
+                for b in baselines:
+                    if b.get("dataset_name") and b.get("dataset_name") == manifest.dataset_name:
+                        baseline_id = b.get("baseline_id")
+                        break
+
+            if not baseline_id:
+                session.stage_results["DISTRIBUTION_SHIFT"] = ComponentState(
+                    status=ComponentStatus.UNAVAILABLE,
+                    error_code="ERR_NO_BASELINE",
+                    explanation="Distribution Shift module UNAVAILABLE: No reference baseline has been registered for this dataset."
+                )
+            elif len(manifest.samples) < 1:
+                session.stage_results["DISTRIBUTION_SHIFT"] = ComponentState(
+                    status=ComponentStatus.UNAVAILABLE,
+                    error_code="ERR_INSUFFICIENT_SAMPLES",
+                    explanation="Distribution Shift module UNAVAILABLE: No valid samples available for statistical distribution analysis."
+                )
+            else:
                 # Extract features from current batch
                 from app.drift.extractor import ImageDistributionExtractor
                 # pyrefly: ignore [missing-import]
@@ -325,12 +358,6 @@ async def _run_scan_pipeline(scan_id: str, batch_id: str):
                         error_code="ERR_NO_VALID_IMAGES",
                         explanation="No valid images could be extracted for distribution analysis."
                     )
-            else:
-                session.stage_results["DISTRIBUTION_SHIFT"] = ComponentState(
-                    status=ComponentStatus.UNAVAILABLE,
-                    error_code="ERR_NO_BASELINE",
-                    explanation="Distribution Shift module UNAVAILABLE: No reference baseline has been registered."
-                )
         except Exception as drift_exc:
             session.stage_results["DISTRIBUTION_SHIFT"] = ComponentState(
                 status=ComponentStatus.UNAVAILABLE,
@@ -375,6 +402,24 @@ async def _run_scan_pipeline(scan_id: str, batch_id: str):
                     }
                 )
                 evidence_items.append(evidence)
+            
+            # If data integrity scan succeeded with zero findings, record clean baseline evidence
+            if not report.findings and report.total_samples_analyzed > 0:
+                clean_evidence = EvidenceItem(
+                    evidence_id=f"integrity_clean_{batch_id[:8]}",
+                    source=EvidenceSource.DATA_INTEGRITY,
+                    severity=IntegritySeverity.LOW,
+                    metric_value=0.0,
+                    description=f"Training data integrity verified clean across {report.total_samples_analyzed} samples.",
+                    subject_id=batch_id,
+                    related_dataset_id=batch_id,
+                    metadata={
+                        "check_type": "DATA_INTEGRITY_CLEAN",
+                        "sample_ids": [s.sample_id for s in manifest.samples],
+                        "contributor": manifest.contributor_id
+                    }
+                )
+                evidence_items.append(clean_evidence)
             
             # Add model assurance findings if available
             if model_id:
@@ -541,9 +586,14 @@ async def _run_scan_pipeline(scan_id: str, batch_id: str):
 
                 # Update assessment with fusion results
                 # Use fusion assessment for the final verdict
+                is_insufficient = (fused_assessment.coverage.coverage_ratio == 0.0)
+                fusion_scope = getattr(fused_assessment, "scope", "FULL")
+
                 session.assessment = {
-                    "assuranceScore": 1.0 - fused_assessment.risk_score,  # Convert risk to assurance score
-                    "disposition": fused_assessment.overall_status.value,
+                    "assuranceScore": None if is_insufficient else round(1.0 - fused_assessment.risk_score, 4),
+                    "disposition": "INSUFFICIENT_EVIDENCE" if is_insufficient else fused_assessment.overall_status.value,
+                    "scope": fusion_scope,
+                    "evidence_completeness": fusion_scope,
                     "hardVetoTriggered": fused_assessment.hard_veto_triggered,
                     "dataRiskScore": report.overall_health_score,
                     "modelRiskScore": -1.0 if not model_id else fused_assessment.risk_score,
@@ -554,10 +604,13 @@ async def _run_scan_pipeline(scan_id: str, batch_id: str):
                         "assessment_id": fused_assessment.assessment_id,
                         "risk_level": fused_assessment.risk_level.value,
                         "confidence": fused_assessment.confidence,
+                        "scope": fusion_scope,
                         "coverage": fused_assessment.coverage.model_dump(),
                         "findings": fused_assessment.findings,
                         "contributors": fused_assessment.contributors,
-                        "recommended_actions": fused_assessment.recommended_actions
+                        "recommended_actions": fused_assessment.recommended_actions,
+                        "explanation": fused_assessment.explanation,
+                        "limitations": fused_assessment.limitations,
                     },
                     "imageResults": [ir.model_dump(mode="json") for ir in report.image_results]
                 }
@@ -565,13 +618,42 @@ async def _run_scan_pipeline(scan_id: str, batch_id: str):
                 session.stage_results["EVIDENCE_FUSION"] = ComponentState(
                     status=ComponentStatus.UNAVAILABLE,
                     error_code="ERR_NO_EVIDENCE",
-                    explanation="No evidence items available for fusion"
+                    explanation="No evidence items available for fusion: insufficient cross-layer telemetry"
                 )
                 session.stage_results["EVIDENCE_GRAPH"] = ComponentState(
                     status=ComponentStatus.UNAVAILABLE,
                     error_code="ERR_NO_EVIDENCE",
                     explanation="No evidence available for graph construction"
                 )
+                session.assessment = {
+                    "assuranceScore": None,
+                    "disposition": "INSUFFICIENT_EVIDENCE",
+                    "hardVetoTriggered": False,
+                    "dataRiskScore": report.overall_health_score,
+                    "modelRiskScore": -1.0,
+                    "inferenceRiskScore": -1.0,
+                    "totalSamples": report.total_samples_analyzed,
+                    "flaggedSamples": report.findings_count,
+                    "fusionAssessment": {
+                        "assessment_id": "uncomputed",
+                        "risk_level": "UNKNOWN",
+                        "confidence": 0.0,
+                        "coverage": {
+                            "sources_checked": [],
+                            "coverage_ratio": 0.0,
+                            "missing_sources": [
+                                "DATA_INTEGRITY", "MODEL_IDENTITY", "BEHAVIOURAL_FINGERPRINT",
+                                "INFERENCE_DNA", "DISTRIBUTION_SHIFT"
+                            ]
+                        },
+                        "findings": [],
+                        "contributors": ["UNKNOWN"],
+                        "recommended_actions": ["Upload full dataset, model artifacts, and inference receipts for comprehensive assurance evaluation."],
+                        "explanation": "Assurance score not computable — insufficient evidence (coverage: 0%, 5/5 verification sources unavailable)",
+                        "limitations": ["Assurance score not computable — insufficient evidence (coverage: 0%, 5/5 verification sources unavailable)."]
+                    },
+                    "imageResults": [ir.model_dump(mode="json") for ir in report.image_results]
+                }
                 
         except Exception as fusion_exc:
             session.stage_results["EVIDENCE_FUSION"] = ComponentState(
@@ -589,8 +671,10 @@ async def _run_scan_pipeline(scan_id: str, batch_id: str):
             if not session.assessment:
                 rec_value = report.recommendation.value if hasattr(report.recommendation, "value") else str(report.recommendation)
                 session.assessment = {
-                    "assuranceScore": report.overall_health_score,
+                    "assuranceScore": round(report.overall_health_score, 4),
                     "disposition": rec_value,
+                    "scope": "MINIMAL",
+                    "evidence_completeness": "MINIMAL",
                     "hardVetoTriggered": rec_value == "QUARANTINED",
                     "dataRiskScore": report.overall_health_score,
                     "modelRiskScore": -1.0,

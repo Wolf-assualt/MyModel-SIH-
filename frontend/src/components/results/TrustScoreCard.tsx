@@ -41,12 +41,15 @@ export const TrustScoreCard: React.FC = () => {
 
   const radius = 48;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (trustScore.overall / 100) * circumference;
 
   const isPassing = trustScore.verdict === 'ACCEPTED' || trustScore.verdict === 'TRUSTED';
   const isReview = trustScore.verdict === 'UNDER_REVIEW' || trustScore.verdict === 'CAUTION';
+  const isInsufficient = trustScore.verdict === 'INSUFFICIENT_EVIDENCE' || trustScore.overall < 0;
 
-  const gaugeColor = isPassing ? 'var(--success)' : isReview ? 'var(--warning)' : 'var(--critical)';
+  const gaugeColor = isInsufficient ? 'var(--border-strong)' : isPassing ? 'var(--success)' : isReview ? 'var(--warning)' : 'var(--critical)';
+  const strokeDashoffset = isInsufficient
+    ? circumference
+    : circumference - (Math.max(0, Math.min(100, trustScore.overall)) / 100) * circumference;
 
   // -1 is the backend sentinel for "module UNAVAILABLE" (never assessed).
   const getSubscoreColor = (val: number) => {
@@ -91,11 +94,15 @@ export const TrustScoreCard: React.FC = () => {
             Zero-Trust Assurance Score
           </h3>
           <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
-            Composite integrity rating across dataset, neural architecture, and inferences
+            Multi-layer system assurance score across dataset, neural architecture, and inference telemetry (distinct from individual sample verdicts below)
           </p>
         </div>
 
-        {isPassing ? (
+        {isInsufficient ? (
+          <Badge variant="default" size="sm">
+            Disposition: Insufficient Evidence
+          </Badge>
+        ) : isPassing ? (
           <Badge variant="success" size="sm">
             Backend disposition: {trustScore.verdict}
           </Badge>
@@ -150,13 +157,13 @@ export const TrustScoreCard: React.FC = () => {
             <span
               className="font-mono"
               style={{
-                fontSize: '1.75rem',
+                fontSize: trustScore.overall < 0 ? '1.5rem' : '1.75rem',
                 fontWeight: 600,
-                color: 'var(--text-primary)',
+                color: trustScore.overall < 0 ? 'var(--text-muted)' : 'var(--text-primary)',
                 lineHeight: 1,
               }}
             >
-              {trustScore.overall}
+              {trustScore.overall < 0 ? '—' : trustScore.overall}
             </span>
             <span
               style={{
@@ -165,7 +172,7 @@ export const TrustScoreCard: React.FC = () => {
                 fontWeight: 500,
               }}
             >
-              / 100
+              {trustScore.overall < 0 ? 'uncomputed' : '/ 100'}
             </span>
           </div>
         </div>

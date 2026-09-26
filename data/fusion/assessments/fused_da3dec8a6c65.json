@@ -1,0 +1,69 @@
+{
+  "assessment_id": "fused_da3dec8a6c65",
+  "target_entity_id": "model_exec_f44",
+  "overall_status": "QUARANTINED",
+  "verdict": "QUARANTINED",
+  "risk_level": "CRITICAL",
+  "risk_score": 0.9,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "BLOCK",
+  "coverage": {
+    "sources_checked": [
+      "CRYPTO_VERIFICATION"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+    "Investigate Invalid or forged cryptographic signature detected."
+  ],
+  "limitations": [
+    "Limited verification scope (MINIMAL): 1/5 evidence sources checked.",
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: DATA_INTEGRITY, MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "Partial verification (MINIMAL) \u2014 evaluated 1/5 sources | HARD VETO: Invalid or forged cryptographic signature detected.",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_drift_base_e119f321",
+      "source": "CRYPTO_VERIFICATION",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "Drift reference baseline digest mismatch: Reference profile modified without signature.",
+      "subject_id": "drift_reference_baseline",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [
+    "ev_drift_base_e119f321"
+  ],
+  "hard_veto_triggered": true,
+  "veto_reasons": [
+    "Invalid or forged cryptographic signature detected."
+  ],
+  "signature": "22f2cf8d5d144b9cb9e75f28235f535e2d99dfcef3ceb3c4ba85b499b3b644bbc9fcc44bf9419c23e180ddf805ef3bd02ff0e414765fea5c635950734d02bd0f",
+  "assessment_digest": "8cb30e1c825a1baa62fc379d2095d4e4a8918481c019541258cd66a0e5697552",
+  "scope": "MINIMAL",
+  "evidence_completeness": "MINIMAL",
+  "created_at": "2026-09-26T18:52:55.875521Z"
+}

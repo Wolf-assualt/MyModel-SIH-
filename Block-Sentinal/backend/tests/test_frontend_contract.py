@@ -329,7 +329,7 @@ class TestGraphAndReadinessContract:
         data = response.json()["data"]
         assert data["ready"] is True
         assert data["status"] == "healthy"
-        assert data["crypto"] == "ECDSA_SECP256R1"
+        assert data["crypto"] == "Ed25519"
 
 
 # ---------------------------------------------------------------------------

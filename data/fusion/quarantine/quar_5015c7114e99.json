@@ -1,0 +1,15 @@
+{
+  "quarantine_id": "quar_5015c7114e99",
+  "subject_id": "model_exec_27b",
+  "subject_type": "REDTEAM_SANDBOX_ASSET",
+  "reason": "Defensive Red-Team Detection: Direct Provenance Graph Edge / Node Mutation. Partial verification (MINIMAL) \u2014 evaluated 1/5 sources",
+  "evidence_ids": [
+    "ev_sys_tamper_a2d768f5"
+  ],
+  "is_active": true,
+  "quarantined_at": "2026-09-26T18:52:55.567109Z",
+  "created_at": "2026-09-26T18:52:55.567109Z",
+  "resolved_at": null,
+  "resolved_by": null,
+  "resolution_notes": null
+}

@@ -1,0 +1,178 @@
+{
+  "assessment_id": "fused_227c18c8ac97",
+  "target_entity_id": "cb3024ed-cfce-49d6-818e-afa46beac88c",
+  "overall_status": "UNDER_REVIEW",
+  "verdict": "UNDER_REVIEW",
+  "risk_level": "HIGH",
+  "risk_score": 0.5,
+  "confidence": 0.2,
+  "confidence_score": 0.2,
+  "action": "REVIEW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "FLAG for security officer and ML engineer secondary review."
+  ],
+  "limitations": [
+    "Limited verification scope (MINIMAL): 1/5 evidence sources checked.",
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "Partial verification (MINIMAL) \u2014 evaluated 1/5 sources",
+  "raw_evidence": [
+    {
+      "evidence_id": "integrity_bd902b54-ae01-4938-ab34-ef40499d7cd7",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.5,
+      "description": "Perceptual near-duplicate cluster of 5 images detected (avg Hamming distance 0.0, threshold 4).",
+      "subject_id": "cb3024ed-cfce-49d6-818e-afa46beac88c",
+      "related_model_id": null,
+      "related_dataset_id": "cb3024ed-cfce-49d6-818e-afa46beac88c",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "NEAR_DUPLICATE",
+        "sample_ids": [
+          "AnnualCrop_0.jpg",
+          "AnnualCrop_1.jpg",
+          "AnnualCrop_2.jpg",
+          "AnnualCrop_3.jpg",
+          "AnnualCrop_4.jpg"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_d7e63465-3a54-4676-8413-6719f5cf5028",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Zero-variance flat image detected (variance: 0.0000). Image appears to be solid color or sensor blackout.",
+      "subject_id": "cb3024ed-cfce-49d6-818e-afa46beac88c",
+      "related_model_id": null,
+      "related_dataset_id": "cb3024ed-cfce-49d6-818e-afa46beac88c",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "AnnualCrop_0.jpg"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_58654671-9913-4071-8a1a-328ed253651c",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Zero-variance flat image detected (variance: 0.0000). Image appears to be solid color or sensor blackout.",
+      "subject_id": "cb3024ed-cfce-49d6-818e-afa46beac88c",
+      "related_model_id": null,
+      "related_dataset_id": "cb3024ed-cfce-49d6-818e-afa46beac88c",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "AnnualCrop_1.jpg"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_886e651c-b086-432a-a3a1-f8fbb3f552f9",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Zero-variance flat image detected (variance: 0.0000). Image appears to be solid color or sensor blackout.",
+      "subject_id": "cb3024ed-cfce-49d6-818e-afa46beac88c",
+      "related_model_id": null,
+      "related_dataset_id": "cb3024ed-cfce-49d6-818e-afa46beac88c",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "AnnualCrop_2.jpg"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_f2de8d8e-37b7-4471-949a-e6eb08ad1ae0",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Zero-variance flat image detected (variance: 0.0000). Image appears to be solid color or sensor blackout.",
+      "subject_id": "cb3024ed-cfce-49d6-818e-afa46beac88c",
+      "related_model_id": null,
+      "related_dataset_id": "cb3024ed-cfce-49d6-818e-afa46beac88c",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "AnnualCrop_3.jpg"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    },
+    {
+      "evidence_id": "integrity_3afa3f89-63b9-4119-9d33-2ad9b9b50af1",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "HIGH",
+      "metric_value": 0.5,
+      "description": "Zero-variance flat image detected (variance: 0.0000). Image appears to be solid color or sensor blackout.",
+      "subject_id": "cb3024ed-cfce-49d6-818e-afa46beac88c",
+      "related_model_id": null,
+      "related_dataset_id": "cb3024ed-cfce-49d6-818e-afa46beac88c",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "QUALITY_ANOMALY",
+        "sample_ids": [
+          "AnnualCrop_4.jpg"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "b8305634c303ad63e812cb3c2b70a6ee46d424856355e9e678b24f2c79ca961a2b7eebd73c240e482f6e22f6472fe308ef47189cad74db0cbe6a7ad08f0fff03",
+  "assessment_digest": "5d551ccd6b642c7258aa83603df60c3d273aad4c62b5dd59ac544505c91b69a1",
+  "scope": "MINIMAL",
+  "evidence_completeness": "MINIMAL",
+  "created_at": "2026-09-26T18:53:33.772968Z"
+}

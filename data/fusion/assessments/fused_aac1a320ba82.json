@@ -1,0 +1,78 @@
+{
+  "assessment_id": "fused_aac1a320ba82",
+  "target_entity_id": "a322e84c-bf43-497a-8631-396ff6ce6a27",
+  "overall_status": "ACCEPTED",
+  "verdict": "ACCEPTED",
+  "risk_level": "LOW",
+  "risk_score": 0.0525,
+  "confidence": 0.28,
+  "confidence_score": 0.28,
+  "action": "ALLOW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY",
+      "MODEL_IDENTITY"
+    ],
+    "coverage_ratio": 0.4,
+    "missing_sources": [
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "ALLOW asset promotion to operational pipeline."
+  ],
+  "limitations": [
+    "Limited verification scope (PARTIAL): 2/5 evidence sources checked.",
+    "Audit coverage ratio: 40%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "Partial verification (PARTIAL) \u2014 evaluated 2/5 sources",
+  "raw_evidence": [
+    {
+      "evidence_id": "ev_data_integ_01",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "d0e0cd8b-2e2c-4f94-8beb-6bd7c27ee1b2",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": 0.98,
+      "evidence_type": "INTEGRITY_CHECK",
+      "metadata": {}
+    },
+    {
+      "evidence_id": "ev_model_weights_01",
+      "source": "MODEL_IDENTITY",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "",
+      "subject_id": "a322e84c-bf43-497a-8631-396ff6ce6a27",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": 1.0,
+      "evidence_type": "WEIGHT_VERIFICATION",
+      "metadata": {}
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "88aacaf3ffd65e7cab7288125aa5346eec9048c4fe4e89f6faaffc2349981d53fd53836caacb6fdaeeb4db4c28c4127b79d1cad558dee36f051a487cad428a07",
+  "assessment_digest": "89b55a6396e88acf642c87d6855d9113f119fc2986bf7b085048881494c11a42",
+  "scope": "PARTIAL",
+  "evidence_completeness": "PARTIAL",
+  "created_at": "2026-09-26T18:52:18.315268Z"
+}

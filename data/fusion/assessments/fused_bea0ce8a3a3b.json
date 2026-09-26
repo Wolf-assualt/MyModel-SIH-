@@ -1,0 +1,69 @@
+{
+  "assessment_id": "fused_bea0ce8a3a3b",
+  "target_entity_id": "9d75814b-1103-4d53-b2c1-09428deec35d",
+  "overall_status": "ACCEPTED",
+  "verdict": "ACCEPTED",
+  "risk_level": "LOW",
+  "risk_score": 0.0225,
+  "confidence": 0.12,
+  "confidence_score": 0.12,
+  "action": "ALLOW",
+  "coverage": {
+    "sources_checked": [
+      "DATA_INTEGRITY"
+    ],
+    "coverage_ratio": 0.2,
+    "missing_sources": [
+      "MODEL_IDENTITY",
+      "BEHAVIOURAL_FINGERPRINT",
+      "INFERENCE_DNA",
+      "DISTRIBUTION_SHIFT"
+    ]
+  },
+  "findings": [],
+  "correlated_findings": [],
+  "contributors": [
+    "UNKNOWN"
+  ],
+  "recommended_actions": [
+    "ALLOW asset promotion to operational pipeline."
+  ],
+  "limitations": [
+    "Limited verification scope (MINIMAL): 1/5 evidence sources checked.",
+    "Audit coverage ratio: 20%.",
+    "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+    "Unchecked evidence sources: MODEL_IDENTITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+  ],
+  "explanation": "Partial verification (MINIMAL) \u2014 evaluated 1/5 sources",
+  "raw_evidence": [
+    {
+      "evidence_id": "integrity_clean_9d75814b",
+      "source": "DATA_INTEGRITY",
+      "domain": null,
+      "severity": "LOW",
+      "metric_value": 0.0,
+      "description": "Training data integrity verified clean across 1 samples.",
+      "subject_id": "9d75814b-1103-4d53-b2c1-09428deec35d",
+      "related_model_id": null,
+      "related_dataset_id": "9d75814b-1103-4d53-b2c1-09428deec35d",
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {
+        "check_type": "DATA_INTEGRITY_CLEAN",
+        "sample_ids": [
+          "clean_sample_1790449738461.png"
+        ],
+        "contributor": "UNKNOWN"
+      }
+    }
+  ],
+  "decisive_evidence": [],
+  "hard_veto_triggered": false,
+  "veto_reasons": [],
+  "signature": "c3c8d5fa8a8c762316c0e70c68a111aec3a9c000f05b3058864006b92baae5ef7d7a755718f452f5a065b3ac030bb8da0dcc0f05616fba72f3c49904b207e30c",
+  "assessment_digest": "0169719c752455df5ff709ab7bc60acc63046c15e8cb3764a2d5d0e46e398e92",
+  "scope": "MINIMAL",
+  "evidence_completeness": "MINIMAL",
+  "created_at": "2026-09-26T19:09:01.160383Z"
+}

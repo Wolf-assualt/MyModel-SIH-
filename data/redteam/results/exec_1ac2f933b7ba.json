@@ -1,0 +1,259 @@
+{
+  "execution_id": "exec_1ac2f933b7ba",
+  "scenario_id": "MODEL_SINGLE_WEIGHT_MUTATION",
+  "scenario_name": "Single Parameter Segment Weight Mutation",
+  "category": "MODEL",
+  "attack_id": "",
+  "is_detected": true,
+  "execution_success": true,
+  "detected": true,
+  "detecting_subsystems": [
+    "MODEL_IDENTITY"
+  ],
+  "evidence_generated": [
+    {
+      "evidence_id": "ev_weight_279a054f",
+      "source": "MODEL_IDENTITY",
+      "domain": null,
+      "severity": "CRITICAL",
+      "metric_value": 1.0,
+      "description": "Binary SHA-256 weight hash discrepancy: Single layer weights modified.",
+      "subject_id": "approved_reference_model",
+      "related_model_id": null,
+      "related_dataset_id": null,
+      "evidence_digest": null,
+      "confidence": null,
+      "evidence_type": null,
+      "metadata": {}
+    }
+  ],
+  "fused_assessment": {
+    "assessment_id": "fused_085070e3f85b",
+    "target_entity_id": "model_exec_1ac",
+    "overall_status": "QUARANTINED",
+    "verdict": "QUARANTINED",
+    "risk_level": "CRITICAL",
+    "risk_score": 0.9,
+    "confidence": 0.12,
+    "confidence_score": 0.12,
+    "action": "BLOCK",
+    "coverage": {
+      "sources_checked": [
+        "MODEL_IDENTITY"
+      ],
+      "coverage_ratio": 0.2,
+      "missing_sources": [
+        "DATA_INTEGRITY",
+        "BEHAVIOURAL_FINGERPRINT",
+        "INFERENCE_DNA",
+        "DISTRIBUTION_SHIFT"
+      ]
+    },
+    "findings": [
+      "Model Identity Compromise: Active model weights mismatch reference baseline manifest."
+    ],
+    "correlated_findings": [
+      "Model Identity Compromise: Active model weights mismatch reference baseline manifest."
+    ],
+    "contributors": [
+      "UNKNOWN"
+    ],
+    "recommended_actions": [
+      "QUARANTINE asset immediately; notify SOC and revoke active deployment credentials.",
+      "Investigate Model identity hash mismatch: unauthorized model substitution or weight modification detected."
+    ],
+    "limitations": [
+      "Limited verification scope (MINIMAL): 1/5 evidence sources checked.",
+      "Audit coverage ratio: 20%.",
+      "Offline deterministic assurance without reliance on third-party cloud trust oracles.",
+      "Unchecked evidence sources: DATA_INTEGRITY, BEHAVIOURAL_FINGERPRINT, INFERENCE_DNA, DISTRIBUTION_SHIFT."
+    ],
+    "explanation": "Partial verification (MINIMAL) \u2014 evaluated 1/5 sources | HARD VETO: Model identity hash mismatch: unauthorized model substitution or weight modification detected. | CORRELATED FINDINGS: Model Identity Compromise: Active model weights mismatch reference baseline manifest.",
+    "raw_evidence": [
+      {
+        "evidence_id": "ev_weight_279a054f",
+        "source": "MODEL_IDENTITY",
+        "domain": null,
+        "severity": "CRITICAL",
+        "metric_value": 1.0,
+        "description": "Binary SHA-256 weight hash discrepancy: Single layer weights modified.",
+        "subject_id": "approved_reference_model",
+        "related_model_id": null,
+        "related_dataset_id": null,
+        "evidence_digest": null,
+        "confidence": null,
+        "evidence_type": null,
+        "metadata": {}
+      }
+    ],
+    "decisive_evidence": [
+      "ev_weight_279a054f"
+    ],
+    "hard_veto_triggered": true,
+    "veto_reasons": [
+      "Model identity hash mismatch: unauthorized model substitution or weight modification detected."
+    ],
+    "signature": "713f66f2130ff41e3ec55efba0f7927dad6592f5dbcde217049a07c29c2163fc89b07ad84adfb597fdf2c280a0b9b48299a36c44b82a8125664a522fd585f203",
+    "assessment_digest": "7a342534ac075489b7e7967c4b8166582760e29dc1c601cdb174d081a945912c",
+    "scope": "MINIMAL",
+    "evidence_completeness": "MINIMAL",
+    "created_at": "2026-09-26T18:52:55.754411Z"
+  },
+  "hard_veto_triggered": true,
+  "quarantine_record": {
+    "quarantine_id": "quar_1bc78d4ee1a1",
+    "subject_id": "model_exec_1ac",
+    "subject_type": "REDTEAM_SANDBOX_ASSET",
+    "reason": "Defensive Red-Team Detection: Single Parameter Segment Weight Mutation. Partial verification (MINIMAL) \u2014 evaluated 1/5 sources | HARD VETO: Model identity hash mismatch: unauthorized model sub",
+    "evidence_ids": [
+      "ev_weight_279a054f"
+    ],
+    "is_active": true,
+    "quarantined_at": "2026-09-26T18:52:55.755946Z",
+    "created_at": "2026-09-26T18:52:55.755946Z",
+    "resolved_at": null,
+    "resolved_by": null,
+    "resolution_notes": null
+  },
+  "graph_lineage_nodes": [
+    {
+      "id": "model_exec_1ac",
+      "node_type": "MODEL",
+      "label": "Model model_exec_1ac",
+      "digest": null,
+      "canonical_identity": null,
+      "properties": {},
+      "created_at": "2026-09-26T18:52:55.756463Z"
+    },
+    {
+      "id": "infer_exec_1ac",
+      "node_type": "INFERENCE",
+      "label": "Inference infer_exec_1ac",
+      "digest": null,
+      "canonical_identity": null,
+      "properties": {},
+      "created_at": "2026-09-26T18:52:55.756473Z"
+    },
+    {
+      "id": "out_exec_1ac",
+      "node_type": "OUTPUT",
+      "label": "Output out_exec_1ac",
+      "digest": null,
+      "canonical_identity": null,
+      "properties": {},
+      "created_at": "2026-09-26T18:52:55.756496Z"
+    },
+    {
+      "id": "fused_085070e3f85b",
+      "node_type": "FUSION_ASSESSMENT",
+      "label": "Fusion Assessment fused_085070e3f85b",
+      "digest": null,
+      "canonical_identity": null,
+      "properties": {},
+      "created_at": "2026-09-26T18:52:55.756504Z"
+    },
+    {
+      "id": "quar_1bc78d4ee1a1",
+      "node_type": "QUARANTINE_RECORD",
+      "label": "Quarantine quar_1bc78d4ee1a1",
+      "digest": null,
+      "canonical_identity": null,
+      "properties": {},
+      "created_at": "2026-09-26T18:52:55.756512Z"
+    },
+    {
+      "id": "ev_weight_279a054f",
+      "node_type": "EVIDENCE",
+      "label": "Binary SHA-256 weight hash discrepancy: Single layer weights modified.",
+      "digest": null,
+      "canonical_identity": null,
+      "properties": {
+        "severity": "IntegritySeverity.CRITICAL",
+        "metric_value": 1.0,
+        "source_domain": "EvidenceSource.MODEL_IDENTITY",
+        "subject_id": "model_exec_1ac"
+      },
+      "created_at": "2026-09-26T18:52:55.756551Z"
+    }
+  ],
+  "graph_lineage_edges": [
+    {
+      "source_id": "out_exec_1ac",
+      "target_id": "infer_exec_1ac",
+      "edge_type": "GENERATED_BY",
+      "evidence_id": "out_out_exec_1ac_infer_exec_1ac",
+      "metadata": {},
+      "created_at": "2026-09-26T18:52:55.756499Z"
+    },
+    {
+      "source_id": "fused_085070e3f85b",
+      "target_id": "model_exec_1ac",
+      "edge_type": "DECIDES_ON",
+      "evidence_id": "fa_fused_085070e3f85b_model_exec_1ac",
+      "metadata": {},
+      "created_at": "2026-09-26T18:52:55.756507Z"
+    },
+    {
+      "source_id": "quar_1bc78d4ee1a1",
+      "target_id": "model_exec_1ac",
+      "edge_type": "QUARANTINES",
+      "evidence_id": "quar_quar_1bc78d4ee1a1_model_exec_1ac",
+      "metadata": {},
+      "created_at": "2026-09-26T18:52:55.756515Z"
+    },
+    {
+      "source_id": "quar_1bc78d4ee1a1",
+      "target_id": "fused_085070e3f85b",
+      "edge_type": "RESULTED_FROM",
+      "evidence_id": "quar_fa_quar_1bc78d4ee1a1_fused_085070e3f85b",
+      "metadata": {},
+      "created_at": "2026-09-26T18:52:55.756520Z"
+    },
+    {
+      "source_id": "model_exec_1ac",
+      "target_id": "ev_weight_279a054f",
+      "edge_type": "FLAGGED_WITH",
+      "evidence_id": "edge_flag_ev_weight_279a054f",
+      "metadata": {},
+      "created_at": "2026-09-26T18:52:55.756555Z"
+    },
+    {
+      "source_id": "ev_weight_279a054f",
+      "target_id": "model_exec_1ac",
+      "edge_type": "ABOUT",
+      "evidence_id": "edge_about_ev_weight_279a054f",
+      "metadata": {},
+      "created_at": "2026-09-26T18:52:55.756565Z"
+    }
+  ],
+  "blast_radius_report": {
+    "root_cause_id": "model_exec_1ac",
+    "root_cause_type": "MODEL",
+    "status": "QUARANTINED",
+    "directly_affected_count": 6,
+    "total_downstream_count": 2,
+    "affected_training_runs": [],
+    "affected_models": [],
+    "affected_inferences": [
+      "infer_exec_1ac"
+    ],
+    "affected_evidence_ids": [
+      "ev_weight_279a054f"
+    ],
+    "affected_quarantines": [
+      "quar_1bc78d4ee1a1"
+    ],
+    "affected_nodes": [
+      "infer_exec_1ac",
+      "out_exec_1ac"
+    ],
+    "total_affected_entities": 1,
+    "explanation": "Downstream dependencies of 'model_exec_1ac' (MODEL) include 0 training runs, 0 models, and 1 deployed inference sequences."
+  },
+  "execution_time_ms": 3.99,
+  "execution_time_seconds": 0.0,
+  "forensic_summary": "Scenario 'Single Parameter Segment Weight Mutation' [MODEL_SINGLE_WEIGHT_MUTATION] executed in 3.99ms. Outcome: SUCCESSFULLY DETECTED by MODEL_IDENTITY. Gatekeeper Action: BLOCK (Risk: 0.9000, Hard Veto: True). Downstream blast radius affected 2 assets.",
+  "assigned_verdict": "QUARANTINED",
+  "details": {},
+  "executed_at": "2026-09-26T18:52:55.756939Z"
+}

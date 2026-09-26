@@ -14,6 +14,7 @@ from app.integrity.detectors import (
     QualityDetector,
     OODDetector,
     TriggerCandidateDetector,
+    CleanlabLabelQualityDetector,
 )
 from app.schemas.base import AssetStatus
 from app.schemas.dataset import BatchManifest
@@ -49,6 +50,7 @@ class DataIntegrityEngine:
         self.quality_detector = QualityDetector()
         self.ood_detector = OODDetector()
         self.trigger_detector = TriggerCandidateDetector()
+        self.cleanlab_detector = CleanlabLabelQualityDetector()
 
     def _preview_data_url(self, file_path: Path) -> Optional[str]:
         try:
@@ -133,6 +135,8 @@ class DataIntegrityEngine:
 
         # 2. Label Inconsistency + Missing Labels + Malformed Annotations
         findings.extend(self.label_detector.detect(manifest.samples))
+        # Cleanlab Confident Learning Label Quality & Noise Detection
+        findings.extend(self.cleanlab_detector.detect(manifest.samples))
 
         # 3. Quality Detection (variance, aspect ratio, corruption)
         findings.extend(self.quality_detector.detect(manifest.samples))

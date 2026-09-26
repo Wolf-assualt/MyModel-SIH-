@@ -1,6 +1,6 @@
 export type Phase = 'launch' | 'scan' | 'results';
 
-export type ArtifactType = 'dataset' | 'model' | 'inference' | 'manifest';
+export type ArtifactType = 'dataset' | 'model' | 'inference' | 'manifest' | 'baseline';
 
 export interface ArtifactItem {
   id: string;
@@ -102,7 +102,8 @@ export type VerdictStatus =
   | 'UNDER_REVIEW'
   | 'COMPROMISED'
   | 'CRITICAL'
-  | 'QUARANTINED';
+  | 'QUARANTINED'
+  | 'INSUFFICIENT_EVIDENCE';
 
 export interface TrustScore {
   overall: number;

@@ -39,6 +39,7 @@ class BatchManifest(BaseModel):
     signature: Optional[str] = None
     public_key_pem: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
 class IngestDirectoryRequest(BaseModel):

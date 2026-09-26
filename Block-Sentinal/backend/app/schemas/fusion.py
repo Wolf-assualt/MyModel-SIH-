@@ -113,9 +113,15 @@ class FusedAssessment(BaseModel):
     veto_reasons: List[str] = Field(default_factory=list)
     signature: Optional[str] = None
     assessment_digest: str = Field(..., min_length=64, max_length=64)
+    scope: str = "FULL"
+    evidence_completeness: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     def model_post_init(self, __context: Any) -> None:
+        if self.evidence_completeness is None:
+            self.evidence_completeness = self.scope
+        elif self.scope == "FULL" and self.evidence_completeness != "FULL":
+            self.scope = self.evidence_completeness
         # Sync verdict and overall_status
         if self.verdict is not None and self.overall_status == AssetStatus.ACCEPTED and self.verdict != AssetStatus.ACCEPTED:
             self.overall_status = self.verdict

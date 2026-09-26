@@ -10,6 +10,7 @@ from app.ledger.engine import LedgerEngine
 from app.ledger.database import LedgerBase
 from app.models.ledger import LedgerEvent
 from app.crypto.signer import KeyManager
+from app.crypto.canonical import canonical_json_hash
 
 
 @pytest.fixture(scope="function")
@@ -188,5 +189,133 @@ def test_ledger_persistence_tamper_detection(temp_ledger_dir):
     assert verification_result["valid"] is False
     assert "Current hash recomputation failed" in verification_result["failure_reason"]
     assert verification_result["first_invalid_sequence"] == 0
+    assert verification_result["likely_cause"] == "TAMPER"
     
     db2.close()
+
+
+def test_ledger_key_rotation_scenario(temp_ledger_dir):
+    """Simulate key rotation: event signed with key1, verified with key2.
+    
+    Should report valid=False with likely_cause=KEY_ROTATION and an explanatory message.
+    """
+    ledger_url = f"sqlite:///{temp_ledger_dir}"
+    engine = create_engine(ledger_url, connect_args={"check_same_thread": False})
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    LedgerBase.metadata.create_all(bind=engine)
+
+    km1 = KeyManager()
+    db = SessionLocal()
+    ledger1 = LedgerEngine(db, key_manager=km1)
+
+    ledger1.append_event(
+        event_type="analyst_decision",
+        entity_id="sample_unit",
+        payload={"decision": "QUARANTINE"},
+        sign=True,
+    )
+    db.commit()
+
+    # Verified under km1: valid
+    res_km1 = ledger1.verify_chain()
+    assert res_km1["valid"] is True
+    assert res_km1["likely_cause"] is None
+
+    # Now verify under rotated km2
+    km2 = KeyManager()
+    ledger2 = LedgerEngine(db, key_manager=km2)
+    res_km2 = ledger2.verify_chain()
+
+    assert res_km2["valid"] is False
+    assert res_km2["likely_cause"] == "KEY_ROTATION"
+    assert "Signature verification failed" in res_km2["failure_reason"]
+    assert "key rotation" in res_km2["failure_reason"]
+    assert km1.fingerprint in res_km2["failure_reason"]
+    assert km2.fingerprint in res_km2["failure_reason"]
+
+    db.close()
+
+
+def test_ledger_genuine_tampering_scenario(temp_ledger_dir):
+    """Simulate genuine tampering: modify hash or signature without key rotation.
+    
+    Should report valid=False with likely_cause=TAMPER and strong tamper alert.
+    """
+    ledger_url = f"sqlite:///{temp_ledger_dir}"
+    engine = create_engine(ledger_url, connect_args={"check_same_thread": False})
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    LedgerBase.metadata.create_all(bind=engine)
+
+    km = KeyManager()
+    db = SessionLocal()
+    ledger = LedgerEngine(db, key_manager=km)
+
+    event = ledger.append_event(
+        event_type="analyst_decision",
+        entity_id="sample_unit",
+        payload={"decision": "ACCEPT"},
+        sign=True,
+    )
+    db.commit()
+    # 1. First event: Mutate payload_hash in DB directly -> Hash recomputation failure -> TAMPER
+    db.execute(text("UPDATE ledger_events SET payload_hash = 'badhash0000000000000000000000000000000000000000000000000000000000' WHERE sequence = 0"))
+    db.commit()
+
+    res_hash_tamper = ledger.verify_chain()
+    assert res_hash_tamper["valid"] is False
+    assert res_hash_tamper["likely_cause"] == "TAMPER"
+    assert "Current hash recomputation failed" in res_hash_tamper["failure_reason"]
+
+    # 2. Fresh database: Append signed event and corrupt signature only (fingerprint intact) -> TAMPER
+    db.close()
+    engine2 = create_engine(f"sqlite:///{temp_ledger_dir}_sig", connect_args={"check_same_thread": False})
+    SessionLocal2 = sessionmaker(autocommit=False, autoflush=False, bind=engine2)
+    LedgerBase.metadata.create_all(bind=engine2)
+    db2 = SessionLocal2()
+    ledger_sig = LedgerEngine(db2, key_manager=km)
+
+    event2 = ledger_sig.append_event(
+        event_type="analyst_decision",
+        entity_id="sample_unit_2",
+        payload={"decision": "QUARANTINE"},
+        sign=True,
+    )
+    db2.commit()
+
+    # Corrupt only the signature string
+    db2.execute(text(f"UPDATE ledger_events SET signature = 'deadbeef' WHERE sequence = {event2.sequence}"))
+    db2.commit()
+
+    res_sig_tamper = ledger_sig.verify_chain()
+    assert res_sig_tamper["valid"] is False
+    assert res_sig_tamper["likely_cause"] == "TAMPER"
+    assert "Invalid signature at sequence 0" in res_sig_tamper["failure_reason"]
+
+    db2.close()
+
+
+def test_get_or_create_persistent_key_manager_cwd_invariance(monkeypatch, tmp_path):
+    """Test that key manager path resolution is invariant to process working directory."""
+    import os
+    from app.crypto.signer import get_resolved_keys_dir
+
+    orig_cwd = os.getcwd()
+    dir1 = tmp_path / "simulated_cwd_1"
+    dir2 = tmp_path / "simulated_cwd_2"
+    dir1.mkdir()
+    dir2.mkdir()
+
+    try:
+        os.chdir(str(dir1))
+        resolved_path_1 = get_resolved_keys_dir()
+        assert resolved_path_1.is_absolute()
+
+        os.chdir(str(dir2))
+        resolved_path_2 = get_resolved_keys_dir()
+        assert resolved_path_2.is_absolute()
+
+        assert resolved_path_1 == resolved_path_2, (
+            f"Key directory changed based on cwd: {resolved_path_1} != {resolved_path_2}"
+        )
+    finally:
+        os.chdir(orig_cwd)
